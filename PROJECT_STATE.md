@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.3 committed as `9b3b01a`)_
+_Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.4 committed as `c617808`)_
 
 ---
 
@@ -11,20 +11,20 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.3 committed a
 | Field | Value |
 |---|---|
 | Phase | 0 — Setup, governance & tooling |
-| Active task | `P0.4` — Testing harness: Vitest + Testing Library + jsdom; Playwright + axe |
-| Status | **awaiting review** (acceptance criteria met, not committed) |
-| Next task | `P0.5` |
+| Active task | `P0.5` — CI: `ci.yml`, `security.yml`, `dependabot.yml` |
+| Status | **awaiting review** (files written and checked locally; **never run on GitHub yet**; not committed) |
+| Next task | `P0.6` |
 
 **Plan for the active task**
-1. Add devDependencies: `vitest`, `@vitejs/plugin-react`, `jsdom`, `@testing-library/react`, `@testing-library/dom`, `@testing-library/jest-dom`, `@playwright/test`, `@axe-core/playwright`; install Chromium for Playwright.
-2. `vitest.config.mts` (jsdom, `@/` alias, `src/**/*.test.{ts,tsx}`), `vitest.setup.ts` (jest-dom matchers, explicit cleanup).
-3. `playwright.config.ts` (Chromium, `e2e/`, serves a production build on port 3100), `e2e/smoke.spec.ts` (page loads + single h1; axe WCAG 2.2 AA scan with zero violations allowed).
-4. Replace the placeholder `test` / `test:e2e` scripts; add `test:watch`; ignore Playwright output in `.gitignore`.
-5. Prove the axe check can fail, then remove the throwaway spec.
+1. `ci.yml`: jobs `verify` (`pnpm verify`, `knip`, `format:check`) and `e2e` (Playwright + axe, report uploaded on failure). Corepack for pnpm, Node from `.nvmrc`, `pull_request` + push to `main`, read-only token, concurrency.
+2. `security.yml`: gitleaks only (private repo without GHAS, so no CodeQL / dependency-review). Pinned gitleaks 8.30.1 binary with sha256 check instead of the third-party action; scans full history on PR, push, weekly and manual.
+3. `dependabot.yml`: `npm` and `github-actions`, weekly, minor/patch grouped.
+4. Pin every action to a full commit SHA, resolved from upstream tags (not from memory).
+5. Test secret detection with a synthetic canary; run the CI commands locally.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Throwaway negative spec removed; tree is green.
-- The only unit test (`src/app/page.test.tsx`) and the e2e smoke test exercise the **stock scaffold page**; both are expected to be rewritten when the real home page lands (P2.2).
+- Nothing half-done. Scratch downloads (gitleaks, actionlint archives, canary dirs) live only in the session scratchpad, not the repo.
+- **Manual steps left for you (not done by me):** push, check that both workflows run green on a PR, then enable branch protection on `main` (see section 8).
 
 ---
 
@@ -32,7 +32,7 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.3 committed a
 
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
-| 0 Setup & governance | ◐ | 4/7 | P0.1–P0.3 committed; P0.4 awaiting review/commit |
+| 0 Setup & governance | ◐ | 5/7 | P0.1–P0.4 committed; P0.5 awaiting review/commit, CI not yet run on GitHub |
 | 1 Core, design system, motion | ☐ | 0/8 | |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
@@ -47,6 +47,7 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.3 committed a
 | 2026-11-04 | P0.1 | Next.js 16.4.5 scaffold, strict TS, Tailwind v4, pnpm 12.16.1, Node 24 pinned | `9718ab3` |
 | 2026-11-04 | P0.2 | Claude Code permissions, `.env.example` contract, `.gitignore` for env/secrets | `f0c3c40` |
 | 2026-11-04 | P0.3 | ESLint strict type-checked + jsx-a11y, Prettier + Tailwind plugin, knip, `verify` script | `9b3b01a` |
+| 2026-11-04 | P0.4 | Vitest + Testing Library + jsdom; Playwright + axe smoke test | `c617808` |
 
 ---
 
@@ -69,6 +70,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D11 | 2026-11-04 | Claude permissions: env/secret/key files denied for Read and Edit by explicit filename (not `.env.*`); state-changing git, `rm -rf`, `npm install`, publish and curl/wget-to-shell denied; rules mirrored for `Bash` and `PowerShell` tools | A blanket `.env.*` deny would also block `.env.example`, and deny always wins over allow | — |
 | D12 | 2026-11-04 | Tooling: `typescript-eslint` `strictTypeChecked` (TS files only), `eslint-plugin-jsx-a11y` strict rules, Prettier + `prettier-plugin-tailwindcss`, `knip`; `*.md`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` excluded from Prettier. `knip` and `format:check` are separate scripts, not part of `verify` | Matches the P0.3 spec; hand-formatted docs tables and pnpm-managed files would create noisy diffs | — |
 | D13 | 2026-11-04 | Testing: Vitest 5 (jsdom, globals off, explicit imports) for `src/**/*.test.{ts,tsx}`; Playwright (Chromium only for now) in top-level `e2e/` against a production build on port 3100; `@axe-core/playwright` scan with WCAG 2.0/2.1/2.2 A+AA tags, zero violations allowed. `pnpm verify` runs unit tests only; e2e stays a separate command (`pnpm test:e2e`) | Matches CLAUDE.md §4 (`verify` = typecheck + lint + test + build); a production build avoids dev-overlay noise in axe results | — |
+| D14 | 2026-11-04 | CI: GitHub Actions only; every action pinned to a full commit SHA with a version comment (`checkout` v7.0.1, `setup-node` v7.1.0, `cache` v6.1.0, `upload-artifact` v7.0.2); pnpm via Corepack from `packageManager`; Node from `.nvmrc`. Secret scanning = gitleaks 8.30.1 binary pinned by version + sha256 (no third-party action); CodeQL and dependency-review excluded because the repo is private without GHAS | Supply-chain hygiene; the official gitleaks action needs a paid licence once the repo is owned by an organisation | — |
 
 ---
 
@@ -117,7 +119,14 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 - **Limits of the deny rules:** `Read`/`Edit`/`Grep` denies are path-based and solid. The `Bash`/`PowerShell` env patterns (`* .env.local` etc.) only match literal command text; I did **not** test bypass spellings such as `cat ./.env.local` or `type .\.env.local`, which probably slip through. For a hard guarantee, use Claude Code's sandbox / OS-level filesystem restrictions.
 - **`.env.example` assumptions to confirm:** email variables are provider-neutral (`EMAIL_API_KEY`, `EMAIL_FROM`, `INQUIRY_NOTIFY_TO`) because the EU provider is not chosen yet (P2.5); Turnstile values are Cloudflare's published always-pass test keys, copied from memory, so check them against Cloudflare's docs; no analytics or Cal.com variables yet (D6 platform and P2.7 undecided).
 - **CLAUDE.md §13:** changing `.claude/settings.json` normally needs asking; done here because P0.2 explicitly requests it.
-- **P0.5 (CI):** run `pnpm knip`, `pnpm format:check` and `pnpm test:e2e` in CI; none are part of `verify`. CI needs `pnpm exec playwright install --with-deps chromium` (cache `~/.cache/ms-playwright`). `playwright.config.ts` already switches to retries + html/github reporters when `CI` is set.
+- **CI has never run on GitHub.** Everything in `.github/` was checked locally only (see section 9). Likeliest first-run surprises: Corepack on the runner resolving `pnpm@12.16.1`, `setup-node` `cache: pnpm`, and Dependabot's support for the pnpm 12 lockfile format. Read the first PR's checks before relying on them.
+- **`actionlint` was not run:** I downloaded it (checksum matched) but the auto-mode classifier blocked executing the binary, so I did not retry. YAML syntax is verified by Prettier and SHA pins against upstream tags; workflow semantics (expressions, step keys) are unchecked. Run `actionlint` yourself or watch the first run.
+- **Branch protection is NOT enabled (roadmap P0.5 asks for it).** It is an outward-facing GitHub setting, not requested in this task, and private repos need a plan that supports it. Suggested: require PR, require checks `verify`, `e2e` and `gitleaks`, block force-push. The `gitleaks` check only *fails a PR*; without branch protection nothing stops a direct push of a secret to `main`.
+- **Secret test coverage:** detection was proven with `gitleaks dir` on a synthetic canary (rule `github-pat`, exit 1) and `gitleaks git` on the real history (exit 0, 5 commits then). The end-to-end roadmap test, "a commit with a fake secret fails the PR check", could not be run here (`git commit` is denied by `.claude/settings.json`, and pushing is yours). To do it: on a throwaway branch commit a file with a fake `ghp_` + 36 random alphanumerics, open a PR, expect `gitleaks` red, then delete the branch.
+- **Detection, not prevention:** by the time CI flags a secret it is already in a pushed commit and must be rotated. Consider a local `gitleaks` pre-commit hook later (needs your approval under CLAUDE.md §13; hooks are not approved by default).
+- **gitleaks upgrades are manual:** `GITLEAKS_VERSION` and `GITLEAKS_SHA256` in `security.yml` are not tracked by Dependabot. Bump both together from the release's checksums file.
+- **Not added (out of the requested scope):** `pnpm audit` job (roadmap P4.4 wants a clean dependency audit), Lighthouse CI (P4.6), ZAP (P4.4).
+- **Playwright in CI:** `playwright.config.ts` switches to retries and github/html reporters when `CI` is set; browsers are cached by lockfile hash and installed with `--with-deps`.
 - **New top-level dir `e2e/`:** CLAUDE.md §2 says not to create top-level directories without asking; the task requires a place for Playwright specs, so `e2e/` was chosen. Say if you prefer another location (`tests/e2e`, `src/...`).
 - **Test dependencies beyond those you named:** `@vitejs/plugin-react` (JSX transform in Vitest), `@testing-library/dom` (peer of `@testing-library/react` 16) and `@testing-library/jest-dom` (matchers such as `toBeInTheDocument`). `@testing-library/user-event` was **not** added; add it when the first interaction test needs it.
 - **Only Chromium:** `playwright.config.ts` has one project. Add Firefox/WebKit and mobile viewports (360/768/1280/1920 per CLAUDE.md §7) when real pages exist; browsers are an extra download each.
@@ -140,19 +149,26 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
+pnpm install --frozen-lockfile → pass
 pnpm verify       → pass (typecheck → lint → test → build); test step: 1 file, 2 tests passed
-pnpm test:e2e     → pass (2 tests, Chromium: smoke + axe WCAG 2.2 AA, ~12 s incl. build)
+pnpm test:e2e     → pass (2 tests, Chromium: smoke + axe WCAG 2.2 AA, ~11 s incl. build)
 pnpm knip         → pass
-pnpm format:check → pass
+pnpm format:check → pass (includes .github/**/*.yml)
 
-P0.4 acceptance:
-  pnpm test      → Vitest 5.1.0, jsdom: src/app/page.test.tsx, 2 passed
-  pnpm test:e2e  → e2e/smoke.spec.ts, 2 passed; Playwright started and stopped its own server
-                   (port 3100 had no listener afterwards)
-  Negative check — axe wiring can fail: a throwaway spec scanning
-    `<img src="x.png"><button></button>` failed with `image-alt` and `button-name`
-    violations (spec deleted afterwards).
-  Not done: no manual/visual check; UI is still the stock scaffold page.
+P0.5 checks (the workflows themselves cannot run locally):
+  Prettier on .github/        → pass (valid YAML, formatted)
+  uses: pinning               → all 5 `uses:` lines are `owner/repo@<40-hex> # vX.Y.Z`; none unpinned
+  SHA vs upstream             → each SHA resolved via `git ls-remote` and matches its tag:
+                                checkout v7.0.1, setup-node v7.1.0, cache v6.1.0, upload-artifact v7.0.2
+  gitleaks 8.30.1             → archives matched the release checksums file (same origin, so integrity
+                                only, not independent authenticity); the workflow's sha256 equals the
+                                linux_x64 entry; `sha256sum --check` passes with the right hash and
+                                fails with a wrong one; archive contains the `gitleaks` binary
+  gitleaks on real repo       → `gitleaks git` full history: no leaks (5 commits); `gitleaks dir`
+                                finds 12 hits only under gitignored `.next/` build cache (not in git)
+  gitleaks canary             → clean dir exit 0; dir with a synthetic `ghp_…` string exit 1,
+                                rule `github-pat`, value redacted
+  NOT done: actionlint (execution blocked), a real PR run, branch protection, commit-based canary
 ```
 
 ---
@@ -160,16 +176,17 @@ P0.4 acceptance:
 ## 10. Proposed commit(s) for the work above
 
 ```
-test: add vitest and playwright harness with axe checks
+ci: add verification, secret scanning and dependabot
 
-Set up Vitest with Testing Library and jsdom for unit and component
-tests, and Playwright with @axe-core/playwright for end-to-end and
-accessibility checks against a production build. Replace the
-placeholder test and test:e2e scripts, add test:watch, and add a
-component test plus a smoke test with a WCAG 2.2 AA axe scan so
-both runners are exercised. Ignore Playwright output in .gitignore.
+Add a CI workflow that runs verify, knip, format check and the
+Playwright axe suite, a security workflow that scans the full git
+history with gitleaks, and Dependabot for npm and GitHub Actions.
+All actions are pinned to full commit SHAs. gitleaks runs as a
+version- and sha256-pinned binary because the repository is private
+without GitHub Advanced Security, so CodeQL and dependency-review
+are intentionally omitted.
 
-Task: P0.4
+Task: P0.5
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```
