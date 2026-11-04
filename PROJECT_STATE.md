@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-04 · by: Claude Code · branch: `main`_
+_Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.1 committed as `9718ab3`)_
 
 ---
 
@@ -11,17 +11,19 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main`_
 | Field | Value |
 |---|---|
 | Phase | 0 — Setup, governance & tooling |
-| Active task | `P0.1` — Scaffold Next.js 16 + TS strict + Tailwind v4 + pnpm |
+| Active task | `P0.2` — Governance & config files (`.claude/settings.json`, `.env.example`, `.gitignore`) |
 | Status | **awaiting review** (acceptance criteria met, not committed) |
-| Next task | `P0.2` |
+| Next task | `P0.3` |
 
 **Plan for the active task**
-1. Scaffold with `create-next-app@16.4.5` (TS, Tailwind, ESLint, App Router, `src/`, Turbopack, pnpm) in a scratch dir, then copy into the repo root (it already holds the governance files).
-2. Pin the toolchain: `.nvmrc` = `24`, `packageManager: pnpm@12.16.1`, `engines` (`node >=24 <25`, `pnpm >=12.16.1`); rename package to `website-ai-engineering`; align `@types/node` to `^24`.
-3. Verify baseline (frozen install, typecheck, lint, build, dev serves `/`), update this file.
+1. `.gitignore`: keep `.env*` ignored but re-include `!.env.example`; also ignore `secrets/`, key/cert files and `.claude/settings.local.json`.
+2. `.env.example`: placeholder-only contract split public / server-only, no real secrets.
+3. `.claude/settings.json`: deny reading/editing env, secrets and key files, deny state-changing git and destructive commands, allow verification commands and read-only git, keep `enableAllProjectMcpServers` off.
+4. Test the deny rule against a dummy canary `.env.local`.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Scaffold is the untouched `create-next-app` default page and styles; first real work is P0.2.
+- Nothing half-done. **Action for you:** delete the dummy test file `.env.local` (it only contains `DENY_RULE_CANARY=…`, gitignored). I could not remove it because the deny rules also block me from touching it.
+- The governance files from the blueprint other than `.claude/settings.json` and `.env.example` (CLAUDE.md, ROADMAP.md, PROJECT_STATE.md, `docs/*`) were already committed in `b8b50ef`; `.mcp.json` and `.github/*` belong to P0.7 / P0.5.
 
 ---
 
@@ -29,7 +31,7 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main`_
 
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
-| 0 Setup & governance | ◐ | 1/7 | P0.1 awaiting review/commit |
+| 0 Setup & governance | ◐ | 2/7 | P0.1 committed; P0.2 awaiting review/commit |
 | 1 Core, design system, motion | ☐ | 0/8 | |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
@@ -41,7 +43,7 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main`_
 
 | Date | Task | Summary | Commit (filled by you) |
 |---|---|---|---|
-| | | | |
+| 2026-11-04 | P0.1 | Next.js 16.4.5 scaffold, strict TS, Tailwind v4, pnpm 12.16.1, Node 24 pinned | `9718ab3` |
 
 ---
 
@@ -61,6 +63,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D8 | 2026-11-03 | Repo private | Keeps abuse heuristics private | — |
 | D9 | 2026-11-04 | Pinned toolchain: Node 24 (`.nvmrc` `24`, engines `>=24 <25`), pnpm 12.16.1 via `packageManager`; Next 16.4.5, React 19.3.0, Tailwind 4.3.4, TS 5.9.3 | Reproducible installs; versions are what `create-next-app` resolved today | — |
 | D10 | 2026-11-04 | `@types/node` bumped from scaffold `^20` to `^24` | Types should match the pinned Node runtime | — |
+| D11 | 2026-11-04 | Claude permissions: env/secret/key files denied for Read and Edit by explicit filename (not `.env.*`); state-changing git, `rm -rf`, `npm install`, publish and curl/wget-to-shell denied; rules mirrored for `Bash` and `PowerShell` tools | A blanket `.env.*` deny would also block `.env.example`, and deny always wins over allow | — |
 
 ---
 
@@ -87,8 +90,10 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | Claude API | | | | budget alert set? |
 | 21st MCP | key in shell env | n/a | n/a | never in repo |
 
-Env vars added this session (names only, never values):
-- none
+Env vars added this session (names only, never values; all in `.env.example` with placeholders; `src/lib/env.ts` does not exist yet, P1.7 must mirror this list):
+- Public: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- Server: `DATABASE_URL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `TURNSTILE_SECRET_KEY`, `RATE_LIMIT_IP_SALT`, `EMAIL_API_KEY`, `EMAIL_FROM`, `INQUIRY_NOTIFY_TO`, `ANTHROPIC_API_KEY`, `DEMOS_LIVE_ENABLED`
+- Not in the file on purpose: `API_KEY_21ST` (shell env, P0.7)
 
 Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Program Files\nodejs`, so pnpm shims were created in `%USERPROFILE%\.corepack-bin` (`corepack enable --install-directory`). Add that folder to your user PATH, or run `corepack pnpm …`.
 
@@ -104,7 +109,9 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
-- **P0.2 / `.gitignore`:** scaffold ignores `.env*` with no `!.env.example` exception; add it when governance files land.
+- **Limits of the deny rules:** `Read`/`Edit`/`Grep` denies are path-based and solid. The `Bash`/`PowerShell` env patterns (`* .env.local` etc.) only match literal command text; I did **not** test bypass spellings such as `cat ./.env.local` or `type .\.env.local`, which probably slip through. For a hard guarantee, use Claude Code's sandbox / OS-level filesystem restrictions.
+- **`.env.example` assumptions to confirm:** email variables are provider-neutral (`EMAIL_API_KEY`, `EMAIL_FROM`, `INQUIRY_NOTIFY_TO`) because the EU provider is not chosen yet (P2.5); Turnstile values are Cloudflare's published always-pass test keys, copied from memory, so check them against Cloudflare's docs; no analytics or Cal.com variables yet (D6 platform and P2.7 undecided).
+- **CLAUDE.md §13:** changing `.claude/settings.json` normally needs asking; done here because P0.2 explicitly requests it.
 - **P0.3 / `typecheck` script:** `tsc --noEmit` fails on a fresh checkout (`LayoutProps` is a Next-generated global; `next-env.d.ts` and `.next/types` are gitignored). Use `next typegen && tsc --noEmit`. Verified that works from a clean state.
 - **P0.3 / scripts:** `pnpm verify`, `typecheck`, `format`, `test`, `test:e2e` do not exist yet; only `dev`, `build`, `start`, `lint`.
 - **Decision for you — `next.config.ts`:** the generator enabled `cacheComponents: true` and `partialPrefetching: true` (kept as generated). Cache Components changes how dynamic data/Suspense work and may interact with the P1.4 (next-intl) and P1.7 (CSP nonce) tasks. Keep or turn off before Phase 1.
@@ -123,9 +130,18 @@ pnpm verify      → not available yet (added in P0.3); equivalent checks run in
   tsc --noEmit                   → pass (after Next generated route types; also pass from a clean state with `next typegen`)
   pnpm lint --max-warnings=0     → pass
   pnpm build                     → pass (Next 16.4.5 Turbopack; routes: /, /_not-found, both static)
-  pnpm dev → GET /               → HTTP 200, default page rendered; server stopped afterwards
   unit tests                     → none yet (harness arrives in P0.4)
-pnpm test:e2e    → not run (no UI change beyond the stock page; Playwright arrives in P0.4)
+pnpm test:e2e    → not run (no UI change; Playwright arrives in P0.4)
+
+P0.2 acceptance (deny rule test against dummy canary .env.local, live without restart):
+  Read tool        → denied
+  Grep tool        → denied
+  Bash `cat .env.local`              → denied
+  PowerShell `Get-Content .env.local` → denied
+  Write tool       → denied
+  Read .env.example                  → allowed
+  settings.json parses; git check-ignore: .env.local/.env.production/secrets/*/*.key ignored,
+  .env.example and .claude/settings.json tracked
 ```
 
 ---
@@ -133,15 +149,16 @@ pnpm test:e2e    → not run (no UI change beyond the stock page; Playwright arr
 ## 10. Proposed commit(s) for the work above
 
 ```
-chore: scaffold next.js app with strict typescript
+chore: add claude code permissions and env contract
 
-Bootstrap the app with create-next-app 16.4.5 (App Router, src/
-directory, Turbopack, Tailwind CSS v4, TypeScript strict, ESLint)
-and pin the toolchain so installs are reproducible: .nvmrc for
-Node 24, packageManager pnpm@12.16.1, and an engines field. Align
-@types/node with the Node 24 runtime.
+Add .claude/settings.json that denies reading or editing env files,
+secrets and key material, denies state-changing git and destructive
+commands, and allows the verification commands and read-only git.
+Add a placeholder-only .env.example split into public and server
+variables, and re-include it in .gitignore (which also now ignores
+secrets/, key/cert files and settings.local.json).
 
-Task: P0.1
+Task: P0.2
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

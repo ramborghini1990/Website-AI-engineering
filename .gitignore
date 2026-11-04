@@ -30,8 +30,20 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files: ignore every .env*, keep only the committed contract
 .env*
+!.env.example
+
+# secrets, keys and certificates
+/secrets/
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# claude code: per-developer overrides stay local
+/.claude/settings.local.json
 
 # vercel
 .vercel
