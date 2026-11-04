@@ -1,0 +1,136 @@
+# DEPLOYMENT.md — Vercel (region `fra1`)
+
+Runbook for linking this repository to Vercel and keeping Preview and Production separate. The repo side is done (`vercel.json`, `engines`, `.gitignore`); **steps 1–5 need your Vercel account** and have not been performed. Nothing here has been run against a real Vercel project yet.
+
+Facts below come from the Vercel docs as of 2026-11-04 (links at the end). Where something could not be confirmed it says **unverified**.
+
+## 0. Prerequisites
+
+- **Vercel Pro (or Enterprise), not Hobby.** Hobby is for personal, non-commercial use only; a company business site counts as commercial and risks the deployment being paused. (BLUEPRINT D1 already assumes Pro.)
+- MFA on the Vercel and GitHub accounts (GDPR_CHECKLIST: least-privilege access).
+- Decide the **production domain** before filling `NEXT_PUBLIC_SITE_URL` (DNS itself is P4.7).
+
+## 1. Create the project and link the repo
+
+Dashboard path: _Add New → Project → Import Git Repository → this repo_, scope = the Pro team, Root Directory `./`, Framework Preset `Next.js`. Grant the Vercel GitHub app access to **this repository only**.
+
+CLI path (no global install; the version is the latest at time of writing, bump it as needed):
+
+```bash
+pnpm dlx vercel@65.11.0 login
+pnpm dlx vercel@65.11.0 link          # pick the Pro team scope; create/link project "website-ai-engineering"
+pnpm dlx vercel@65.11.0 git connect   # connect the GitHub repo if `link` did not
+```
+
+`vercel link` writes `.vercel/project.json` (org and project ids). `.vercel` is already in `.gitignore`; do not commit it.
+
+## 2. Project settings
+
+| Setting (Project → Settings) | Value | Why |
+|---|---|---|
+| Framework Preset | Next.js | also set in `vercel.json` |
+| Node.js Version | 24.x | `engines.node` is `24.x` and overrides this; Vercel's default is now a newer major, so keep them equal |
+| Function Region | `fra1` (Frankfurt) | `vercel.json` `regions: ["fra1"]` takes precedence and the dashboard setting is then ignored |
+| Install Command | from `vercel.json`: `pnpm install --frozen-lockfile` | reproducible installs |
+| Production Branch | `main` | production deploys on merge to `main`; every other branch/PR gets a Preview |
+| Deployment Protection | keep **Vercel Authentication** on for Preview | previews of a private repo must not be public |
+| Web Analytics / Speed Insights | **off** | D6 (cookieless analytics later); GDPR_CHECKLIST §analytics |
+| Environment variable `ENABLE_EXPERIMENTAL_COREPACK` | `1`, all environments | lets Vercel honour `packageManager: pnpm@12.16.1` (see risks) |
+
+What `fra1` does and does not cover: it sets where **Vercel Functions** execute. Static pages (everything in the scaffold today) are served from Vercel's global CDN, and request metadata is handled at the edge worldwide. Do not describe the site as "EU-only hosting" in the privacy notice (see §6).
+
+## 3. Environment variables
+
+Source of truth for names: [`.env.example`](../.env.example). The current app reads **none** of them yet (`src/lib/env.ts` arrives in P1.7), so the scaffold deploys with no variables. Create the scoping now; add each variable when the task that consumes it lands.
+
+Rules:
+
+- Production values never go into Preview or Development. Preview uses its own database branch, its own Redis and **test** keys.
+- Values are different per environment, including `RATE_LIMIT_IP_SALT`.
+- Variables are entered via the CLI prompt or the dashboard, never on a command line, in a file in the repo, or in chat.
+- `NEXT_PUBLIC_*` values are inlined into the browser bundle at **build time**: public data only, and changing one needs a redeploy.
+- Server secrets are stored as **Sensitive** (write-only). On the CLI, Production and Preview default to sensitive; pass `--no-sensitive` for `NEXT_PUBLIC_*`.
+
+| Variable | Development (`.env.local`) | Preview | Production |
+|---|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | do **not** hardcode: derive from Vercel's per-deployment URL variable in `env.ts` (P1.7) | `https://<production domain>` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare test site key | Cloudflare test site key | production widget key |
+| `TURNSTILE_SECRET_KEY` | Cloudflare test secret | Cloudflare test secret | production secret |
+| `DATABASE_URL` | local or dev EU Postgres | dedicated EU Postgres **branch** for previews | production EU Postgres |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | dev database (EU) | separate preview database (EU) | production database (EU) |
+| `RATE_LIMIT_IP_SALT` | random | random, different from prod | random, rotated regularly |
+| `EMAIL_API_KEY` | provider sandbox | provider sandbox, no real sends | production key |
+| `EMAIL_FROM` | example address | example address | verified sender domain (SPF/DKIM/DMARC, P4.7) |
+| `INQUIRY_NOTIFY_TO` | your own inbox | your own inbox, never a client mailbox | real inbox |
+| `ANTHROPIC_API_KEY` | empty (simulation) | empty | empty until P3.0, then a dedicated key with a spend cap |
+| `DEMOS_LIVE_ENABLED` | `false` | `false` | `false` (kill switch; flip deliberately) |
+
+Build-only setting, deliberately not in `.env.example` because app code never reads it: `ENABLE_EXPERIMENTAL_COREPACK=1`.
+
+Commands (each prompts for the value; the optional third argument limits a Preview variable to one branch, leave it out for "all preview branches"):
+
+```bash
+pnpm dlx vercel@65.11.0 env add NEXT_PUBLIC_SITE_URL production --no-sensitive
+pnpm dlx vercel@65.11.0 env add DATABASE_URL production
+pnpm dlx vercel@65.11.0 env add DATABASE_URL preview
+pnpm dlx vercel@65.11.0 env add ENABLE_EXPERIMENTAL_COREPACK production --no-sensitive   # repeat for preview, development
+pnpm dlx vercel@65.11.0 env ls
+pnpm dlx vercel@65.11.0 env pull .env.local        # pulls the Development scope; sensitive values come back as placeholders
+```
+
+`.env.local` is gitignored and is deliberately unreadable to Claude Code (`.claude/settings.json`).
+
+## 4. Readiness checklist
+
+Done in the repo:
+
+- [x] `vercel.json` valid against `https://openapi.vercel.sh/vercel.json` (`framework`, `regions`, `installCommand`)
+- [x] `engines.node` = `24.x`, `packageManager` = `pnpm@12.16.1`, `.nvmrc` = `24`
+- [x] `pnpm verify` and `pnpm test:e2e` green locally; CI workflows in `.github/` (P0.5)
+- [x] `.env.example` lists every variable, placeholders only; `.vercel` and `.env*` are gitignored
+- [x] No app code reads env variables yet, so a first deploy needs none
+
+To do in Vercel (you):
+
+- [ ] Pro team, MFA, DPA accepted (see §6)
+- [ ] Project created and linked to this repo (§1)
+- [ ] Settings in §2 applied, `ENABLE_EXPERIMENTAL_COREPACK=1` set for all environments
+- [ ] First deployment: build log shows the intended pnpm and Node versions (§5)
+- [ ] Open a PR: it gets a Preview URL behind Vercel Authentication
+- [ ] Merge to `main`: Production deploys and serves the scaffold
+- [ ] GitHub branch protection requires `verify`, `e2e`, `gitleaks` (and optionally the Vercel check)
+
+## 5. First-deployment checks
+
+1. In the build log confirm **Node 24.x** and **pnpm 12.16.1**.
+2. Open the Preview URL while signed in to Vercel; the page renders.
+3. Region: the scaffold has no function (both routes are static), so `fra1` cannot be observed yet. Re-check on the first dynamic route (the inquiry handler, P2.5): the deployment's Functions/Runtime Logs view shows the region, and the `x-vercel-id` response header carries it (exact format **unverified**).
+4. Confirm Analytics and Speed Insights are off.
+
+## 6. Known risks and fallbacks
+
+- **pnpm 12 on Vercel is unverified.** `pnpm-lock.yaml` has `lockfileVersion: '9.0'`, which Vercel uses to choose a pnpm version when Corepack is not active, and Vercel's docs call Corepack support experimental. Community reports show `packageManager` being ignored in some projects. If the build log shows a different pnpm than 12.16.1: (a) confirm `ENABLE_EXPERIMENTAL_COREPACK=1` is set for that environment; (b) override Install/Build commands in the dashboard with a pinned runner, e.g. `npx pnpm@12.16.1 install --frozen-lockfile` and `npx pnpm@12.16.1 build`; (c) as a last resort, discuss moving the repo to a pnpm major that Vercel supports natively. Do not do (c) silently.
+- **Plan lock-in:** Hobby will work technically but breaches its terms for this use.
+- **Function regions on plans:** one region (`fra1`) is fine; Vercel's docs disagree on multi-region limits per plan, so check before adding a failover region.
+- **Preview URL for `NEXT_PUBLIC_SITE_URL`:** `env.ts` (P1.7) must not make the variable mandatory in Preview, or previews will fail the "missing env" build check.
+
+## 7. GDPR: Vercel as a processor
+
+Vercel is a processor (hosting, build, CDN, logs). Facts still to be established by you and recorded in `docs/ROPA.md` (P4.3) and `docs/GDPR_CHECKLIST.md` §processors (that line is tagged `[P0.6, P4.2]` and has **not** been ticked):
+
+- DPA accepted in the Vercel account.
+- Transfer mechanism, because Vercel is a US company and the edge network is global: EU–US Data Privacy Framework certification and/or SCCs. **Unverified here; check Vercel's current DPA and sub-processor list.**
+- Data seen: IP addresses, user agents, URLs, request logs, deployment contents, environment variables.
+- Runtime and build log retention and who can access them (GDPR_CHECKLIST §logs). No PII to stdout.
+- The privacy notice must describe hosting accurately: functions in Frankfurt, CDN and edge global.
+
+This text is a working note, not legal advice; it needs review by a qualified professional (CLAUDE.md §14).
+
+## Sources
+
+- Corepack and `packageManager`: <https://vercel.com/docs/builds/configure-a-build>
+- `regions` in `vercel.json`: <https://vercel.com/docs/functions/configuring-functions/region>
+- Node.js versions: <https://vercel.com/docs/functions/runtimes/node-js/node-js-versions>
+- Hobby plan and commercial use: <https://vercel.com/docs/limits/fair-use-guidelines>
+- Env CLI: <https://vercel.com/docs/cli/env>
+- `vercel.json` schema: <https://openapi.vercel.sh/vercel.json>

@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.4 committed as `c617808`)_
+_Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.5 committed as `9d7338c`)_
 
 ---
 
@@ -11,20 +11,20 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.4 committed a
 | Field | Value |
 |---|---|
 | Phase | 0 — Setup, governance & tooling |
-| Active task | `P0.5` — CI: `ci.yml`, `security.yml`, `dependabot.yml` |
-| Status | **awaiting review** (files written and checked locally; **never run on GitHub yet**; not committed) |
-| Next task | `P0.6` |
+| Active task | `P0.6` — Vercel deployment, region `fra1`, per-environment env vars |
+| Status | **repo side done, awaiting review (not committed). Vercel side NOT done: needs your account.** Acceptance ("PR gets a preview URL; production serves the scaffold") is therefore not yet met |
+| Next task | `P0.7` |
 
 **Plan for the active task**
-1. `ci.yml`: jobs `verify` (`pnpm verify`, `knip`, `format:check`) and `e2e` (Playwright + axe, report uploaded on failure). Corepack for pnpm, Node from `.nvmrc`, `pull_request` + push to `main`, read-only token, concurrency.
-2. `security.yml`: gitleaks only (private repo without GHAS, so no CodeQL / dependency-review). Pinned gitleaks 8.30.1 binary with sha256 check instead of the third-party action; scans full history on PR, push, weekly and manual.
-3. `dependabot.yml`: `npm` and `github-actions`, weekly, minor/patch grouped.
-4. Pin every action to a full commit SHA, resolved from upstream tags (not from memory).
-5. Test secret detection with a synthetic canary; run the CI commands locally.
+1. `vercel.json`: `framework: nextjs`, `regions: ["fra1"]`, `installCommand: pnpm install --frozen-lockfile`; validated against the official schema (keys and types).
+2. `engines.node` tightened from `>=24 <25` to `24.x` (the form Vercel's docs use; Vercel's default Node is a newer major).
+3. `docs/DEPLOYMENT.md`: runbook (prerequisites, link via dashboard or CLI, project settings, Preview/Production env matrix derived from `.env.example`, readiness checklist, first-deploy checks, risks, GDPR processor notes). Facts taken from Vercel docs, unverifiable parts marked.
+4. Pointer to the runbook in `.env.example`; local verification.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Scratch downloads (gitleaks, actionlint archives, canary dirs) live only in the session scratchpad, not the repo.
-- **Manual steps left for you (not done by me):** push, check that both workflows run green on a PR, then enable branch protection on `main` (see section 8).
+- Repo files are complete. I did not log in to Vercel, create or link a project, set env vars or deploy (outward-facing, needs your account and approval).
+- **Your steps:** follow `docs/DEPLOYMENT.md` §1–§5, then tell me the result (build log versions, preview URL) so I can close P0.6.
+- Also still open from P0.5: branch protection on `main`; I could not see whether CI ran green after your push (no GitHub access from here).
 
 ---
 
@@ -32,7 +32,7 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.4 committed a
 
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
-| 0 Setup & governance | ◐ | 5/7 | P0.1–P0.4 committed; P0.5 awaiting review/commit, CI not yet run on GitHub |
+| 0 Setup & governance | ◐ | 5/7 | P0.1–P0.5 committed; P0.6 repo side ready, Vercel linking pending (yours) |
 | 1 Core, design system, motion | ☐ | 0/8 | |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
@@ -48,6 +48,7 @@ _Last updated: 2026-11-04 · by: Claude Code · branch: `main` (P0.4 committed a
 | 2026-11-04 | P0.2 | Claude Code permissions, `.env.example` contract, `.gitignore` for env/secrets | `f0c3c40` |
 | 2026-11-04 | P0.3 | ESLint strict type-checked + jsx-a11y, Prettier + Tailwind plugin, knip, `verify` script | `9b3b01a` |
 | 2026-11-04 | P0.4 | Vitest + Testing Library + jsdom; Playwright + axe smoke test | `c617808` |
+| 2026-11-04 | P0.5 | CI workflows (SHA-pinned), gitleaks security workflow, Dependabot | `9d7338c` |
 
 ---
 
@@ -65,12 +66,13 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D6 | 2026-11-03 | Analytics: cookieless EU (Plausible/Umami) | No consent banner for analytics | — |
 | D7 | 2026-11-03 | Order funnel = inquiry + booking, no payments v1 | Avoids invoicing/VAT scope | — |
 | D8 | 2026-11-03 | Repo private | Keeps abuse heuristics private | — |
-| D9 | 2026-11-04 | Pinned toolchain: Node 24 (`.nvmrc` `24`, engines `>=24 <25`), pnpm 12.16.1 via `packageManager`; Next 16.4.5, React 19.3.0, Tailwind 4.3.4, TS 5.9.3 | Reproducible installs; versions are what `create-next-app` resolved today | — |
+| D9 | 2026-11-04 | Pinned toolchain: Node 24 (`.nvmrc` `24`, engines `24.x` since D15), pnpm 12.16.1 via `packageManager`; Next 16.4.5, React 19.3.0, Tailwind 4.3.4, TS 5.9.3 | Reproducible installs; versions are what `create-next-app` resolved today | — |
 | D10 | 2026-11-04 | `@types/node` bumped from scaffold `^20` to `^24` | Types should match the pinned Node runtime | — |
 | D11 | 2026-11-04 | Claude permissions: env/secret/key files denied for Read and Edit by explicit filename (not `.env.*`); state-changing git, `rm -rf`, `npm install`, publish and curl/wget-to-shell denied; rules mirrored for `Bash` and `PowerShell` tools | A blanket `.env.*` deny would also block `.env.example`, and deny always wins over allow | — |
 | D12 | 2026-11-04 | Tooling: `typescript-eslint` `strictTypeChecked` (TS files only), `eslint-plugin-jsx-a11y` strict rules, Prettier + `prettier-plugin-tailwindcss`, `knip`; `*.md`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` excluded from Prettier. `knip` and `format:check` are separate scripts, not part of `verify` | Matches the P0.3 spec; hand-formatted docs tables and pnpm-managed files would create noisy diffs | — |
 | D13 | 2026-11-04 | Testing: Vitest 5 (jsdom, globals off, explicit imports) for `src/**/*.test.{ts,tsx}`; Playwright (Chromium only for now) in top-level `e2e/` against a production build on port 3100; `@axe-core/playwright` scan with WCAG 2.0/2.1/2.2 A+AA tags, zero violations allowed. `pnpm verify` runs unit tests only; e2e stays a separate command (`pnpm test:e2e`) | Matches CLAUDE.md §4 (`verify` = typecheck + lint + test + build); a production build avoids dev-overlay noise in axe results | — |
 | D14 | 2026-11-04 | CI: GitHub Actions only; every action pinned to a full commit SHA with a version comment (`checkout` v7.0.1, `setup-node` v7.1.0, `cache` v6.1.0, `upload-artifact` v7.0.2); pnpm via Corepack from `packageManager`; Node from `.nvmrc`. Secret scanning = gitleaks 8.30.1 binary pinned by version + sha256 (no third-party action); CodeQL and dependency-review excluded because the repo is private without GHAS | Supply-chain hygiene; the official gitleaks action needs a paid licence once the repo is owned by an organisation | — |
+| D15 | 2026-11-04 | Vercel: `vercel.json` pins `regions: ["fra1"]`, `framework: nextjs`, `installCommand: pnpm install --frozen-lockfile`; `engines.node` is `24.x`; Pro plan required (Hobby is non-commercial only); `ENABLE_EXPERIMENTAL_COREPACK=1` to honour `packageManager`; Preview and Production use separate DB/Redis/keys per the matrix in `docs/DEPLOYMENT.md` §3; Vercel Authentication on for Previews; Web Analytics / Speed Insights off | Region and Node version are then reproducible from the repo; Vercel's default Node is a newer major than the one we pin; commercial site needs Pro; Preview must never touch production data (BLUEPRINT) | — |
 
 ---
 
@@ -82,6 +84,8 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B2 | Company legal data for footer (sede legale, P.IVA, REA, capitale sociale, PEC) | you | P1.8 |
 | B3 | Privacy contact email + retention period for inquiries | you | P2.5 / P4.3 |
 | B4 | Legal review of privacy/cookie policy texts | you / counsel | P4.2 |
+| B5 | Vercel: Pro team (not Hobby), MFA, account access for linking, DPA accepted; then do `docs/DEPLOYMENT.md` §1–§5 | you | P0.6 (acceptance) |
+| B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production) | you | P1.7 / P2.6 |
 
 ---
 
@@ -89,7 +93,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 
 | Service | Dev | Preview | Prod | Notes |
 |---|---|---|---|---|
-| Vercel project | | | | region fra1 |
+| Vercel project | n/a | not linked | not linked | region fra1 set in `vercel.json`; runbook `docs/DEPLOYMENT.md`; no env vars set yet |
 | Postgres (EU) | | | | separate branch per env |
 | Upstash Redis (EU) | | | | |
 | Email provider (EU) | | | | SPF/DKIM/DMARC |
@@ -116,6 +120,11 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P0.6: pnpm 12 on Vercel is unverified (main risk).** The lockfile says `lockfileVersion: '9.0'`; Vercel picks pnpm from that unless Corepack is on, and its Corepack support is documented as experimental. Check the first build log for pnpm 12.16.1 and Node 24; fallbacks are in `docs/DEPLOYMENT.md` §6. Moving the repo to another pnpm major is a decision for you, not something to do silently.
+- **P0.6: `fra1` cannot be observed yet.** Both routes are static (CDN), so no function runs. Verify on the first dynamic route (inquiry handler, P2.5). `fra1` covers function execution only; CDN/edge is global, so the privacy notice must not claim EU-only hosting.
+- **P0.6: Vercel as processor.** `docs/GDPR_CHECKLIST.md` processor line (tagged `[P0.6, P4.2]`) is **not ticked**: DPA acceptance, transfer mechanism (DPF/SCC, unverified here), sub-processors and log retention are yours to confirm; record in `docs/ROPA.md` (does not exist yet, P4.3).
+- **P0.6: for P1.7.** `env.ts` must not make `NEXT_PUBLIC_SITE_URL` mandatory in Preview (derive it from Vercel's deployment URL), or every PR preview fails the missing-env build check. `engines.node` change (`>=24 <25` → `24.x`) is equivalent for Node 24 and avoids Vercel's default of a newer major.
+- **P0.6: Hobby plan.** It builds fine but breaches Vercel's terms for a company site; use Pro.
 - **Limits of the deny rules:** `Read`/`Edit`/`Grep` denies are path-based and solid. The `Bash`/`PowerShell` env patterns (`* .env.local` etc.) only match literal command text; I did **not** test bypass spellings such as `cat ./.env.local` or `type .\.env.local`, which probably slip through. For a hard guarantee, use Claude Code's sandbox / OS-level filesystem restrictions.
 - **`.env.example` assumptions to confirm:** email variables are provider-neutral (`EMAIL_API_KEY`, `EMAIL_FROM`, `INQUIRY_NOTIFY_TO`) because the EU provider is not chosen yet (P2.5); Turnstile values are Cloudflare's published always-pass test keys, copied from memory, so check them against Cloudflare's docs; no analytics or Cal.com variables yet (D6 platform and P2.7 undecided).
 - **CLAUDE.md §13:** changing `.claude/settings.json` normally needs asking; done here because P0.2 explicitly requests it.
@@ -149,26 +158,22 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass
+pnpm install --frozen-lockfile → pass (no engine warnings with engines.node "24.x")
 pnpm verify       → pass (typecheck → lint → test → build); test step: 1 file, 2 tests passed
-pnpm test:e2e     → pass (2 tests, Chromium: smoke + axe WCAG 2.2 AA, ~11 s incl. build)
+pnpm test:e2e     → pass (2 tests, Chromium: smoke + axe WCAG 2.2 AA, ~16 s incl. build)
 pnpm knip         → pass
-pnpm format:check → pass (includes .github/**/*.yml)
+pnpm format:check → pass (includes vercel.json)
 
-P0.5 checks (the workflows themselves cannot run locally):
-  Prettier on .github/        → pass (valid YAML, formatted)
-  uses: pinning               → all 5 `uses:` lines are `owner/repo@<40-hex> # vX.Y.Z`; none unpinned
-  SHA vs upstream             → each SHA resolved via `git ls-remote` and matches its tag:
-                                checkout v7.0.1, setup-node v7.1.0, cache v6.1.0, upload-artifact v7.0.2
-  gitleaks 8.30.1             → archives matched the release checksums file (same origin, so integrity
-                                only, not independent authenticity); the workflow's sha256 equals the
-                                linux_x64 entry; `sha256sum --check` passes with the right hash and
-                                fails with a wrong one; archive contains the `gitleaks` binary
-  gitleaks on real repo       → `gitleaks git` full history: no leaks (5 commits); `gitleaks dir`
-                                finds 12 hits only under gitignored `.next/` build cache (not in git)
-  gitleaks canary             → clean dir exit 0; dir with a synthetic `ghp_…` string exit 1,
-                                rule `github-pat`, value redacted
-  NOT done: actionlint (execution blocked), a real PR run, branch protection, commit-based canary
+P0.6 checks:
+  vercel.json       → every key exists in https://openapi.vercel.sh/vercel.json (schema forbids
+                      unknown keys) with the right type; `framework` enum accepts `nextjs`
+  .gitignore        → `.vercel` is ignored (`git check-ignore`)
+  Node              → local 24.21.0 satisfies `24.x`
+  Vercel docs       → regions override, Node 24.x support, Hobby = non-commercial, env CLI syntax
+                      checked via web search (sources listed in docs/DEPLOYMENT.md)
+  NOT done          → no Vercel login/link/deploy/env set (needs your account); no `vercel build`
+                      (would pull environment values to disk); region, pnpm 12 and Node 24 on
+                      Vercel are therefore unconfirmed; CI result after your push not checked
 ```
 
 ---
@@ -176,17 +181,18 @@ P0.5 checks (the workflows themselves cannot run locally):
 ## 10. Proposed commit(s) for the work above
 
 ```
-ci: add verification, secret scanning and dependabot
+chore(deploy): add vercel config for fra1 and deployment runbook
 
-Add a CI workflow that runs verify, knip, format check and the
-Playwright axe suite, a security workflow that scans the full git
-history with gitleaks, and Dependabot for npm and GitHub Actions.
-All actions are pinned to full commit SHAs. gitleaks runs as a
-version- and sha256-pinned binary because the repository is private
-without GitHub Advanced Security, so CodeQL and dependency-review
-are intentionally omitted.
+Pin Vercel function execution to Frankfurt (fra1) in vercel.json
+with a frozen-lockfile install, and set engines.node to 24.x so
+Vercel does not fall back to its newer default Node major. Add
+docs/DEPLOYMENT.md covering project linking, settings, a
+Preview/Production environment variable matrix derived from
+.env.example, readiness checks and the known pnpm 12 risk. Linking
+the project and setting variables still has to be done in the
+Vercel account.
 
-Task: P0.5
+Task: P0.6 (repo side; Vercel-side acceptance pending)
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```
