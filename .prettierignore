@@ -1,0 +1,16 @@
+# build output and generated files
+.next
+out
+build
+coverage
+playwright-report
+test-results
+next-env.d.ts
+*.tsbuildinfo
+pnpm-lock.yaml
+pnpm-workspace.yaml
+node_modules
+
+# governance and project docs are hand-formatted (tables); Prettier would
+# re-align them and create noisy diffs. Revisit if docs get a lint step.
+*.md

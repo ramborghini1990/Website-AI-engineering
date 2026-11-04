@@ -10,7 +10,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "knip": "knip",
+    "test": "node -e \"console.log('No unit tests yet: Vitest is added in P0.4.')\"",
+    "test:e2e": "node -e \"console.error('Playwright is not installed yet (P0.4).');process.exit(1)\"",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "dependencies": {
     "next": "16.4.5",
@@ -24,8 +31,13 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "knip": "^6.44.1",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.72.1"
   },
   "packageManager": "pnpm@12.16.1"
 }
