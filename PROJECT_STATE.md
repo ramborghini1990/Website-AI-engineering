@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.4 committed as `7fc6b2d`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.5 committed as `f41ee66`)_
 
 ---
 
@@ -11,21 +11,20 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.4 committed a
 | Field | Value |
 |---|---|
 | Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.5` — Motion system (Lenis + GSAP in one loop, single GSAP registration, `useReducedMotion`, CLS < 0.05, zero ScrollTrigger leaks, reduced-motion e2e) |
+| Active task | `P1.6` — FX library: text reveal, magnetic button, marquee, spotlight card, gradient mesh, scroll-pinned section (static fallbacks, lazy, documented, showcased, tested) |
 | Status | **acceptance criteria met, awaiting review (not committed)** |
-| Next task | `P1.6` — see ROADMAP; do not start unprompted |
+| Next task | `P1.7` — security headers, CSP with nonce, validated env; do not start unprompted |
 
 **Plan for the active task**
-1. `src/lib/motion/`: `tokens.ts` (mirror of the CSS motion tokens, parity-tested), `gsap.ts` (the only GSAP import point: registers `useGSAP`, `ScrollTrigger`, `CustomEase` once, creates the `ds-*` eases, refreshes after fonts), `use-reduced-motion.ts`, `use-motion.ts` (`useGSAP` + `gsap.matchMedia`, everything reverted on unmount / deps change / preference flip), `reveal.ts` helpers.
-2. `LenisProvider` mounted once in `[locale]/layout.tsx`; the engine (`lenis-runtime.tsx`) is a lazy chunk loaded after idle and never under reduced motion; one loop: `gsap.ticker` calls `lenis.raf`, Lenis `scroll` calls `ScrollTrigger.update()`; route change refreshes ScrollTrigger; Radix scroll lock stops/starts Lenis.
-3. Layout: body `min-h-dvh`, no height on `<html>` (the upstream `html.lenis { height:auto }` rule caused CLS 0.062 and is not copied).
-4. Dev test page `/[locale]/_dev/motion` (intro, 6 reveals, 1 pinned scrubbed scene) and `window.__motionDebug` (dev-tools only).
-5. Tests: unit (152 in total) and e2e (`motion.spec.ts` against `next dev`, `scroll.spec.ts` against the production build), with mutation checks; `docs/MOTION.md`.
+1. `src/components/fx/`: six components, all written in-house (no code copied, no new dependency). Four are client wrappers + a lazy `*.motion.tsx` chunk that uses `useMotion` (`TextReveal`, `MagneticButton`, `SpotlightCard`, `ScrollPinnedSection`); two are CSS-only server components (`Marquee`, `GradientMesh`).
+2. Code splitting: wrapper = markup + `ref` + `next/dynamic(ssr:false)`, mounted by `useFxReady()` (idle, not reduced, mouse for pointer effects). `useMotion` gained a cleanup return and `contextSafe`.
+3. CSS: `--animate-marquee` / `--animate-mesh-*` tokens (off under reduced motion), `animation-paused` utility.
+4. Showcase at `/[locale]/_dev/fx` (linked from the UI gallery and the motion page).
+5. Tests: unit (contrast, structure, wrappers, motion modules, integration with real lazy chunks), e2e `fx.spec.ts` (dev) and `fx-bundle.spec.ts` (prod); mutations; screenshots; docs (`MOTION.md`, `THIRD_PARTY.md`).
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Throwaway probes and mutations are removed or reverted; no `next` / `playwright` process or listener on 3100, 3101, 3200 (netstat + command-line check).
-- The GSAP licence is custom and has **not** been reviewed by a human: tick the box in `docs/THIRD_PARTY.md` after reading https://gsap.com/standard-license.
-- `e2e/gallery.spec.ts` was edited (one wait added, see section 8, "P1.5 / select test"); no assertion was weakened.
+- Nothing half-done. The dev server I started for screenshots was stopped by PID; no `next` / `playwright` process and no listener on 3100, 3101, 3200 (netstat + command-line check). The temporary mutation of the home page was reverted (`git diff` on it is empty).
+- **Your review items:** the look of the effects (I could only judge screenshots: dark, light, 1280 and 360 px; see section 8, "P1.6 / the mesh is subtle"), and the deviations from the roadmap wording (section 8: separate showcase page, mesh is CSS not canvas, no code taken from React Bits).
 
 ---
 
@@ -34,7 +33,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.4 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 4/8 | P1.1–P1.4 committed; P1.5 awaiting review/commit |
+| 1 Core, design system, motion | ◐ | 5/8 | P1.1–P1.5 committed; P1.6 awaiting review/commit |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -56,6 +55,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.4 committed a
 | 2026-11-05 | P1.2 | Design tokens in `globals.css`, self-hosted Instrument Sans + JetBrains Mono, contrast and raw-colour guards | `9263b31` |
 | 2026-11-05 | P1.3 | Accessible UI primitives on Radix, dev-only gallery, keyboard/axe/reduced-motion e2e | `15ba83f` |
 | 2026-11-05 | P1.4 | next-intl routing (it/en), proxy, typed messages, switcher, hreflang | `7fc6b2d` |
+| 2026-11-05 | P1.5 | Lenis + GSAP in one loop, `useMotion` / `useReducedMotion`, lazy engine, CLS 0, no ScrollTrigger leaks | `f41ee66` |
 
 ---
 
@@ -87,6 +87,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D20 | 2026-11-05 | Dev gallery: code in `src/app/[locale]/dev-tools/`, public URL `/[locale]/_dev/ui` via a rewrite in `next.config.ts`; layout calls `notFound()` unless `isDevelopment` (`src/lib/env.ts`, the only `process.env` read, a stand-in until P1.7's Zod env). Playwright has two projects/servers: production build on 3100 (what users get; also asserts the 404s) and `next dev` on 3200 (gallery) | A `_dev` folder is a private folder (never routable); a `%5Fdev` folder makes `next dev` and `next build` emit conflicting route types (`"/[locale]/%5Fdev"` vs `"/[locale]/_dev"`), which broke `pnpm verify` after any dev session. Next 16 writes dev output to `.next/dev`, so both servers can run together | — |
 | D21 | 2026-11-05 | i18n (P1.4): next-intl 4.14.9; locales `it` (default) and `en`; prefix always; locale from `next/root-params` (Cache Components); `proxy.ts` (Next 16 name) with matcher `/((?!api\|trpc\|_next\|_vercel\|.*\\..*).*)`; **`localeCookie: false`** and **`alternateLinks: false`** (hreflang only in HTML metadata); typed messages with Italian as the source shape; root layout is `app/[locale]/layout.tsx` and there is no `app/layout.tsx`; canonical and hreflang are absolute via `siteUrl` (`resolveSiteUrl`: explicit var, Vercel production domain, `VERCEL_URL`, localhost); `tsconfig` excludes `.next/dev`; `@parcel/watcher` and `@swc/core` build scripts stay disabled | The URL carries the language so no storage is needed (GDPR); a pass-through root layout would break root params; stale dev types broke `verify` after every route change; the two scripts only serve next-intl features we do not use (CLAUDE.md §5) | — |
 | D22 | 2026-11-05 | Motion (P1.5): `gsap`, `@gsap/react`, `lenis` (named in CLAUDE.md §5). `src/lib/motion/gsap.ts` is the only GSAP import point and registers once (no-op on the server). **One loop:** Lenis `autoRaf:false`, `gsap.ticker` drives `lenis.raf`, Lenis `scroll` drives `ScrollTrigger.update()`, `lagSmoothing(0)` while running and restored on cleanup; touch stays native (`syncTouch:false`). Components write animations only through `useMotion` (`useGSAP` + `gsap.matchMedia` with `reduced` / `full`), so all tweens and triggers are reverted on unmount, deps change and live preference flips. Reduced contract: final state or ≤ 0.16 s opacity fade, no pin/scrub/loops. **Lazy engine:** `LenisProvider` loads the chunk after idle (≈ 47 KB transferred, 119 KB raw) and not at all under reduced motion. Radix scroll lock (`body[data-scroll-locked]`) stops Lenis; scrollable overlays carry `data-lenis-prevent`. Motion tokens are mirrored in `tokens.ts` and parity-tested against `globals.css`. Layout: `min-h-dvh` on `<body>`, no height on `<html>`, upstream `html.lenis{height:auto}` not copied (it measured CLS 0.062 with the previous `h-full` layout; with the fix 0.0000). Playwright runs a `globalSetup` that warms the dev routes sequentially | Meets CLAUDE.md §8 literally (single loop, single registration, cleanup via `useGSAP`, reduced motion implemented in the hook and the provider); the lazy chunk keeps motion code off the critical path; mirrored tokens avoid two sources of truth drifting silently; parallel first compiles of new `next dev` routes crashed with `Unexpected end of JSON input` | — |
+| D23 | 2026-11-05 | FX library (P1.6): six components in `src/components/fx/`, **all written in-house** (no React Bits / 21st.dev code, no new dependency). **Split by weight:** `TextReveal`, `MagneticButton`, `SpotlightCard`, `ScrollPinnedSection` are a small client wrapper (final-state markup + ref + `next/dynamic(ssr:false)`) plus a lazy `*.motion.tsx` that calls `useMotion`; `Marquee` and `GradientMesh` are server components with zero JS (CSS keyframes from `--animate-*` tokens, off under reduced motion). The motion chunk mounts only through `useFxReady()`: after idle, never under reduced motion, and for cursor effects only with hover + fine pointer. `useMotion` now lets `build` return a cleanup and passes `contextSafe` (tweens created in event handlers escape the revert otherwise). Static fallbacks: no JS, reduced motion and touch all show the plain final state. Specific choices: mesh is three CSS blobs, not a `<canvas>` (no second frame loop); mesh peak 5 % because the contrast test fails above about 10 % for the strongest overlap; marquee pause is a native checkbox (WCAG 2.2.2, works without JS); marquee copies stretch to `min-w-screen`; the pinned section lives in an unpinned wrapper div and refuses to pin content taller than the viewport; text reveal leaves headlines already on screen alone; showcase is a separate dev page, not part of the UI gallery | Meets the roadmap acceptance (each has a static fallback; FX JS is not in pages that do not use it, proven on the production build); the gallery's per-theme axe suite is untouched by a pinned scene; no licence or supply-chain exposure | — |
 
 ---
 
@@ -136,6 +137,12 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P1.6 / deviations from the roadmap wording (your call):** (1) **Showcase** is its own dev page `/[locale]/_dev/fx`, linked from the UI gallery and the motion page, not a section of `/_dev/ui`: a pinned scene and ambient animation would interfere with the gallery's per-theme axe and keyboard tests. (2) **"adapted from React Bits or custom-built"**: all six are custom-built; I did not read React Bits or 21st.dev, so no licence applies and `docs/THIRD_PARTY.md` says so. (3) **Gradient mesh is CSS blobs, not a canvas** (the task text said "ambient canvas"): no frame loop of its own, no pixel cost, static fallback is the same markup. Say if you want a real canvas or shader.
+- **P1.6 / the mesh is subtle, by a hard limit.** At the strongest blob overlap, text keeps 4.5 : 1 only up to about 10 % accent; the first values (10/10/7 %) failed `fx-contrast.test.ts` for muted and accent text (dark 3.84, light 4.05 at the strongest pair), so the peaks are 5/5/4 %. In the screenshots it reads as a faint warm drift on dark and almost nothing on light. A stronger look needs a different token approach (for example a darker text token over it), a design decision.
+- **P1.6 / nothing in production uses the FX yet.** The only consumer is the dev page; the first real use is P2.x. "Not downloaded under reduced motion" is therefore proven by unit tests (the wrapper never mounts the chunk) and by the same mechanism measured for Lenis in P1.5, not by a production page. `next dev` preloads dynamic chunks whatever the preference, so the dev e2e cannot show it (my first request-based check was vacuous: a positive control caught it, then I removed it).
+- **P1.6 / limits of the effects.** `ScrollPinnedSection` checks "content taller than the viewport" once when its motion loads, not on resize or rotation; steps are text only (a not-yet-visible step is still focusable). `TextReveal` skips a headline that is already on screen or scrolled past (by design: no flash, no LCP risk), so a hero headline needs `playIntro` (P2.2). `Marquee` needs about 5 or more items to look right and its second copy must stay plain text. `MagneticButton` handles one control and only a mouse. The marquee ticks as a CSS animation even when off screen (cheap, compositor-only; not paused).
+- **P1.6 / bugs the tests found in my own first version (all fixed):** (a) removing the pinned section alone (conditional render, key change) threw `NotFoundError` because ScrollTrigger had moved it into a spacer; now it sits in an unpinned wrapper (`fx-integration.test.tsx`). (b) The spotlight's tweens, created in pointer handlers, escaped the revert, so a card lit during a live switch to reduced motion would have stayed lit; fixed with `contextSafe` (e2e and unit). (c) Mesh too strong for AA (above). (d) At 1920 px a 10-item marquee left a gap in the loop (`min-w-screen` now). (e) Under reduced motion at 360 px the wrapped marquee list overflowed the screen by 613 px (`shrink-0` kept it from wrapping). (f) The e2e axe scan caught partly transparent steps mid-scrub; the scan now runs at the end of the scene (a transient animation frame, not a design contrast issue). Also a test-clock ordering issue in `use-motion.test.tsx` (GSAP's module-level last-change time).
+- **P1.6 / things I changed outside `src/components/fx`:** `useMotion` (cleanup return, `contextSafe`; the `void | (() => void)` union has one justified lint disable), `use-reduced-motion.ts` and `lenis-provider.tsx` (now built on the new shared `use-media-query.ts` and `use-after-idle.ts`, behaviour unchanged, their tests pass untouched), `globals.css` (animation tokens, keyframes, `animation-paused`, reduced-motion list), `src/test-utils/match-media.ts` (answers the pointer query; backwards compatible) and `idle.ts`, `playwright.config.ts` + `e2e/support/servers.ts` (the `fx` spec joins the dev project, the route is warmed), `ui-gallery.tsx` (link), `docs/{MOTION,THIRD_PARTY,DESIGN}.md`. Existing P1.5 `use-motion` tests were adjusted from an exact `{ reduced }` match to `objectContaining` because the context object grew.
 - **P1.5 / GSAP licence needs a human check.** The registry licence field is "Standard 'no charge' license" (https://gsap.com/standard-license), not an OSI licence; `@gsap/react` points at the same text. CLAUDE.md and BLUEPRINT say GSAP is free for commercial use; I did not verify that and I am not qualified to. Only public-package plugins are used (`ScrollTrigger`, `CustomEase`). Tick the box in `docs/THIRD_PARTY.md` after reading it.
 - **P1.5 / select test (found while verifying, fixed in the test).** `gallery.spec.ts` "select: opens and chooses with the keyboard" started failing most runs after the motion work (ended on "AI agents" instead of "Workflow automation"). Cause, from a step-by-step probe: Radix Select moves the highlight inside a `setTimeout` after `ArrowDown`, so an immediate `Enter` chose the previously highlighted option when the main thread was busy (the engine mounts after idle). In the probe the highlight was still on the first option when Enter was pressed. It is not `data-lenis-prevent` (removed: still failed) or `MotionProbe` (removed: still failed); I did not isolate which P1.5 change made the main thread busy enough to expose it. The test now waits for `data-highlighted` on the target option before `Enter`; 6/6 passes afterwards and the full suite is green. A real user cannot press two keys in the same millisecond, so I treat it as a test race, not a component bug.
 - **P1.5 / limits.** CLS was measured on Chromium on a fast machine as the plain sum of shifts without recent input (a negative control proves the tracker sees a real shift); it is not field data and not mid-range mobile. Lenis was not run on iOS Safari or Firefox (touch scrolling is native by design). The ~47 KB engine is fetched on every page after idle, even pages without scroll motion; an opt-out per route is possible later. GSAP `matchMedia` ignores preference changes within 2 ms of each other (tests advance the clock).
@@ -208,39 +215,57 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass (lockfile up to date)
-pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 21 files,
-                    152 tests; the build lists the motion and ui dev routes
-pnpm test:e2e     → pass, 90 tests (Chromium) in 59 s: production build + `next dev` projects
+pnpm install --frozen-lockfile → pass (no dependency changed)
+pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 27 files,
+                    244 tests (152 before P1.6)
+pnpm test:e2e     → pass, 124 tests (Chromium), twice in a row (no flake): production build + `next dev`
+                    projects; new: 30 in e2e/fx.spec.ts, 4 in e2e/fx-bundle.spec.ts
 pnpm knip         → pass
 pnpm format:check → pass (does not cover *.md)
-no `next` / `playwright` process and no listener on 3100, 3101, 3200 afterwards (netstat + command lines)
+no `next` / `playwright` process and no listener on 3100, 3101, 3200 afterwards
 
-P1.5 checks:
-  single loop        → unit: only the live Lenis instance receives ticker frames, none after unmount, also under
-                       StrictMode; lagSmoothing restored on cleanup
-  registration       → plugins registered once (idempotent), no-op on the server (gsap.ssr test), eases created
-                       from the CSS bezier tokens; tokens.test.ts fails if tokens.ts and globals.css drift
-  reduced motion     → unit (hook, useMotion, provider: engine chunk not rendered) and e2e with
-                       `reducedMotion: "reduce"`: no `lenis` class, engine chunk never requested (prod build),
-                       no pin spacers, no scrubbed triggers, content visible; live preference flips x3 give
-                       stable trigger counts
-  leaks              → e2e on the motion page: exactly 7 ScrollTriggers and 1 pin-spacer, 0 after navigating
-                       away, exactly 7 / 1 again on return, x3 round trips, Back/Forward, scroll back at top;
-                       counts proven by mutation
-  CLS                → measured 0.0000 on /it, /en, /it/non-esiste (prod) and on the motion page full and
-                       reduced (dev), each over load + Lenis start-up + a full scroll; negative control (an
-                       injected shift is detected); mutation: the old `h-full` layout + upstream
-                       `html.lenis{height:auto}` gave CLS 0.0617 and the test failed; layout fix kept
-  lazy engine        → not in the initial script list, arrives after idle (prod); ≈ 46.9 KB transferred /
-                       118.9 KB raw
-  scroll lock        → a dialog stops the page behind it (Lenis stopped) and scrolling resumes on close
-  bugs found by the tests (all fixed) → CLS 0.0617 from the Lenis height rule (layout change above); dev-server
-                       first-compile crash under parallel workers (globalSetup warm-up); a "leak" test that
-                       scrolled to top before navigating (rewritten); matchMedia dedupe within 2 ms in unit
-                       tests (clock advanced); gallery select test race (section 8)
-  NOT done           → Firefox/WebKit/iOS; mid-range mobile CLS/LCP; INP; screen-reader pass; human review of the
-                       GSAP licence; the live Vercel deployment after you push
+P1.6 checks:
+  static fallback    → e2e with JavaScript disabled: headline complete and visible, marquee list with 10 items
+                       and still looping, its pause switch still works (CSS only), cards readable with discs at
+                       opacity 0, pinned steps stacked and visible, no pin spacer, progress bar hidden. Unit:
+                       server-rendered markup of every component has no hiding style
+  reduced motion     → e2e (`reducedMotion: reduce`): 0 ScrollTriggers and 0 pins, every word and step opacity 1,
+                       marquee animation none / wrapped / copy and switch hidden / no clipping and no
+                       horizontal scroll at 360 px, mesh still, no lean, no glow; unit: wrappers never mount the
+                       chunk; live flips x3 give stable counts (3 triggers + 1 pin when full, 0 when reduced);
+                       a lit card goes dark on the flip and stays dark
+  touch / small      → mobile context: `(hover: hover) and (pointer: fine)` false, tap leaves the button and
+                       card untouched, scroll effects still run; 740 x 300 viewport: no pin (content taller than
+                       the viewport), 2 reveals only, steps visible
+  leaks              → exact counts across 3 round trips between the FX page and the gallery, and across Back /
+                       Forward after leaving mid-pin: 0 / 0 away, 3 / 1 on return (1 / 1 after Back because the
+                       restored scroll is past the headlines, which stay as rendered); unit: unmounting the
+                       pinned wrapper on its own leaves no trigger, no spacer
+  code splitting     → `fx-structure.test.ts`: no wrapper statically imports GSAP, `useMotion` or a `.motion`
+                       module; each `.motion` is reached only via `next/dynamic` with `ssr:false`; the CSS-only
+                       components have no hooks. `fx-bundle.spec.ts` (production build): FX markers exist in the
+                       build (control: 5 chunks, 21 KB raw / 8.9 KB gzip in total, each motion module 1-2 KB raw;
+                       15 KB of that is the dev page) and none is downloaded by /it, /en or the 404, at load or
+                       after idle. Mutation: importing `TextReveal` into the home page made all 3 route tests
+                       fail; reverted
+  contrast           → `fx-contrast.test.ts`: every text colour (text, secondary, muted, accent) on bg, surface-1
+                       and surface-2 under the strongest mesh overlap (alpha 0.0975) and under the spotlight
+                       glow, both themes, real tokens; the test is not vacuous (30 % would fail). It FAILED on my
+                       first values (see section 8) and drove them down. axe (WCAG 2.0-2.2 A/AA, zero
+                       violations) on the page in dark, light, reduced motion, and with a card lit + the scene
+                       pinned
+  layout shift       → CLS 0.0000 over load, motion start-up and a full scroll, full motion and reduced motion
+                       (same tracker as P1.5, negative control in motion.spec.ts)
+  keyboard           → the pause switch is reachable (Shift+Tab from the next control), shows the 2 px focus
+                       ring and toggles with Space; the wrapped button keeps its normal focus ring and does not
+                       move on focus
+  visual             → screenshots of the dev page in dark and light at 1280 x 720 (top, marquee, leaning button,
+                       text, lit card, pinned mid-scene), reduced motion (marquee wrapped, steps stacked) and
+                       360 px (top, marquee full and reduced); nothing looked broken
+  bugs found by the tests (all fixed) → see section 8, "P1.6 / bugs the tests found"
+  NOT done           → Firefox / WebKit / iOS; real mid-range mobile performance (the ambient loops and the
+                       pointer effects were not profiled); a screen-reader pass of the marquee switch and the
+                       split headline; a human visual review of how the effects feel; the live Vercel deployment
 ```
 
 ---
@@ -248,33 +273,38 @@ P1.5 checks:
 ## 10. Proposed commit(s) for the work above
 
 ```
-feat(motion): add lenis and gsap motion system with reduced-motion support
+feat(fx): add fx library with static fallbacks and lazy motion
 
-Run smooth scrolling and GSAP in a single loop: gsap.ticker drives
-Lenis, and Lenis scroll events drive ScrollTrigger. GSAP and its
-plugins are registered once in lib/motion/gsap.ts, which is also the
-only place components import GSAP from. useMotion wraps useGSAP and
-gsap.matchMedia so every tween and ScrollTrigger is reverted on
-unmount, dependency change and when the reduced-motion preference
-flips. ScrollTrigger is refreshed on route change and after fonts load.
+Add six effects in src/components/fx, all written for this project:
+text reveal, magnetic button, marquee, spotlight card, gradient mesh
+and a scroll-pinned section. Each renders its final state on the
+server, so it reads correctly without JavaScript, with reduced motion
+and on touch devices.
 
-useReducedMotion follows the OS setting live. Under reduce, Lenis is
-never loaded and timelines become final states or fades of at most
-0.16 s; no pinning, scrubbing or loops. The engine is a lazy chunk
-loaded after idle. Radix scroll locks pause Lenis, and scrollable
-overlays opt out of smooth scrolling.
+The four that need GSAP are a small client wrapper plus a *.motion
+chunk loaded through next/dynamic once the browser is idle, never under
+reduced motion and, for cursor effects, only with a mouse. Pages that
+do not import an effect get none of its code; a production-build test
+proves it. The marquee and the mesh are CSS only and add no JavaScript.
+The marquee pauses on hover and through a native checkbox.
 
-Layout shift: body uses min-h-dvh and html has no height, because the
-upstream html.lenis height:auto rule produced CLS 0.062 with the old
-h-full layout. Measured CLS is 0 on the pages and the motion test page.
+useMotion now accepts a cleanup function from build and passes
+contextSafe, so tweens created in event handlers are reverted with the
+rest. useReducedMotion and LenisProvider move onto shared
+useMediaQuery and useAfterIdle hooks. Add animation tokens and
+keyframes, switched off under reduced motion.
 
-Add a dev-only motion page, unit tests, and Playwright specs for CLS,
-ScrollTrigger and pin counts across navigations, live preference
-changes and scroll lock. Wait for the Radix highlight in the select
-keyboard test (Radix moves it in a setTimeout). Document it in
-docs/MOTION.md and record the GSAP licence for review.
+The mesh is capped at 5 % per blob: a contrast test proves text keeps
+4.5:1 over it and over the spotlight glow in both themes. Pinned
+sections sit in an unpinned wrapper so React can remove them, and do
+not pin content taller than the viewport.
 
-Task: P1.5
+Add a dev showcase at /_dev/fx, unit tests, and Playwright specs for
+no-JS, reduced motion, touch, live preference changes, route-change
+leaks, axe in both themes and CLS. Document sources and adaptation
+notes in docs/THIRD_PARTY.md and docs/MOTION.md.
+
+Task: P1.6
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

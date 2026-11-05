@@ -19,14 +19,14 @@ export default defineConfig({
     {
       // What users get: the production build.
       name: "chromium",
-      testIgnore: /(gallery|motion)\.spec\.ts/,
+      testIgnore: /(gallery|motion|fx)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], baseURL: prodURL },
     },
     {
-      // The UI gallery and the motion test page exist only under `next dev`
+      // The UI gallery, the motion test page and the FX showcase exist only under `next dev`
       // (they are a 404 in production).
       name: "chromium-dev",
-      testMatch: /(gallery|motion)\.spec\.ts/,
+      testMatch: /(gallery|motion|fx)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], baseURL: devURL },
     },
   ],

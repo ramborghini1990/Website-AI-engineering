@@ -141,6 +141,16 @@
   --animate-toast-in: toast-in var(--duration-base) var(--ease-out);
   --animate-toast-out: toast-out var(--duration-fast) var(--ease-in) forwards;
 
+  /*
+   * FX library (src/components/fx): ambient loops, transform only. They are
+   * long on purpose (slow drift, not a spectacle). The marquee length is set
+   * per instance through --marquee-duration.
+   */
+  --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
+  --animate-mesh-a: mesh-a 28s var(--ease-in-out) infinite alternate;
+  --animate-mesh-b: mesh-b 36s var(--ease-in-out) infinite alternate;
+  --animate-mesh-c: mesh-c 44s var(--ease-in-out) infinite alternate;
+
   @keyframes overlay-in {
     from {
       opacity: 0;
@@ -227,6 +237,26 @@
       transform: translateY(0.5rem);
     }
   }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes mesh-a {
+    to {
+      transform: translate3d(12%, 8%, 0) scale(1.12);
+    }
+  }
+  @keyframes mesh-b {
+    to {
+      transform: translate3d(-10%, 12%, 0) scale(0.92);
+    }
+  }
+  @keyframes mesh-c {
+    to {
+      transform: translate3d(8%, -10%, 0) scale(1.08);
+    }
+  }
 
   /* Layers */
   --z-sticky: 10;
@@ -260,6 +290,10 @@
     --animate-sheet-bottom-out: none;
     --animate-toast-in: none;
     --animate-toast-out: none;
+    --animate-marquee: none;
+    --animate-mesh-a: none;
+    --animate-mesh-b: none;
+    --animate-mesh-c: none;
   }
 }
 
@@ -287,6 +321,11 @@
 
 @utility shadow-glow-accent {
   box-shadow: var(--shadow-glow-accent);
+}
+
+/* Pause a running CSS animation (marquee: hover and the pause switch). */
+@utility animation-paused {
+  animation-play-state: paused;
 }
 
 /* Light theme, explicit choice */

@@ -16,8 +16,12 @@ afterEach(() => {
  * one (it reads Date.now()). People change the OS setting seconds apart, so
  * move the clock forward between flips, like a real session.
  */
+let clock = Date.now();
 function flip(media: ReturnType<typeof mockReducedMotion>, reduced: boolean) {
-  vi.setSystemTime(Date.now() + 1000);
+  // GSAP keeps the time of the last change in a module variable that outlives
+  // a test, so the fake clock must only ever move forward across the whole file.
+  clock += 1000;
+  vi.setSystemTime(clock);
   act(() => {
     media.set(reduced);
   });
@@ -48,7 +52,9 @@ describe("useMotion", () => {
     render(<Probe onBuild={onBuild} />);
 
     expect(onBuild).toHaveBeenCalledTimes(1);
-    expect(onBuild).toHaveBeenCalledWith({ reduced: false });
+    expect(onBuild).toHaveBeenCalledWith(
+      expect.objectContaining({ reduced: false }),
+    );
   });
 
   it("builds with reduced=true when the visitor asks for reduced motion", () => {
@@ -58,7 +64,9 @@ describe("useMotion", () => {
     render(<Probe onBuild={onBuild} />);
 
     expect(onBuild).toHaveBeenCalledTimes(1);
-    expect(onBuild).toHaveBeenCalledWith({ reduced: true });
+    expect(onBuild).toHaveBeenCalledWith(
+      expect.objectContaining({ reduced: true }),
+    );
   });
 
   it("rebuilds with the new value each time the preference changes, without stacking tweens", () => {
@@ -70,15 +78,21 @@ describe("useMotion", () => {
     expect(gsap.getTweensOf(box)).toHaveLength(1);
 
     flip(media, true);
-    expect(onBuild).toHaveBeenLastCalledWith({ reduced: true });
+    expect(onBuild).toHaveBeenLastCalledWith(
+      expect.objectContaining({ reduced: true }),
+    );
     expect(gsap.getTweensOf(box)).toHaveLength(1); // the old one was reverted
 
     flip(media, false);
-    expect(onBuild).toHaveBeenLastCalledWith({ reduced: false });
+    expect(onBuild).toHaveBeenLastCalledWith(
+      expect.objectContaining({ reduced: false }),
+    );
     expect(gsap.getTweensOf(box)).toHaveLength(1);
 
     flip(media, true);
-    expect(onBuild).toHaveBeenLastCalledWith({ reduced: true });
+    expect(onBuild).toHaveBeenLastCalledWith(
+      expect.objectContaining({ reduced: true }),
+    );
     expect(gsap.getTweensOf(box)).toHaveLength(1);
     expect(onBuild).toHaveBeenCalledTimes(4); // mount + three flips, no extras
   });
@@ -92,6 +106,46 @@ describe("useMotion", () => {
     unmount();
 
     expect(gsap.getTweensOf(box)).toHaveLength(0);
+  });
+
+  it("runs the cleanup function that build returns on unmount", () => {
+    mockReducedMotion(false);
+    const cleanup = vi.fn();
+    function WithCleanup() {
+      const scope = useRef<HTMLDivElement>(null);
+      useMotion(() => cleanup, { scope });
+      return <div ref={scope} />;
+    }
+    const { unmount } = render(<WithCleanup />);
+    expect(cleanup).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs the returned cleanup before rebuilding when the preference flips", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const media = mockReducedMotion(false);
+    const events: string[] = [];
+    function WithCleanup() {
+      const scope = useRef<HTMLDivElement>(null);
+      useMotion(
+        ({ reduced }) => {
+          events.push(`build:${String(reduced)}`);
+          return () => {
+            events.push(`cleanup:${String(reduced)}`);
+          };
+        },
+        { scope },
+      );
+      return <div ref={scope} />;
+    }
+    render(<WithCleanup />);
+
+    flip(media, true);
+
+    expect(events).toEqual(["build:false", "cleanup:false", "build:true"]);
   });
 
   it("removes its media-query listeners on unmount", () => {

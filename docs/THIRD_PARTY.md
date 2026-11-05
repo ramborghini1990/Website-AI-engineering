@@ -35,6 +35,21 @@ Licences were read from the npm registry on 2026-11-05.
 
 **Lenis stylesheet.** `src/app/globals.css` contains a subset of upstream `lenis/dist/lenis.css` (MIT). Two rules were deliberately left out: `html.lenis, html.lenis body { height: auto }` (changes the document height when Lenis starts, a layout shift measured at CLS 0.062 in this project) and the `lenis-stopped` overflow rule (Radix already locks scroll).
 
+## FX library (P1.6)
+
+All six components in `src/components/fx/` are **written in-house for this project**. No code was copied, translated or adapted from React Bits, 21st.dev, shadcn blocks or any other source, and no new dependency was added (they use GSAP, `@gsap/react` and Tailwind, already recorded above). So no third-party licence attaches to them; they are INAMBIENTE's own code.
+
+| Component | Pattern (concept only) | What was built here |
+|---|---|---|
+| `TextReveal` | the common "split text, stagger words in" headline effect | Server-rendered words, `aria-label` on the heading with the split words `aria-hidden`; no SplitText plugin; stagger capped at 600 ms; leaves a headline that is already on screen alone |
+| `MagneticButton` | the common "button follows the cursor" effect | Wraps one control; moves an inner span with `gsap.quickTo`; pointer-only, 12 px cap |
+| `Marquee` | the common CSS infinite ticker | Zero-JS: CSS keyframes, a real checkbox as pause switch (WCAG 2.2.2), pause on hover, wrapped static list under reduced motion |
+| `SpotlightCard` | the common "radial highlight follows the pointer on a card" effect | Two transform-only discs (border ring and surface) instead of animating a gradient position; opacity capped for contrast |
+| `GradientMesh` | the common ambient "mesh gradient" background | Three faint accent blobs in CSS (not a canvas), no rAF loop of its own; strength limited by the contrast test |
+| `ScrollPinnedSection` | the pinned scroll-story pattern (docs/DESIGN.md §6.3) | ScrollTrigger pin + scrubbed timeline through `useMotion`; refuses to pin content taller than the viewport; wrapper element so React can unmount it safely |
+
+React Bits and 21st.dev were not queried or read for this task, so nothing about their licences was checked or is claimed. If code from either is adopted later, add a row to the first table with its source URL and licence, and review it as third-party code (CLAUDE.md §5, §13).
+
 ## Not yet used
 
-React Bits / 21st.dev components: none copied so far (P1.6 will add rows when it does).
+React Bits / 21st.dev / shadcn blocks: nothing copied in so far.

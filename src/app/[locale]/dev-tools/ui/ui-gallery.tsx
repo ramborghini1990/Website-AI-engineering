@@ -236,9 +236,12 @@ export function UiGallery() {
           </p>
           <ThemeSwitch />
           <LanguageSwitcher />
-          <div>
+          <div className="flex flex-wrap gap-4">
             <Button asChild variant="secondary">
               <Link href="/_dev/motion">Motion test page</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href="/_dev/fx">FX library</Link>
             </Button>
           </div>
         </header>

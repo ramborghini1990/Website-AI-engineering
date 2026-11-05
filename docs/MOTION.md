@@ -9,7 +9,8 @@ Rules: CLAUDE.md §8 and docs/DESIGN.md §6 (this file is how they are implement
 | `gsap.ts` | **The only place GSAP is imported from.** Registers `useGSAP`, `ScrollTrigger` and `CustomEase` once, creates the `ds-*` eases from the CSS bezier tokens, refreshes ScrollTrigger when fonts have loaded. No-op on the server |
 | `tokens.ts` | Durations (seconds), bezier curves and ease names mirroring the CSS `--duration-*` / `--ease-*` tokens; `tokens.test.ts` fails if they drift |
 | `use-reduced-motion.ts` | `useReducedMotion()`: follows the OS setting live; `false` on the server and during hydration |
-| `use-motion.ts` | `useMotion(build, { scope })`: **how to write a GSAP animation here** |
+| `use-motion.ts` | `useMotion(build, { scope })`: **how to write a GSAP animation here** (`build` may return a cleanup; `contextSafe` wraps handlers) |
+| `use-media-query.ts`, `use-after-idle.ts` | Small hooks behind `useReducedMotion`, `LenisProvider` and the FX components (`useFxReady`) |
 | `reveal.ts` | `revealOnScroll`, `playIntro`: reveal helpers (FROM an offset TO the server-rendered state) |
 | `lenis-provider.tsx` | `LenisProvider`, mounted once in `[locale]/layout.tsx`. Loads the engine after idle; never under reduced motion |
 | `lenis-runtime.tsx` | The engine (GSAP + Lenis), lazy-loaded by the provider |
@@ -59,8 +60,39 @@ Lenis adds a `lenis` class to `<html>`. Upstream's stylesheet sets `html.lenis, 
 | Dev test page (intro, 6 reveals, 1 pinned scene) | `/[locale]/_dev/motion` (dev only, 404 in production) |
 | Full motion, reduced motion, live preference switches, exact ScrollTrigger and pin counts across navigations, CLS, scroll lock | `e2e/motion.spec.ts` (against `next dev`) |
 | Engine is lazy and absent under reduced motion, CLS on real pages | `e2e/scroll.spec.ts` (production build) |
+| FX library: markup, motion modules, contrast, code splitting | `src/components/fx/*.test.ts(x)` |
+| FX library in a browser: no-JS, full, reduced, live switches, navigation leaks, touch, short viewport, axe in both themes, CLS | `e2e/fx.spec.ts` (against `next dev`) |
+| FX code is absent from pages that do not use it | `e2e/fx-bundle.spec.ts` (production build) |
 
 `window.__motionDebug` (`triggers()`, `pinSpacers()`, `lenis()`) exists only on dev-tools pages and is what the tests read.
+
+## FX library (`src/components/fx/`, P1.6)
+
+Six reusable effects, showcased at `/[locale]/_dev/fx` (dev only). Every one is static-first: the server renders the final state, and each has a fallback for no JavaScript and for reduced motion.
+
+| Component | Needs JS | Under reduced motion | Without JS |
+|---|---|---|---|
+| `TextReveal` (headline) | yes, lazy | plain headline; chunk never loads | plain headline |
+| `MagneticButton` | yes, lazy, mouse only | button stays put; chunk never loads | plain button |
+| `SpotlightCard` | yes, lazy, mouse only | plain card; chunk never loads | plain card |
+| `ScrollPinnedSection` | yes, lazy | stacked steps, nothing hidden or pinned | stacked steps |
+| `Marquee` | **no** (CSS) | wrapped static list, no loop, no switch | still loops; the pause switch still works |
+| `GradientMesh` | **no** (CSS) | blobs stand still | blobs drift (CSS) |
+
+**How code splitting works.** A page that imports an FX component gets only a small wrapper (markup, a `ref`, `next/dynamic`). The animation code sits in `*.motion.tsx` next to it, which only the wrapper reaches through `next/dynamic(..., { ssr: false })`, and only after the browser is idle (`useFxReady`), never under reduced motion (and, for pointer effects, never on touch devices). Pages that do not import FX components get none of it: `e2e/fx-bundle.spec.ts` proves that on the production build, `fx-structure.test.ts` keeps wrappers from importing GSAP statically. `Marquee` and `GradientMesh` have no JavaScript at all.
+
+**Writing a new FX:** copy the pair `x.tsx` + `x.motion.tsx`. The wrapper renders the final-state markup with a `ref`, calls `useFxReady()` and mounts `<XMotion scope={ref} />` when ready; the motion file calls `useMotion` and returns null.
+
+**`useMotion` additions made for this:** `build` may return a cleanup function (event listeners, observers), and receives `contextSafe`: wrap any event handler that creates tweens (they are made after `build` returns, so without it they escape the revert and survive unmount or a preference flip).
+
+Things worth knowing:
+
+- `TextReveal` only animates a headline that is still below the trigger line when its motion loads. One already on screen (or scrolled past, e.g. after Back) stays as rendered: hiding visible text to animate it in is a flash and would hurt LCP. A hero headline is `playIntro`'s job.
+- `ScrollPinnedSection` does not pin when its content is taller than the viewport (reflow, WCAG 1.4.10). It checks once when its motion loads; it does not re-check on resize. Steps are text: a step that is still transparent is focusable, so put no links or controls in them.
+- ScrollTrigger pins by moving the section into a spacer element. The wrapper keeps the section inside an unpinned `div` so React can remove it on its own (`fx-integration.test.tsx` covers the case that used to throw `NotFoundError`).
+- `GradientMesh` and the `SpotlightCard` glow are translucent accent over text. Their strengths live in `fx-tokens.ts` and `fx-contrast.test.ts` proves 4.5:1 for every text colour in both themes. The mesh is capped at about 5 % per blob for that reason, so on a dark background it is subtle to the point of being easy to miss. Raising it fails the test.
+- `Marquee` stretches each copy to at least the viewport width, so the loop never shows a gap, at the cost of wider spacing on wide screens. Items are plain text (the second copy is `aria-hidden`).
+- `next dev` preloads dynamic chunks whatever the preference, so "the chunk is not downloaded under reduced motion" can only be observed on a production build; the dev e2e checks behaviour instead (no triggers, nothing hidden).
 
 ## Known limits
 

@@ -237,7 +237,7 @@ The GSAP column names the closest built-in ease; if exact curve parity is needed
 - **Dialogs and sheets:** opacity plus 8 px translate, `duration-slow`, `ease-out` in and `ease-in` out. Exits are about 30 % shorter than entrances.
 - **Smooth scroll (Lenis):** a single instance, driven by `gsap.ticker`. It adds inertia, never changes scroll length or hijacks keyboard and anchor navigation.
 - **Pinned story section (home process timeline, P2.2):** the only scroll-linked scene; uses `ease-linear` for scrubbing and `ease-in-out` between steps.
-- **Magnetic buttons, spotlight cards, marquee, gradient mesh (P1.6):** decorative; each has a static fallback and none carries meaning that is unavailable elsewhere.
+- **Magnetic buttons, spotlight cards, marquee, gradient mesh, text reveal, pinned section (P1.6):** implemented in `src/components/fx/` (see [MOTION.md](MOTION.md)); decorative; each has a static fallback and none carries meaning that is unavailable elsewhere. Translucent layers (mesh, spotlight glow) are capped so text keeps 4.5 : 1, which makes the mesh very subtle.
 
 ### 6.4 Reduced motion (mandatory for every motion component)
 

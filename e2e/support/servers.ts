@@ -5,4 +5,8 @@ export const prodURL = `http://localhost:${String(prodPort)}`;
 export const devURL = `http://localhost:${String(devPort)}`;
 
 /** Dev-only routes. `next dev` compiles a route on its first request. */
-export const devRoutes = ["/it/_dev/ui", "/it/_dev/motion"] as const;
+export const devRoutes = [
+  "/it/_dev/ui",
+  "/it/_dev/motion",
+  "/it/_dev/fx",
+] as const;

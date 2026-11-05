@@ -4,19 +4,27 @@ type Listener = (event: { matches: boolean; media: string }) => void;
 
 /**
  * jsdom has no `matchMedia`. This fake answers the reduced-motion queries from
- * one flag and lets a test flip it while the code under test is subscribed.
+ * one flag, answers the pointer query from another, and lets a test flip them
+ * while the code under test is subscribed.
  *
  *   const media = mockReducedMotion(false);
  *   media.set(true); // fires "change" on every subscribed query
+ *   mockReducedMotion(false, { finePointer: true }); // a desktop mouse
  */
-export function mockReducedMotion(initial: boolean) {
+export function mockReducedMotion(
+  initial: boolean,
+  options: { finePointer?: boolean } = {},
+) {
   let reduced = initial;
+  const finePointer = options.finePointer ?? false;
   const subscribers = new Map<string, Set<Listener>>();
 
   const matchesFor = (query: string) => {
     if (query.includes("prefers-reduced-motion: reduce")) return reduced;
     if (query.includes("prefers-reduced-motion: no-preference"))
       return !reduced;
+    if (query.includes("hover: hover") && query.includes("pointer: fine"))
+      return finePointer;
     return false;
   };
 

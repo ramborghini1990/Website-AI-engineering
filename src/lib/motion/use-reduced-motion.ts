@@ -1,14 +1,4 @@
-import { useSyncExternalStore } from "react";
-
-const QUERY = "(prefers-reduced-motion: reduce)";
-
-function subscribe(onChange: () => void) {
-  const list = window.matchMedia(QUERY);
-  list.addEventListener("change", onChange);
-  return () => {
-    list.removeEventListener("change", onChange);
-  };
-}
+import { useMediaQuery } from "@/lib/motion/use-media-query";
 
 /**
  * True while the visitor asks for reduced motion. It follows changes live (the
@@ -19,9 +9,5 @@ function subscribe(onChange: () => void) {
  * hydration without a mismatch warning.
  */
 export function useReducedMotion(): boolean {
-  return useSyncExternalStore(
-    subscribe,
-    () => window.matchMedia(QUERY).matches,
-    () => false,
-  );
+  return useMediaQuery("(prefers-reduced-motion: reduce)");
 }
