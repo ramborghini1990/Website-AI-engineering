@@ -2,7 +2,27 @@
   "metadata": {
     "home": {
       "title": "Ingegneria AI e sviluppo full-stack",
-      "description": "{brand} progetta agenti AI, automazioni dei processi e applicazioni web in produzione per startup, PMI e grandi aziende."
+      "description": "{brand}: agenti AI, automazione dei processi e web app in produzione per startup, PMI e grandi aziende. Consulente indipendente a Torino."
+    },
+    "services": {
+      "title": "Servizi: agenti AI, automazione e web app",
+      "description": "Agenti AI autonomi, automazione dei processi, applicazioni web in produzione e document intelligence: che cosa progetto, per chi e con quali risultati."
+    },
+    "work": {
+      "title": "Progetti, demo e casi studio",
+      "description": "Demo interattive e casi studio di agenti AI, automazioni e applicazioni web. I progetti dei clienti vengono pubblicati solo con il loro consenso."
+    },
+    "process": {
+      "title": "Metodo di lavoro, dall'idea al rilascio",
+      "description": "Come lavoro in quattro fasi: ascolto, prototipo, sviluppo e rilascio. Obiettivi misurabili, consegne chiare, codice e documentazione che restano a te."
+    },
+    "about": {
+      "title": "Chi sono: ingegnere AI e full-stack a Torino",
+      "description": "Ingegnere AI e full-stack indipendente a Torino: lavoro direttamente con te dall'idea al rilascio, con attenzione a qualità, privacy e trasparenza."
+    },
+    "contact": {
+      "title": "Contatti: parliamo del tuo progetto",
+      "description": "Racconta il tuo progetto o il processo da automatizzare. Ti rispondo di persona per capire obiettivi e vincoli e proporre i prossimi passi."
     },
     "notFound": {
       "title": "Pagina non trovata"
@@ -55,7 +75,211 @@
   },
   "home": {
     "title": "{brand}",
-    "status": "Il nuovo sito è in costruzione."
+    "status": "Il nuovo sito è in costruzione.",
+    "hero": {
+      "eyebrow": "Ingegneria AI e full-stack · Torino",
+      "headline": "Costruisco agenti AI e software che reggono in produzione.",
+      "lead": "Progetto e sviluppo agenti autonomi, automazione dei processi, applicazioni web e sistemi di document intelligence per startup, PMI e grandi aziende. Dall'idea al rilascio, con una sola persona responsabile del risultato.",
+      "primaryCta": "Parliamone",
+      "secondaryCta": "Scopri i servizi"
+    },
+    "proof": {
+      "title": "Come lavoro",
+      "items": {
+        "owner": {
+          "title": "Una persona responsabile",
+          "text": "Parli direttamente con chi progetta e scrive il codice, senza passaggi intermedi."
+        },
+        "quality": {
+          "title": "Qualità verificabile",
+          "text": "Test automatici, accessibilità e prestazioni controllati prima di ogni rilascio."
+        },
+        "human": {
+          "title": "Persona nel ciclo",
+          "text": "Gli agenti propongono, una persona decide nei passaggi critici e ogni azione resta tracciata."
+        },
+        "privacy": {
+          "title": "Privacy e sicurezza fin dall'inizio",
+          "text": "Meno dati possibile, segreti solo lato server, integrazioni tramite le API ufficiali."
+        }
+      }
+    },
+    "services": {
+      "title": "Cosa posso fare per te",
+      "lead": "Quattro aree che si integrano, dal processo al software fino ai documenti. Ognuna parte da un problema concreto, non da una tecnologia.",
+      "cta": "Tutti i servizi"
+    },
+    "demos": {
+      "title": "Provalo in una simulazione",
+      "lead": "Demo interattive con dati sintetici: nessun account reale collegato e nessun dato personale. Mostrano come ragiona un agente e dove interviene una persona.",
+      "cta": "Vedi le demo"
+    },
+    "process": {
+      "title": "Dall'idea al rilascio in quattro fasi",
+      "lead": "Obiettivi misurabili, un prototipo valutato su casi reali, sviluppo a iterazioni brevi e rilascio con passaggio di consegne.",
+      "cta": "Il metodo di lavoro"
+    },
+    "finalCta": {
+      "title": "Hai un processo da automatizzare o un prodotto da costruire?",
+      "body": "Raccontami il contesto. Ti dico con onestà se e come l'AI può aiutare, anche quando la risposta è che non serve, e quali sono i prossimi passi.",
+      "cta": "Parliamone"
+    }
+  },
+  "services": {
+    "title": "Servizi",
+    "lead": "Quattro aree, un unico filo conduttore: soluzioni che funzionano nel lavoro di tutti i giorni, non solo in una demo.",
+    "labels": {
+      "idealFor": "Ideale per",
+      "outcomes": "Cosa ottieni",
+      "deliverables": "Cosa consegno",
+      "stack": "Tecnologie",
+      "demo": "Provalo in una demo",
+      "learnMore": "Scopri il servizio"
+    },
+    "cta": {
+      "title": "Non sai da dove cominciare?",
+      "body": "Descrivimi la situazione in poche righe: ti aiuto a capire quale strada ha più senso.",
+      "cta": "Parliamone"
+    }
+  },
+  "work": {
+    "title": "Progetti e demo",
+    "lead": "Demo interattive e casi studio di agenti AI, automazioni e applicazioni web. I progetti dei clienti vengono pubblicati solo con il loro consenso.",
+    "empty": {
+      "title": "Demo e casi studio in arrivo",
+      "body": "Questa sezione ospiterà simulazioni interattive e progetti realizzati. I progetti dei clienti compaiono solo con il loro consenso. Se vuoi parlare di un caso simile al tuo, scrivimi."
+    },
+    "labels": {
+      "demo": "Demo interattiva",
+      "project": "Caso studio",
+      "sector": "Settore",
+      "stack": "Tecnologie",
+      "client": "Cliente",
+      "outcomes": "Risultati",
+      "simulation": "Simulazione con dati sintetici: nessun account reale collegato e nessun dato personale trattato."
+    },
+    "cta": {
+      "title": "Hai un caso simile?",
+      "body": "Raccontami di che cosa ti occupi e di che cosa hai bisogno.",
+      "cta": "Parliamone"
+    }
+  },
+  "process": {
+    "title": "Metodo di lavoro",
+    "lead": "Quattro fasi, ciascuna con consegne chiare. Così sai sempre a che punto siamo e che cosa riceverai.",
+    "stepLabel": "Fase",
+    "outputsLabel": "Cosa ottieni",
+    "steps": {
+      "discover": {
+        "title": "Ascolto e discovery",
+        "summary": "Capire il problema, i dati disponibili e che cosa significa «funziona» per te.",
+        "body": "Una o due conversazioni per chiarire obiettivi, utenti, vincoli tecnici e normativi e sistemi già in uso. Dico subito se l'AI è la scelta giusta o se basta un'automazione più semplice.",
+        "outputs": {
+          "first": "Un brief di una pagina con obiettivi e criteri di successo",
+          "second": "La mappa dei dati e dei sistemi coinvolti",
+          "third": "I rischi principali e le domande ancora aperte"
+        }
+      },
+      "prototype": {
+        "title": "Prototipo e valutazione",
+        "summary": "Un primo risultato funzionante, misurato su esempi reali, prima di impegnare un budget grande.",
+        "body": "Costruisco un prototipo mirato sul punto più incerto e lo valuto su un insieme di casi concreti. Se non regge, lo scopriamo subito e a basso costo.",
+        "outputs": {
+          "first": "Un prototipo funzionante",
+          "second": "La valutazione su casi reali, con i risultati",
+          "third": "Una proposta di progetto con ambito, tempi e costi"
+        }
+      },
+      "build": {
+        "title": "Sviluppo a iterazioni brevi",
+        "summary": "Rilasci frequenti, test automatici e feedback continuo.",
+        "body": "Sviluppo a cicli brevi, con funzionalità visibili a ogni passo. Test automatici, controlli di accessibilità e di sicurezza fanno parte del lavoro, non di una fase finale.",
+        "outputs": {
+          "first": "Software funzionante e testato in un ambiente di prova",
+          "second": "Documentazione tecnica e per gli utenti",
+          "third": "Aggiornamenti regolari sullo stato del lavoro"
+        }
+      },
+      "launch": {
+        "title": "Rilascio e miglioramento",
+        "summary": "Messa in produzione, monitoraggio e passaggio di consegne.",
+        "body": "Rilascio controllato, monitoraggio di qualità e costi, formazione di chi userà il sistema. Codice e documentazione sono tuoi; restano a disposizione evoluzione e supporto.",
+        "outputs": {
+          "first": "Il sistema in produzione, con monitoraggio",
+          "second": "Codice sorgente e documentazione consegnati",
+          "third": "Un piano di evoluzione e supporto"
+        }
+      }
+    },
+    "principles": {
+      "title": "Principi che non cambiano",
+      "items": {
+        "measurable": {
+          "title": "Obiettivi misurabili",
+          "text": "Concordiamo all'inizio come capiremo se funziona, e lo verifichiamo su casi reali."
+        },
+        "transparent": {
+          "title": "Trasparenza",
+          "text": "Ti dico che cosa fa l'AI, dove può sbagliare e dove interviene una persona."
+        },
+        "handover": {
+          "title": "Passaggio di consegne",
+          "text": "Codice, documentazione e accessi restano a te: il sistema deve poter vivere anche senza di me."
+        }
+      }
+    },
+    "cta": {
+      "title": "Vuoi capire se questo metodo fa al caso tuo?",
+      "body": "Una prima conversazione serve a chiarire obiettivi e vincoli, senza impegno.",
+      "cta": "Parliamone"
+    }
+  },
+  "about": {
+    "cta": {
+      "title": "Vediamo se posso aiutarti",
+      "body": "Raccontami il tuo progetto: ti rispondo di persona.",
+      "cta": "Parliamone"
+    }
+  },
+  "contact": {
+    "title": "Parliamone",
+    "lead": "Racconta il tuo progetto o il processo che vuoi automatizzare. Bastano poche righe: ti rispondo di persona per capire obiettivi e vincoli e proporre i prossimi passi.",
+    "informal": "Non serve nulla di formale: scrivi come parleresti a un collega.",
+    "prepare": {
+      "title": "Cosa mi aiuta a risponderti bene",
+      "items": {
+        "context": {
+          "title": "Il contesto",
+          "text": "Chi sei, di che cosa ti occupi e quale processo o prodotto hai in mente."
+        },
+        "goal": {
+          "title": "L'obiettivo",
+          "text": "Che cosa vorresti ottenere e come capirai che ha funzionato."
+        },
+        "constraints": {
+          "title": "I vincoli",
+          "text": "Tempi, budget indicativo, sistemi e dati già disponibili, requisiti di privacy."
+        }
+      }
+    },
+    "next": {
+      "title": "Che cosa succede dopo",
+      "items": {
+        "reply": {
+          "title": "Ti rispondo di persona",
+          "text": "Leggo con attenzione e ti scrivo per capire meglio il caso."
+        },
+        "call": {
+          "title": "Ci sentiamo",
+          "text": "Se ha senso, fissiamo una prima conversazione per chiarire obiettivi e vincoli."
+        },
+        "proposal": {
+          "title": "Ricevi i prossimi passi",
+          "text": "Ti propongo come procedere: un prototipo, un progetto oppure, se è la risposta giusta, la scelta di non fare nulla."
+        }
+      }
+    },
+    "detailsTitle": "Dove trovarmi"
   },
   "notFound": {
     "title": "Pagina non trovata",

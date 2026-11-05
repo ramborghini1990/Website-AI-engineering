@@ -14,3 +14,7 @@ node_modules
 # governance and project docs are hand-formatted (tables); Prettier would
 # re-align them and create noisy diffs. Revisit if docs get a lint step.
 *.md
+
+# hand-written copy: content files are reviewed as prose, and Prettier would
+# reflow the JSON frontmatter
+content

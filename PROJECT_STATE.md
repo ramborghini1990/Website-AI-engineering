@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.7 committed as `259e34a`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.8 committed as `6f03a86`)_
 
 ---
 
@@ -10,20 +10,20 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.7 committed a
 
 | Field | Value |
 |---|---|
-| Phase | 1 — Core framework, design system & motion: **all 8 tasks done**, P1.8 awaiting review (Phase 0 closed 7/7; carry-overs in section 8) |
-| Active task | `P1.8` — Layout shell: accessible header (nav, localized links, theme switch, language switcher, primary CTA), skip link to `#main-content`, footer with the corrected identity and Italian location disclosures, `Toaster` and `TooltipProvider` in the root layout; plus the identity correction |
-| Status | **acceptance criteria met, awaiting review (not committed)**; three small decisions need you (below) |
-| Next task | `P2.1` — information architecture and copy deck (Phase 2); do not start unprompted |
+| Phase | 2 — Landing page & agency value proposition (Phase 1 closed 8/8; carry-overs in section 8) |
+| Active task | `P2.1` — Information architecture & copy deck: IT-first, EN adapted copy for Home, Services, Work, Process, About, Contact; content models and collections in `content/`; localized titles and descriptions for every page |
+| Status | **built and verified, awaiting your review and approval of the copy (not committed)**. The roadmap criterion "copy approved by you" is yours; `docs/CONTENT.md` §7 lists the 16 statements only you can confirm |
+| Next task | `P2.2` — Home page (reads the `home.*` copy and the services collection); do not start unprompted |
 
 **Plan for the active task**
-1. Identity: the earlier business name was wrong. `src/lib/business.ts` is the single source (placeholder brand token `AI Solutions & Engineering`, owner `Ramin Rashidi Alavijeh`, Turin location, `vatNumber` / `reaNumber` / `pec` = `null` until registered, validated when filled). Messages use `{brand}`. The old name was removed from messages, metadata, docs, tests and CLAUDE.md; `identity.test.ts` keeps it out.
-2. Shell in `src/components/shell/`: `SkipLink`, `SiteHeader`, `MainNav`, `ThemeSwitch` + `ThemeSync`, `SiteFooter`; navigation as data (`src/lib/navigation.ts`, a link appears only when its page exists); theme logic in `src/lib/theme.ts`.
-3. Root layout owns the single `<main id="main-content">`, providers (`TooltipProvider`, `LenisProvider`, `Toaster`) and a nonce'd pre-paint theme script. Pages render a `div`, not a `main`. `error.tsx` is the 500 page.
-4. Tests: unit (config, navigation, theme, shell components, identity guard, error page) and `e2e/shell.spec.ts` (48 tests on the enforced-CSP production build); visual check in both themes and at 360 / 768 / 1280.
+1. Architecture (`docs/CONTENT.md`): short page copy in messages, long-form repeatable content as MDX in `content/<collection>/<locale>/<slug>.mdx`; frontmatter is one JSON object between `---` lines (valid YAML, no new dependency); strict Zod schemas that encode the honesty rules.
+2. Copy: `metadata.<page>` (title + description for all six pages) and the Home, Services, Work, Process, About and Contact copy in both languages (125 strings and about 1,100 words per language); 18 MDX files (4 services, 4 planned demos as drafts, About; each in IT and EN, about 2,400 body words).
+3. Library `src/lib/content/`: `site-map` (pages, collections, ordered key lists), `schemas`, `frontmatter`, `lint` (editorial rules and a claims filter), `read` (server-only loaders).
+4. Gate in `pnpm test`: every file validates, IT and EN match, references resolve, titles and descriptions are within limits and unique, no unverifiable claims; proven by 6 mutations on the real files.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Throwaway specs and screenshots are deleted; every server I started was stopped by PID; no `next` / `playwright` process and no listener on 3100, 3101, 3200 (netstat + command-line check).
-- **Decisions needed from you** (section 8, "P1.8 / decisions for you"): (1) the nav shows **Home only** until the P2.x pages exist; (2) the CTA points at the footer contact block (`#contact`) until the inquiry page exists; (3) I edited **CLAUDE.md** §1 (the old business name) and dropped "capitale sociale" from the footer.
+- Nothing half-done. No page was built (P2.2-P2.5 own them) and no dependency was added. Throwaway probes and mutations are removed or restored; no `next` / `playwright` / `vitest` process and no listener on 3100, 3101, 3200.
+- **Needs you:** approve or correct the copy (`docs/CONTENT.md` §7, in particular: "tu" vs "Lei", the commitments, the missing biography), and the two product decisions in section 8 ("P2.1 / decisions for you").
 
 ---
 
@@ -33,7 +33,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.7 committed a
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
 | 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
-| 2 Landing & value proposition | ☐ | 0/7 | |
+| 2 Landing & value proposition | ◐ | 1/7 | P2.1 built, awaiting your approval of the copy |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
@@ -57,6 +57,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.7 committed a
 | 2026-11-05 | P1.5 | Lenis + GSAP in one loop, `useMotion` / `useReducedMotion`, lazy engine, CLS 0, no ScrollTrigger leaks | `f41ee66` |
 | 2026-11-05 | P1.6 | FX library: text reveal, magnetic button, marquee, spotlight card, gradient mesh, pinned section; static fallbacks, lazy chunks | `e398ebd` |
 | 2026-11-05 | P1.7 | Zod-validated env (server-only guard), nonce CSP (Report-Only default) and security headers in `proxy.ts`, per-request rendering | `259e34a` |
+| 2026-11-05 | P1.8 | Layout shell (skip link, header, footer, theme switch, providers), corrected business identity | `6f03a86` |
 
 ---
 
@@ -91,6 +92,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D23 | 2026-11-05 | FX library (P1.6): six components in `src/components/fx/`, **all written in-house** (no React Bits / 21st.dev code, no new dependency). **Split by weight:** `TextReveal`, `MagneticButton`, `SpotlightCard`, `ScrollPinnedSection` are a small client wrapper (final-state markup + ref + `next/dynamic(ssr:false)`) plus a lazy `*.motion.tsx` that calls `useMotion`; `Marquee` and `GradientMesh` are server components with zero JS (CSS keyframes from `--animate-*` tokens, off under reduced motion). The motion chunk mounts only through `useFxReady()`: after idle, never under reduced motion, and for cursor effects only with hover + fine pointer. `useMotion` now lets `build` return a cleanup and passes `contextSafe` (tweens created in event handlers escape the revert otherwise). Static fallbacks: no JS, reduced motion and touch all show the plain final state. Specific choices: mesh is three CSS blobs, not a `<canvas>` (no second frame loop); mesh peak 5 % because the contrast test fails above about 10 % for the strongest overlap; marquee pause is a native checkbox (WCAG 2.2.2, works without JS); marquee copies stretch to `min-w-screen`; the pinned section lives in an unpinned wrapper div and refuses to pin content taller than the viewport; text reveal leaves headlines already on screen alone; showcase is a separate dev page, not part of the UI gallery | Meets the roadmap acceptance (each has a static fallback; FX JS is not in pages that do not use it, proven on the production build); the gallery's per-theme axe suite is untouched by a pinned scene; no licence or supply-chain exposure | — |
 | D24 | 2026-11-05 | Security (P1.7). **Env:** Zod schemas in pure `env-schema.ts`; `env.ts` is `import "server-only"` (a client import fails `next build`), `env.client.ts` holds `NEXT_PUBLIC_*` only and never throws; `process.env` is read only in those two (ESLint rule + test); errors name variables, never values; blank = unset; groups complete-or-absent (Turnstile, Upstash, email); `DEMOS_LIVE_ENABLED` fails closed and requires the key and Redis; `REQUIRED_IN_PRODUCTION` exists and is **empty** (no consumer yet); `SKIP_ENV_VALIDATION=1` only during `next build`, never at runtime; new deps `zod` 4.6.7 and `server-only` 0.0.1 (both MIT, zero dependencies; the task named both). **Headers/CSP in `proxy.ts`:** nonce per request (128-bit), `script-src 'self' 'nonce-…' 'strict-dynamic'`, `style-src` with nonce plus `style-src-attr 'unsafe-inline'`, `connect/frame/object/base/form/frame-ancestors` locked to `'self'`/`'none'`; Turnstile and the analytics origin only when configured; `CSP_MODE` default `report-only`; fixed headers (nosniff, Referrer-Policy, X-Frame-Options, Permissions-Policy, COOP, HSTS in production). **Rendering:** `cacheComponents` and `partialPrefetching` OFF and `await connection()` in the root layout, so every page is rendered per request | A nonce can only be stamped while rendering; measured on this app: with Cache Components on, `/it` was cached with zero `nonce=` attributes, and the `instant = false` variant turned unknown paths into soft 200s. With the chosen setup every script carries the nonce, unknown paths return 404, redirects work, and an enforced policy runs the whole site with zero violations. Cost: HTML no longer comes from the CDN (docs/SECURITY.md §3) | — |
 | D25 | 2026-11-05 | Identity and shell (P1.8). **Identity:** the site belongs to an independent AI practice in Turin owned by Ramin Rashidi Alavijeh, not a company; the earlier business name and legal form were an assumption and are gone. The trade name is a **placeholder token** (`AI Solutions & Engineering`) in `src/lib/business.ts`, the only place that spells it (messages use `{brand}`; `identity.test.ts` enforces both that and the removal of the old name). Fiscal data are `null` (rendered "not yet available", nothing invented) and validated when set (Partita IVA with its check digit, REA `TO-1234567`, PEC as email); `reaNumber: false` removes the row. **Shell:** skip link, non-sticky header (wrapping row, DOM order = visual order), one `<main id="main-content">` in the layout, footer, `TooltipProvider`, `Toaster`; navigation is data and lists only pages that exist; the CTA targets the footer contact block until `/contact` exists; theme = three native radios (automatic / dark / light) with one `theme` localStorage key written only on an explicit dark/light choice, applied before paint by a nonce'd inline script and re-applied by `ThemeSync` after a layout remount; `error.tsx` is the 500 page | A wrong legal identity in the footer of a public site is a real risk, so there is one source of truth and a guard test. No dead links in the header; a sticky header would cover focused elements (WCAG 2.2 2.4.11) and the FX pinned scenes; native radios give correct group semantics and arrow keys without ARIA code | — |
+| D26 | 2026-11-05 | Content architecture (P2.1). Short page copy (hero, headings, CTAs, labels, process steps, contact) and ALL page titles/descriptions are in `messages/*.json`; services, work entries and About are MDX in `content/<collection>/<locale>/<slug>.mdx`. Frontmatter is **one JSON object between `---` lines** (valid YAML, so a later MDX/YAML pipeline reads it unchanged; no parser dependency now). Strict Zod schemas (`src/lib/content/schemas.ts`): an unknown key is an error; a client name or any result needs `clientConsent: true`; a demo has no client; a `planned` demo cannot be published; a project must be live and dated. File name = slug = stable id, the same in both languages and the same path in both languages (localized slugs left open). Message lists are keyed objects with the order in code (`site-map.ts`). The Work collection holds the **four planned demos as drafts** and no client projects. About has no biography. Titles are the page part only (12-52 characters), descriptions 80-160. Copy is checked for unverifiable claims (years, numbers of clients, percentages, guarantees, compliance, hype). Voice: first person, informal "tu" in Italian | There are no clients, results or biography to publish and none may be invented (CLAUDE.md §12); JSON frontmatter avoids a dependency before P2.3 decides the MDX stack; typed messages give parity for UI-sized copy; the schema makes "advertise a demo that does not exist yet" impossible | — |
 
 ---
 
@@ -106,6 +108,8 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B7 | Do the P0.7 machine steps (`docs/TOOLING_SETUP.md` §1–§2). Partly visible: `mcp__21st__*` tools are now registered in this session, so the server was approved; not exercised, and `claude mcp list` output / the design-skill fork are unconfirmed | you | P1.3+ (21st), optional second opinion for P1.1 (design skill) |
 | B8 | ~~Approve `docs/DESIGN.md` §11~~ approved 2026-11-05 (amber, Instrument Sans + JetBrains Mono, dark-first, sharp radii). **Still open:** the final trade name, and any logo / brand colours for it (the header wordmark is plain text in the placeholder brand today); reconcile the design direction with them when they exist | you | when the name is chosen |
 | B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production). **Now also drives canonical and hreflang URLs** (P1.4); until it is set they use Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`) | you | P1.7 / P2.6 / before indexing |
+| B9 | **Approve the copy deck** (`docs/CONTENT.md` §7): register (tu / Lei), the commitments written as you, what to say about yourself (About has no biography), and the technologies per service | you | before P2.2 ships copy |
+| B10 | **MDX stack for P2.3** (not decided, nothing installed): rendering `.mdx` needs a dependency (`@next/mdx`, or `next-mdx-remote`); a YAML parser is only needed if you want YAML frontmatter instead of the JSON block. CLAUDE.md §5: I will ask with the facts (downloads, licence, size) when P2.3 starts | you | P2.3 |
 
 ---
 
@@ -140,6 +144,12 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P2.1 / decisions for you.** (1) **Approve or correct the copy.** It is written as you and makes statements the site would be held to; docs/CONTENT.md §7 numbers them: informal "tu" and first person, "I reply personally", "first conversation with no commitment", "code, documentation and access stay with you", the four-phase method, WCAG 2.2 AA and performance checks as part of your web work, official-APIs-only for Instagram/LinkedIn, "Italy and the EU", "I work in Italian and English", and the technologies per service (taken from the blueprint stack, not from past work). Edit the files or tell me what to change. (2) **About has no biography on purpose** (years, past work, sectors, credentials, how you started: none provided, none invented). Send what you want shown and I will add it without numbers I cannot verify. (3) **Two product choices**: the Work collection contains the four planned demos as **drafts** (the services and Home must show a demo only once it is published) and no client projects; and paths are the same in both languages (`/services`, not `/it/servizi`): Italian slugs are a small SEO gain that touches routing, decide before launch.
+- **P2.1 / what I did NOT do, and why.** No page UI (P2.2-P2.5); no MDX renderer and no YAML parser (a dependency, B10); no legal pages (P4.2); no inquiry-form copy (field labels, validation messages and the consent texts belong with the form, P2.5, and the consent wording needs professional review); no Process or About page task exists in the roadmap (the copy is ready, add tasks or fold them into P2.2/P2.3); no email, phone or PEC (B2, B3); no logos, testimonials or numbers anywhere. The Work page's empty state is written for launch ("demos and case studies are coming").
+- **P2.1 / things for professional review.** Document intelligence copy deliberately says nothing about where data is processed or stored ("we define together where, what is kept and for how long"). Anthropic (US) is a sub-processor for live AI features: the privacy notice (P4.2) must say so, and a lawyer should check anything on the site that touches data protection, EU AI Act transparency (Art. 50 disclosures on demo pages, Phase 3) or platform terms. The editorial claims filter is a safety net for the writer, not a legal check.
+- **P2.1 / defects found on the way (all fixed).** (a) My own gate caught three descriptions over 160 characters (two EN services, one IT demo). (b) **A P1.8 defect:** `ThemeSync` removed theme classes when nothing was stored, so hydration clobbered a class set by devtools, an extension or a test; it only restores a *stored* choice now (the `smoke.spec` theme tests failed 2/13 in full runs because of it; 13/13 x 3 after the fix; unit tests changed accordingly). (c) The same tests also now wait for colour transitions to finish and for the theme radios to be enabled before changing the theme (`Promise.allSettled`, because a replaced transition rejects with `AbortError`). (d) One FX CLS test (reduced motion) measured 0.066 once in a loaded full run; it passed 3/3 alone and in the next four full runs: a load-sensitive flake of `next dev`, not reproduced, not investigated further.
+- **P2.1 / things I changed outside the content work:** `messages/*.json` (restructured and extended: `metadata.*`, `home.*`, `services`, `work`, `process`, `about`, `contact`; existing keys kept), `.prettierignore` (`content`: hand-written copy, JSON frontmatter), `src/lib/identity.test.ts` (also scans `.mdx`), `src/lib/theme.ts` + `theme-sync.test.tsx` (defect b), `e2e/smoke.spec.ts` (c), `docs/I18N.md` (pointer). New: `content/`, `src/lib/content/`, `docs/CONTENT.md` (a new top-level `content/` directory: ROADMAP and BLUEPRINT name it, CLAUDE.md §2 asks before creating top-level directories, so say if you want it elsewhere).
+- **P2.1 / for P2.2-P2.5:** consume copy through the key arrays in `src/lib/content/site-map.ts`; read collections with `getServices` / `getWork` / `getPage` (server only; Markdown body as text); add `outputFileTracingIncludes` for `content/**` when pages read it at runtime; handle the **empty Work state**; link a service's demo only when published; metadata from `metadata.<page>` or an entry's `seoTitle` + `description` with `localeAlternates`. Details: docs/CONTENT.md §8.
 - **P1.8 / decisions for you.** (1) **Navigation shows Home only.** The planned IA (Services, Work, Process, About) has no pages yet and a link to a 404 is worse than a short nav, so `src/lib/navigation.ts` marks those `available: false` and the header skips them; flip a flag when its page ships (a test fails if an available item has no page). The wrapping row holds about five items; beyond that use a menu (Sheet). (2) **The primary CTA ("Parliamone" / "Get in touch") scrolls to the contact block in the footer** (`#contact`, which holds location and, once filled, PEC) because `/contact` does not exist; at P2.5 change `contactHref` and render it with the i18n `Link`. (3) **Two edits you did not literally ask for:** `CLAUDE.md` §1 named the old business, so I rewrote that one sentence (revert it if you prefer to word it yourself); and the footer has no "capitale sociale" row (it applies to companies, you listed address, Partita IVA, REA and PEC). Other docs that named the old business (BLUEPRINT, GDPR_CHECKLIST, DESIGN, I18N, THIRD_PARTY, tooling docs, `i18n.spec`) were reworded too; `docs/GDPR_CHECKLIST.md` now says which disclosures depend on the legal form.
 - **P1.8 / legal points I did not decide.** Whether an REA entry, PEC and a Registro Imprese office apply depends on your legal form (individual practice vs company): confirm with your accountant; `reaNumber: false` removes the REA row. The address is shown as you gave it (Corso Regina Margherita, Torino (TO)), without a street number or postcode, labelled "Sede" / "Location" and not "Sede legale", because I do not know it is the registered address. The Italian and English footer copy is mine and needs the same professional review as the legal pages (P4.2). No email address is published anywhere (B3 is open).
 - **P1.8 / theme storage must go in the cookie policy (P4.2).** One `localStorage` key, `theme`, written only when a visitor picks dark or light, removed when they pick automatic. It is a functional preference set by the visitor's own action; whether it needs disclosure or consent is for the policy review. The nonce'd inline script in `<head>` is the layout's first consumer of the CSP nonce.
@@ -235,84 +245,88 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass (no dependency changed)
+pnpm install --frozen-lockfile → pass (no dependency added or changed)
 pnpm verify       → pass, exit 0 with NO env file (typecheck → lint --max-warnings=0 → test → build); test step:
-                    39 files, 462 tests (379 before P1.8)
-pnpm test:e2e     → pass, 196 tests (Chromium): 148 existing + 48 in e2e/shell.spec.ts; run three times, the
-                    first full run after the shell had 4 failures that were real (below), a later run 1 flaky
-                    axe test (fixed, then 3/3 alone and a clean full run), the last two full runs 196/196
+                    43 files, 602 tests (462 before P2.1; 139 of the new ones are the content library and gate)
+pnpm test:e2e     → pass, 196 tests (Chromium), twice in a row at the end. Earlier full runs showed 2 failures each:
+                    the smoke theme tests (real cause: ThemeSync, fixed) and once an FX CLS test (load flake, see
+                    section 8)
 pnpm knip         → pass
-pnpm format:check → pass (does not cover *.md)
-no `next` / `playwright` process and no listener on 3100, 3101, 3200 afterwards
+pnpm format:check → pass (does not cover *.md, nor content/)
+no `next` / `playwright` / `vitest` process and no listener on 3100, 3101, 3200 afterwards
 
-P1.8 checks:
-  identity           → `identity.test.ts` scans every text file (messages, src, e2e, docs, CLAUDE.md, config): the
-                       old business name appears nowhere (negative control: the pattern matches the word in any
-                       case) and the placeholder brand is written only in src/lib/business.ts; e2e: no page text
-                       contains the old name or "srl"; both languages show owner, brand and the Turin address
-  config             → `business.test.ts`: fiscal fields are null (nothing invented); Partita IVA validated with
-                       its check digit (every single-digit change of a valid number is rejected), REA and PEC
-                       formats, REA `false`; footer tests: three placeholders, real values and a mailto PEC when
-                       filled, REA row omitted
-  skip link          → e2e: hidden (1 px) until focused, first tab stop, 44 px, 2 px outline, Enter moves focus to
-                       `main#main-content`, the next Tab lands inside main; works without JavaScript (plain
-                       in-page link); axe clean while it is shown
-  header / nav       → landmarks on /it, /en and both 404s: one banner, one main, one contentinfo, one h1, named
-                       navigations; current page has `aria-current`; every header link returns 200; CTA scrolls to
-                       `#contact`; not sticky; 360 / 768 / 1280 / 1920 px: no horizontal scroll and every header
-                       control >= 44 px; at 360 px three rows
-  theme              → radios: automatic by default, nothing stored until a choice; dark/light set the class,
-                       `color-scheme` and ONE key; body colour really changes; automatic removes the key; a stored
-                       choice is on <html> at DOMContentLoaded (before hydration, no flash) even when the system
-                       says the opposite; survives reload and a language switch; arrow keys work; 2 px focus
-                       ring; disabled without JavaScript; zero CSP violations under the enforced policy
-  providers          → one localized toast region in the layout; the gallery's toast and tooltip tests pass on
-                       the layout's Toaster and TooltipProvider
-  a11y / CLS         → axe (WCAG 2.0-2.2 A/AA) zero violations: /it, /en and both 404s in dark and light, forced
-                       themes at 360 px; CLS < 0.05 over load, theme change and language switch
-  visual             → screenshots at 360 / 768 / 1280 px (light) and 1280 px dark with the skip link and CTA
-                       focused; the header wrapped badly at 360 and 768 before the layout rewrite
-  bugs found by the tests (all fixed) → see section 8, "P1.8 / bugs found by the tests"
-  NOT done           → Lighthouse accessibility = 100 on the shell (the roadmap's criterion; axe is clean but
-                       Lighthouse was not run); securityheaders.com grade; Firefox/WebKit; a screen-reader pass of
-                       the skip link, theme group and footer; first-load JS impact of the shell; the live Vercel
-                       deployment; CI on GitHub has still never been seen
+P2.1 checks:
+  schemas            → `schemas.test.ts`: every honesty rule has positive and negative cases (client name or results
+                       without consent, a demo with a client, a planned demo published, a project not live or
+                       undated, impossible dates, unknown keys such as a misspelt consent flag, length limits)
+  parser             → `frontmatter.test.ts`: fences, JSON only, CRLF and BOM (Windows checkouts), errors name the
+                       file and EVERY failing field, unknown keys rejected
+  editorial lint     → `lint.test.ts`: 18 unverifiable-claim samples flagged (years, numbers of clients, percentages,
+                       guarantees, compliance, hype, placeholders), ordinary wording passes; body rules (## only, no
+                       { } < >, known internal links, https, length)
+  content gate       → `collections.test.ts` over the REAL files: 18 MDX files and 125 deck strings per language;
+                       every .mdx on disk is read; IT/EN same slugs and structure; English not a copy of Italian;
+                       references resolve; no client without consent; all six pages have title and description in
+                       both languages, within 12-52 and 80-160 characters, unique across pages, unique together with
+                       every service and demo per language, and different between languages; no hard-coded brand, no
+                       email or phone number, no unverifiable claims
+  mutation           → on the real files, each made the gate fail and was restored: dangling demo link (2 tests), a
+                       deleted English file (5), a duplicated SEO title (1), "10 anni di esperienza" in a message
+                       (1), a planned demo published (16, at parse time), a client named on a demo (14, at parse time)
+  identity           → `identity.test.ts` now scans `.mdx` too: the retired business name appears nowhere
+  visual             → none: no page was built in this task
+  NOT done           → a native-speaker review of the Italian and English (mine are drafts); SEO title truncation
+                       against the final brand name; the approval itself; MDX rendering; the pages
 ```
 
 ---
 
 ## 10. Proposed commit(s) for the work above
 
+Two logical changes: the copy deck with its content models, and a fix to the theme sync found while verifying. Preferred: two commits.
+
+**Commit 1: files** `content/`, `src/lib/content/`, `messages/it.json`, `messages/en.json`, `docs/CONTENT.md`, `docs/I18N.md`, `.prettierignore`, `src/lib/identity.test.ts`, `PROJECT_STATE.md`
+
 ```
-feat(shell): add layout shell and correct the business identity
+feat(content): add copy deck, content models and collections
 
-The site belongs to an independent AI practice in Turin, not to the
-company an earlier draft assumed. Put the brand token, the owner and
-the Turin location in src/lib/business.ts, the single source for the
-header, titles and footer; Partita IVA, REA and PEC are unset and shown
-as "not yet available" until registered, and are validated (including
-the Partita IVA check digit) when filled in. Messages use a {brand}
-variable. Remove the old name from messages, metadata, docs, tests and
-CLAUDE.md, and add a test that keeps it out.
+Define the information architecture and write the bilingual copy deck
+for Home, Services, Work, Process, About and Contact, Italian first
+and English adapted. Page titles and descriptions for all six pages are
+in the messages, each unique per language and within search-result
+limits; short page copy sits beside them.
 
-Add the shell in the root layout: a skip link to #main-content, a
-header (navigation, theme, language, call to action), the single main
-landmark, a footer with the owner and statutory details, a
-TooltipProvider and one Toaster with translated labels. Navigation is
-data and lists only pages that exist. The call to action points at the
-footer contact block until the inquiry page exists. Add an error page.
+Services, planned demos and About are MDX in content/<collection>/
+<locale>/<slug>.mdx with one JSON object as frontmatter (valid YAML, no
+new dependency). Strict Zod schemas enforce the rules of CLAUDE.md §12:
+a client name or any result needs consent, a demo has no client, a
+planned demo cannot be published. Work holds the four planned demos as
+drafts; no client project, biography or figure is invented.
 
-The theme switch is three native radios (automatic, dark, light). A
-choice is stored in one localStorage key and applied before first paint
-by an inline script that carries the CSP nonce; ThemeSync restores it
-after a language switch remounts the layout. Pages render a div, no
-longer their own main.
+A test gate over the real files checks that every file validates,
+Italian and English match, references resolve, titles and descriptions
+are unique, and the copy makes no unverifiable claim (years, clients,
+percentages, guarantees, compliance, hype). Six mutations were shown to
+fail it. docs/CONTENT.md records the model, the decisions and the
+statements the owner must confirm before the copy is approved.
 
-Add unit tests and 48 Playwright tests (landmarks, skip link, theme,
-responsive layout, axe in both themes and languages, CLS) on the server
-that enforces the CSP. Document it in docs/IDENTITY.md and DESIGN.md.
+Task: P2.1
 
-Task: P1.8
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+**Commit 2: files** `src/lib/theme.ts`, `src/components/shell/theme-sync.test.tsx`, `e2e/smoke.spec.ts`
+
+```
+fix(shell): do not clear theme classes when nothing is stored
+
+ThemeSync restores a stored theme after the root layout remounts, but
+with nothing stored it also removed theme classes. React hydration
+therefore clobbered a class set by devtools, an extension or a test.
+Restore a stored choice only. Make the smoke theme tests wait for the
+theme radios to be enabled and for colour transitions to finish.
+
+Task: P2.1 (found while verifying)
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

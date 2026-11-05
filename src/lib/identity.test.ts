@@ -23,7 +23,7 @@ const SKIP_DIRS = new Set([
   "playwright-report",
   "coverage",
 ]);
-const TEXT = /\.(ts|tsx|mts|mjs|js|json|md|yml|yaml|css|html|txt|example)$/;
+const TEXT = /\.(ts|tsx|mts|mjs|js|json|md|mdx|yml|yaml|css|html|txt|example)$/;
 /** History of the project; it records the correction itself. */
 const HISTORY = new Set(["PROJECT_STATE.md"]);
 /** pnpm lockfiles are generated. */

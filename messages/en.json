@@ -2,7 +2,27 @@
   "metadata": {
     "home": {
       "title": "AI engineering and full-stack development",
-      "description": "{brand} designs AI agents, workflow automation and production web applications for startups, SMEs and enterprises."
+      "description": "{brand}: AI agents, process automation and production web apps for startups, SMEs and enterprises. Independent consultant in Turin."
+    },
+    "services": {
+      "title": "Services: AI agents, automation and web apps",
+      "description": "Autonomous AI agents, process automation, production web applications and document intelligence: what I build, for whom and with what outcomes."
+    },
+    "work": {
+      "title": "Projects, demos and case studies",
+      "description": "Interactive demos and case studies of AI agents, automation and web applications. Client projects appear only with the client's consent."
+    },
+    "process": {
+      "title": "How I work, from idea to release",
+      "description": "How I work in four phases: discovery, prototype, build and launch. Measurable goals, clear deliverables, and code and documentation that stay with you."
+    },
+    "about": {
+      "title": "About: AI and full-stack engineer in Turin",
+      "description": "Independent AI and full-stack engineer in Turin: I work directly with you from idea to release, with care for quality, privacy and transparency."
+    },
+    "contact": {
+      "title": "Contact: let's talk about your project",
+      "description": "Tell me about your project or the process you want to automate. I reply personally to understand goals and constraints and propose next steps."
     },
     "notFound": {
       "title": "Page not found"
@@ -55,7 +75,211 @@
   },
   "home": {
     "title": "{brand}",
-    "status": "The new website is under construction."
+    "status": "The new website is under construction.",
+    "hero": {
+      "eyebrow": "AI and full-stack engineering · Turin",
+      "headline": "I build AI agents and software that hold up in production.",
+      "lead": "I design and build autonomous agents, process automation, web applications and document intelligence for startups, SMEs and enterprises. From idea to release, with one person accountable for the result.",
+      "primaryCta": "Get in touch",
+      "secondaryCta": "See the services"
+    },
+    "proof": {
+      "title": "How I work",
+      "items": {
+        "owner": {
+          "title": "One accountable person",
+          "text": "You talk directly to the person who designs and writes the code, with no layers in between."
+        },
+        "quality": {
+          "title": "Quality you can check",
+          "text": "Automated tests, accessibility and performance are checked before every release."
+        },
+        "human": {
+          "title": "A person in the loop",
+          "text": "Agents propose, a person decides at the critical steps, and every action is traced."
+        },
+        "privacy": {
+          "title": "Privacy and security from the start",
+          "text": "As little data as possible, secrets on the server only, integrations through official APIs."
+        }
+      }
+    },
+    "services": {
+      "title": "What I can do for you",
+      "lead": "Four areas that fit together, from process to software to documents. Each starts from a concrete problem, not from a technology.",
+      "cta": "All services"
+    },
+    "demos": {
+      "title": "Try it in a simulation",
+      "lead": "Interactive demos with synthetic data: no real account connected and no personal data. They show how an agent reasons and where a person steps in.",
+      "cta": "See the demos"
+    },
+    "process": {
+      "title": "From idea to release in four phases",
+      "lead": "Measurable goals, a prototype evaluated on real cases, short development iterations and a launch with a proper handover.",
+      "cta": "How I work"
+    },
+    "finalCta": {
+      "title": "Have a process to automate or a product to build?",
+      "body": "Tell me the context. I will tell you honestly whether and how AI can help, even when the answer is that it is not needed, and what the next steps are.",
+      "cta": "Get in touch"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "lead": "Four areas with one thread running through them: solutions that work in everyday business, not just in a demo.",
+    "labels": {
+      "idealFor": "Ideal for",
+      "outcomes": "What you get",
+      "deliverables": "What I deliver",
+      "stack": "Technologies",
+      "demo": "Try it in a demo",
+      "learnMore": "Read about the service"
+    },
+    "cta": {
+      "title": "Not sure where to start?",
+      "body": "Describe the situation in a few lines and I will help you work out which route makes the most sense.",
+      "cta": "Get in touch"
+    }
+  },
+  "work": {
+    "title": "Projects and demos",
+    "lead": "Interactive demos and case studies of AI agents, automation and web applications. Client projects are published only with the client's consent.",
+    "empty": {
+      "title": "Demos and case studies are coming",
+      "body": "This section will host interactive simulations and finished projects. Client projects appear only with the client's consent. If you want to talk about a case like yours, write to me."
+    },
+    "labels": {
+      "demo": "Interactive demo",
+      "project": "Case study",
+      "sector": "Sector",
+      "stack": "Technologies",
+      "client": "Client",
+      "outcomes": "Results",
+      "simulation": "Simulation with synthetic data: no real account connected and no personal data processed."
+    },
+    "cta": {
+      "title": "Have a similar case?",
+      "body": "Tell me what you do and what you need.",
+      "cta": "Get in touch"
+    }
+  },
+  "process": {
+    "title": "How I work",
+    "lead": "Four phases, each with clear deliverables, so you always know where we are and what you will receive.",
+    "stepLabel": "Phase",
+    "outputsLabel": "What you get",
+    "steps": {
+      "discover": {
+        "title": "Listening and discovery",
+        "summary": "Understanding the problem, the data available and what \"it works\" means for you.",
+        "body": "One or two conversations to clarify goals, users, technical and regulatory constraints and the systems already in use. I tell you straight away whether AI is the right choice or a simpler automation will do.",
+        "outputs": {
+          "first": "A one-page brief with goals and success criteria",
+          "second": "A map of the data and systems involved",
+          "third": "The main risks and the open questions"
+        }
+      },
+      "prototype": {
+        "title": "Prototype and evaluation",
+        "summary": "A first working result, measured on real examples, before committing a large budget.",
+        "body": "I build a prototype aimed at the most uncertain point and evaluate it on a set of concrete cases. If it does not hold up, we find out immediately and cheaply.",
+        "outputs": {
+          "first": "A working prototype",
+          "second": "An evaluation on real cases, with the results",
+          "third": "A project proposal with scope, timing and costs"
+        }
+      },
+      "build": {
+        "title": "Development in short iterations",
+        "summary": "Frequent releases, automated tests and continuous feedback.",
+        "body": "I build in short cycles, with features you can see at every step. Automated tests, accessibility and security checks are part of the work, not a final phase.",
+        "outputs": {
+          "first": "Working, tested software in a test environment",
+          "second": "Technical and user documentation",
+          "third": "Regular updates on progress"
+        }
+      },
+      "launch": {
+        "title": "Launch and improvement",
+        "summary": "Going live, monitoring and handover.",
+        "body": "A controlled release, monitoring of quality and costs, and training for the people who will use the system. Code and documentation are yours; further development and support remain available.",
+        "outputs": {
+          "first": "The system in production, with monitoring",
+          "second": "Source code and documentation handed over",
+          "third": "A plan for further development and support"
+        }
+      }
+    },
+    "principles": {
+      "title": "Principles that do not change",
+      "items": {
+        "measurable": {
+          "title": "Measurable goals",
+          "text": "We agree at the start how we will know it works, and we check it on real cases."
+        },
+        "transparent": {
+          "title": "Transparency",
+          "text": "I tell you what the AI does, where it can be wrong and where a person steps in."
+        },
+        "handover": {
+          "title": "Proper handover",
+          "text": "Code, documentation and access stay with you: the system must be able to live without me."
+        }
+      }
+    },
+    "cta": {
+      "title": "Want to know if this way of working suits you?",
+      "body": "A first conversation is there to clarify goals and constraints, with no commitment.",
+      "cta": "Get in touch"
+    }
+  },
+  "about": {
+    "cta": {
+      "title": "Let us see if I can help",
+      "body": "Tell me about your project: I reply personally.",
+      "cta": "Get in touch"
+    }
+  },
+  "contact": {
+    "title": "Let's talk",
+    "lead": "Tell me about your project or the process you want to automate. A few lines are enough: I reply personally to understand goals and constraints and propose next steps.",
+    "informal": "Nothing formal is needed: write as you would to a colleague.",
+    "prepare": {
+      "title": "What helps me reply well",
+      "items": {
+        "context": {
+          "title": "The context",
+          "text": "Who you are, what you do and which process or product you have in mind."
+        },
+        "goal": {
+          "title": "The goal",
+          "text": "What you would like to achieve and how you will know it worked."
+        },
+        "constraints": {
+          "title": "The constraints",
+          "text": "Timing, a rough budget, the systems and data you already have, privacy requirements."
+        }
+      }
+    },
+    "next": {
+      "title": "What happens next",
+      "items": {
+        "reply": {
+          "title": "I reply personally",
+          "text": "I read carefully and write back to understand the case better."
+        },
+        "call": {
+          "title": "We talk",
+          "text": "If it makes sense, we set up a first conversation to clarify goals and constraints."
+        },
+        "proposal": {
+          "title": "You get the next steps",
+          "text": "I propose how to proceed: a prototype, a project or, if it is the right answer, the choice to do nothing."
+        }
+      }
+    },
+    "detailsTitle": "Where to find me"
   },
   "notFound": {
     "title": "Page not found",
