@@ -4,6 +4,7 @@ import { Copy } from "lucide-react";
 import { useId, useState, type ComponentProps, type ReactNode } from "react";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -235,6 +236,11 @@ export function UiGallery() {
           </p>
           <ThemeSwitch />
           <LanguageSwitcher />
+          <div>
+            <Button asChild variant="secondary">
+              <Link href="/_dev/motion">Motion test page</Link>
+            </Button>
+          </div>
         </header>
 
         <Section title="Button">

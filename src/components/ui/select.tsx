@@ -50,6 +50,7 @@ function SelectContent({
           "relative z-(--z-popover) max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width) overflow-y-auto rounded-md border border-border-subtle bg-surface-2 text-text shadow-popover data-[state=closed]:animate-popover-out data-[state=open]:animate-popover-in",
           className,
         )}
+        data-lenis-prevent
         {...props}
       >
         <SelectPrimitive.Viewport className="p-1">

@@ -221,6 +221,12 @@ for (const theme of ["dark", "light"] as const) {
       });
 
       await page.keyboard.press("ArrowDown");
+      // Radix moves the highlight in a setTimeout after ArrowDown; pressing Enter
+      // before it lands would choose the previous option (a race in the test, not
+      // in the component), so wait for the highlight like a user would see it.
+      await expect(
+        page.getByRole("option", { name: "Workflow automation" }),
+      ).toHaveAttribute("data-highlighted", "");
       await page.keyboard.press("Enter");
       await expect(listbox).toBeHidden();
       await expect(select).toContainText("Workflow automation");

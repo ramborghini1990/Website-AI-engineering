@@ -1,13 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const prodPort = 3100;
-const devPort = 3200;
-const prodURL = `http://localhost:${String(prodPort)}`;
-const devURL = `http://localhost:${String(devPort)}`;
+import { devPort, devURL, prodPort, prodURL } from "./e2e/support/servers";
+
 const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "./e2e",
+  // Compiles each dev-only route once, sequentially, before any test (see the file).
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
@@ -19,13 +19,14 @@ export default defineConfig({
     {
       // What users get: the production build.
       name: "chromium",
-      testIgnore: /gallery\.spec\.ts/,
+      testIgnore: /(gallery|motion)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], baseURL: prodURL },
     },
     {
-      // The UI gallery exists only under `next dev` (it is a 404 in production).
+      // The UI gallery and the motion test page exist only under `next dev`
+      // (they are a 404 in production).
       name: "chromium-dev",
-      testMatch: /gallery\.spec\.ts/,
+      testMatch: /(gallery|motion)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], baseURL: devURL },
     },
   ],
@@ -43,9 +44,7 @@ export default defineConfig({
     {
       // Next 16 writes dev output to .next/dev, so this can run next to `next build`.
       command: `pnpm exec next dev --port ${String(devPort)}`,
-      // Probe the gallery itself: the first request compiles the route, and
-      // parallel first requests from several workers raced during compilation.
-      url: `${devURL}/it/_dev/ui`,
+      url: devURL,
       reuseExistingServer: !isCI,
       timeout: 180_000,
     },

@@ -5,6 +5,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
+import { LenisProvider } from "@/lib/motion/lenis-provider";
 
 import "../globals.css";
 
@@ -46,15 +47,16 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${instrumentSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      {/* min-h-dvh, not h-full: Lenis adds a `lenis` class to <html> and must not be able to change the document height (layout shift). */}
+      <body className="flex min-h-dvh flex-col">
         {/* Only the namespaces that client components read are sent to the browser. */}
         <NextIntlClientProvider
           locale={locale}
           messages={{ languageSwitcher: messages.languageSwitcher }}
         >
-          {children}
+          <LenisProvider>{children}</LenisProvider>
         </NextIntlClientProvider>
       </body>
     </html>

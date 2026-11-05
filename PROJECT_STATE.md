@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.3 committed as `15ba83f`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.4 committed as `7fc6b2d`)_
 
 ---
 
@@ -11,21 +11,21 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.3 committed a
 | Field | Value |
 |---|---|
 | Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.4` — Internationalisation with next-intl (`[locale]` routing, proxy redirect, typed messages, language switcher, hreflang) |
+| Active task | `P1.5` — Motion system (Lenis + GSAP in one loop, single GSAP registration, `useReducedMotion`, CLS < 0.05, zero ScrollTrigger leaks, reduced-motion e2e) |
 | Status | **acceptance criteria met, awaiting review (not committed)** |
-| Next task | `P1.5` — motion system (Lenis + GSAP, reduced motion); do not start unprompted |
+| Next task | `P1.6` — see ROADMAP; do not start unprompted |
 
 **Plan for the active task**
-1. next-intl 4.14.9: `src/i18n/{routing,request,navigation,messages}.ts`, `src/proxy.ts`, plugin in `next.config.ts`; locale from `next/root-params` (Cache Components); `it` default, `en`; prefix always; **no locale cookie**.
-2. Root layout moves to `src/app/[locale]/layout.tsx` (no `app/layout.tsx`); placeholder home, localized 404 (catch-all + `not-found.tsx`).
-3. `messages/it.json` + `messages/en.json`; `AppConfig` augmentation so a missing key is a type error; parity guarded by types and by tests.
-4. `LanguageSwitcher` (labelled nav of links, path preserved); hreflang + canonical via `localeAlternates` and an absolute `siteUrl`.
-5. Tests: unit (messages parity + `@ts-expect-error`, proxy, matcher, seo, env, switcher, routing) and e2e (redirects, no cookie, static assets, hreflang, 404s, switcher, axe); mutation checks; visual check; `pnpm verify`.
+1. `src/lib/motion/`: `tokens.ts` (mirror of the CSS motion tokens, parity-tested), `gsap.ts` (the only GSAP import point: registers `useGSAP`, `ScrollTrigger`, `CustomEase` once, creates the `ds-*` eases, refreshes after fonts), `use-reduced-motion.ts`, `use-motion.ts` (`useGSAP` + `gsap.matchMedia`, everything reverted on unmount / deps change / preference flip), `reveal.ts` helpers.
+2. `LenisProvider` mounted once in `[locale]/layout.tsx`; the engine (`lenis-runtime.tsx`) is a lazy chunk loaded after idle and never under reduced motion; one loop: `gsap.ticker` calls `lenis.raf`, Lenis `scroll` calls `ScrollTrigger.update()`; route change refreshes ScrollTrigger; Radix scroll lock stops/starts Lenis.
+3. Layout: body `min-h-dvh`, no height on `<html>` (the upstream `html.lenis { height:auto }` rule caused CLS 0.062 and is not copied).
+4. Dev test page `/[locale]/_dev/motion` (intro, 6 reveals, 1 pinned scrubbed scene) and `window.__motionDebug` (dev-tools only).
+5. Tests: unit (152 in total) and e2e (`motion.spec.ts` against `next dev`, `scroll.spec.ts` against the production build), with mutation checks; `docs/MOTION.md`.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Throwaway mutations were reverted; no `next dev`/`next start` process is running (`netstat` + command-line check).
-- The home page is a **neutral placeholder** I wrote (company name + "site under construction" in both languages); I removed the Create-Next-App content and its external Vercel/Next links. Real copy is P2.1, real home P2.2. `Toaster` and `TooltipProvider` are still not mounted in the real layout (P1.8).
-- **Your decisions needed:** see section 8, "P1.4 decisions for you" (no locale cookie; placeholder copy; production domain for canonical/hreflang).
+- Nothing half-done. Throwaway probes and mutations are removed or reverted; no `next` / `playwright` process or listener on 3100, 3101, 3200 (netstat + command-line check).
+- The GSAP licence is custom and has **not** been reviewed by a human: tick the box in `docs/THIRD_PARTY.md` after reading https://gsap.com/standard-license.
+- `e2e/gallery.spec.ts` was edited (one wait added, see section 8, "P1.5 / select test"); no assertion was weakened.
 
 ---
 
@@ -34,7 +34,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.3 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 3/8 | P1.1–P1.3 committed; P1.4 awaiting review/commit |
+| 1 Core, design system, motion | ◐ | 4/8 | P1.1–P1.4 committed; P1.5 awaiting review/commit |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -55,6 +55,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.3 committed a
 | 2026-11-05 | P1.1 | `docs/DESIGN.md`: approved design direction, tokens and contrast tables | `0a62012` |
 | 2026-11-05 | P1.2 | Design tokens in `globals.css`, self-hosted Instrument Sans + JetBrains Mono, contrast and raw-colour guards | `9263b31` |
 | 2026-11-05 | P1.3 | Accessible UI primitives on Radix, dev-only gallery, keyboard/axe/reduced-motion e2e | `15ba83f` |
+| 2026-11-05 | P1.4 | next-intl routing (it/en), proxy, typed messages, switcher, hreflang | `7fc6b2d` |
 
 ---
 
@@ -85,6 +86,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D19 | 2026-11-05 | UI primitives (P1.3): hand-written in the shadcn pattern on individual `@radix-ui/react-*` packages, **no shadcn CLI**; `cn()` = clsx + tailwind-merge extended with our custom token names; Toast = Radix Toast + own tiny store (no Sonner); every string a component needs (close, viewport label) is a **required prop** because copy must come from i18n; sizes never below 44 px (checkbox: 24 px box with an invisible 44 px hit area); component animations are `--animate-*` tokens, all switched to `none` under `prefers-reduced-motion` in `globals.css`; errors persist until dismissed, other toasts close after 8 s | CLAUDE.md §5, §9, §12, §13; WCAG 2.2.1, 2.5.8; the audit flags `npx shadcn add` as unpinned code execution | — |
 | D20 | 2026-11-05 | Dev gallery: code in `src/app/[locale]/dev-tools/`, public URL `/[locale]/_dev/ui` via a rewrite in `next.config.ts`; layout calls `notFound()` unless `isDevelopment` (`src/lib/env.ts`, the only `process.env` read, a stand-in until P1.7's Zod env). Playwright has two projects/servers: production build on 3100 (what users get; also asserts the 404s) and `next dev` on 3200 (gallery) | A `_dev` folder is a private folder (never routable); a `%5Fdev` folder makes `next dev` and `next build` emit conflicting route types (`"/[locale]/%5Fdev"` vs `"/[locale]/_dev"`), which broke `pnpm verify` after any dev session. Next 16 writes dev output to `.next/dev`, so both servers can run together | — |
 | D21 | 2026-11-05 | i18n (P1.4): next-intl 4.14.9; locales `it` (default) and `en`; prefix always; locale from `next/root-params` (Cache Components); `proxy.ts` (Next 16 name) with matcher `/((?!api\|trpc\|_next\|_vercel\|.*\\..*).*)`; **`localeCookie: false`** and **`alternateLinks: false`** (hreflang only in HTML metadata); typed messages with Italian as the source shape; root layout is `app/[locale]/layout.tsx` and there is no `app/layout.tsx`; canonical and hreflang are absolute via `siteUrl` (`resolveSiteUrl`: explicit var, Vercel production domain, `VERCEL_URL`, localhost); `tsconfig` excludes `.next/dev`; `@parcel/watcher` and `@swc/core` build scripts stay disabled | The URL carries the language so no storage is needed (GDPR); a pass-through root layout would break root params; stale dev types broke `verify` after every route change; the two scripts only serve next-intl features we do not use (CLAUDE.md §5) | — |
+| D22 | 2026-11-05 | Motion (P1.5): `gsap`, `@gsap/react`, `lenis` (named in CLAUDE.md §5). `src/lib/motion/gsap.ts` is the only GSAP import point and registers once (no-op on the server). **One loop:** Lenis `autoRaf:false`, `gsap.ticker` drives `lenis.raf`, Lenis `scroll` drives `ScrollTrigger.update()`, `lagSmoothing(0)` while running and restored on cleanup; touch stays native (`syncTouch:false`). Components write animations only through `useMotion` (`useGSAP` + `gsap.matchMedia` with `reduced` / `full`), so all tweens and triggers are reverted on unmount, deps change and live preference flips. Reduced contract: final state or ≤ 0.16 s opacity fade, no pin/scrub/loops. **Lazy engine:** `LenisProvider` loads the chunk after idle (≈ 47 KB transferred, 119 KB raw) and not at all under reduced motion. Radix scroll lock (`body[data-scroll-locked]`) stops Lenis; scrollable overlays carry `data-lenis-prevent`. Motion tokens are mirrored in `tokens.ts` and parity-tested against `globals.css`. Layout: `min-h-dvh` on `<body>`, no height on `<html>`, upstream `html.lenis{height:auto}` not copied (it measured CLS 0.062 with the previous `h-full` layout; with the fix 0.0000). Playwright runs a `globalSetup` that warms the dev routes sequentially | Meets CLAUDE.md §8 literally (single loop, single registration, cleanup via `useGSAP`, reduced motion implemented in the hook and the provider); the lazy chunk keeps motion code off the critical path; mirrored tokens avoid two sources of truth drifting silently; parallel first compiles of new `next dev` routes crashed with `Unexpected end of JSON input` | — |
 
 ---
 
@@ -134,6 +136,11 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P1.5 / GSAP licence needs a human check.** The registry licence field is "Standard 'no charge' license" (https://gsap.com/standard-license), not an OSI licence; `@gsap/react` points at the same text. CLAUDE.md and BLUEPRINT say GSAP is free for commercial use; I did not verify that and I am not qualified to. Only public-package plugins are used (`ScrollTrigger`, `CustomEase`). Tick the box in `docs/THIRD_PARTY.md` after reading it.
+- **P1.5 / select test (found while verifying, fixed in the test).** `gallery.spec.ts` "select: opens and chooses with the keyboard" started failing most runs after the motion work (ended on "AI agents" instead of "Workflow automation"). Cause, from a step-by-step probe: Radix Select moves the highlight inside a `setTimeout` after `ArrowDown`, so an immediate `Enter` chose the previously highlighted option when the main thread was busy (the engine mounts after idle). In the probe the highlight was still on the first option when Enter was pressed. It is not `data-lenis-prevent` (removed: still failed) or `MotionProbe` (removed: still failed); I did not isolate which P1.5 change made the main thread busy enough to expose it. The test now waits for `data-highlighted` on the target option before `Enter`; 6/6 passes afterwards and the full suite is green. A real user cannot press two keys in the same millisecond, so I treat it as a test race, not a component bug.
+- **P1.5 / limits.** CLS was measured on Chromium on a fast machine as the plain sum of shifts without recent input (a negative control proves the tracker sees a real shift); it is not field data and not mid-range mobile. Lenis was not run on iOS Safari or Firefox (touch scrolling is native by design). The ~47 KB engine is fetched on every page after idle, even pages without scroll motion; an opt-out per route is possible later. GSAP `matchMedia` ignores preference changes within 2 ms of each other (tests advance the clock).
+- **P1.5 / things I changed outside `src/lib/motion`:** `[locale]/layout.tsx` (LenisProvider; `h-full` removed from `<html>`, body `min-h-dvh`), `globals.css` (Lenis rule subset), `dialog.tsx` / `sheet.tsx` / `select.tsx` (`data-lenis-prevent`), `dev-tools/layout.tsx` + `motion-probe.tsx` + `motion/` (dev page), `ui-gallery.tsx` (link to the motion page), `vitest.setup.ts` (matchMedia / `document.fonts` stubs, `src/test-utils/match-media.ts`), `playwright.config.ts` (`globalSetup`, `e2e/support/servers.ts`; the prod project ignores `gallery|motion` specs, the dev project runs them), `docs/DESIGN.md` §6 (pointer), `docs/THIRD_PARTY.md`. New dirs `src/lib/motion/` and `src/test-utils/` (CLAUDE.md §2: ask before new top-level directories; both are under `src/`).
+- **P1.5 / for P1.6+:** write every GSAP animation through `useMotion` (see `docs/MOTION.md`); never import `gsap` directly; animate transform/opacity only; do not put a height on `html`/`body` that depends on the `lenis` class. The motion dev page and `__motionDebug` are 404 / absent in production (asserted in `scroll.spec.ts`).
 - **P1.4 decisions for you:** (1) **No locale cookie.** next-intl's default `NEXT_LOCALE` cookie is off: the URL is the preference. Trade-off: someone who picks English on a bookmark-less visit is redirected by browser language again on their next `/` visit. Say if you want the cookie; it would then need a row in the cookie policy (P4.2). (2) **Placeholder copy** in `messages/*.json` is mine: company name, "site under construction", a one-line description derived from CLAUDE.md, and the 404 text. Treat it as a stand-in for P2.1. (3) **Production domain (B6):** until `NEXT_PUBLIC_SITE_URL` is set, canonical and hreflang use Vercel's production domain; set it before the site is indexed.
 - **P1.4 / "preserving security headers" is only structural for now.** No security headers exist yet (they are P1.7), so I could not test their survival. `src/proxy.ts` returns next-intl's own response object, so headers and the CSP nonce added there in P1.7 apply to redirects too; keep that shape. Verify with a real header once P1.7 lands (securityheaders.com on a redirect: `/`).
 - **P1.4 / I changed existing things to make this work:** `app/layout.tsx`, `app/page.tsx` and the scaffold page test are gone (replaced under `[locale]`); `tsconfig.json` now excludes `.next/dev` (IDE route types now come from `.next/types`, i.e. after `pnpm typecheck` or a build, not from a dev session); `vitest.config.mts` inlines `next-intl`; `playwright.config.ts` gives the production test server `NEXT_PUBLIC_SITE_URL`, and probes the gallery URL for dev readiness; `pnpm-workspace.yaml` records `allowBuilds: false` for `@parcel/watcher` and `@swc/core` (pnpm 12 fails the install otherwise); `docs/DEPLOYMENT.md` and `.env.example` text about the site URL updated; `src/components/ui/button.test.tsx` uses an external href because a catch-all route makes every internal-looking `<a href>` trip `@next/next/no-html-link-for-pages`.
@@ -201,45 +208,39 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass (exit 0 after recording `@parcel/watcher` and `@swc/core` as `allowBuilds: false`)
-pnpm verify       → pass (typecheck → lint --max-warnings=0 → test → build); test step: 13 files, 103 tests;
-                    the build lists `/it` and `/en` as static and "ƒ Proxy (Middleware)"
-pnpm test:e2e     → pass, 63 tests (Chromium): 39 against the production build + 24 against `next dev`
-                    (23 gallery tests + 1 gallery language-switcher test)
+pnpm install --frozen-lockfile → pass (lockfile up to date)
+pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 21 files,
+                    152 tests; the build lists the motion and ui dev routes
+pnpm test:e2e     → pass, 90 tests (Chromium) in 59 s: production build + `next dev` projects
 pnpm knip         → pass
 pnpm format:check → pass (does not cover *.md)
+no `next` / `playwright` process and no listener on 3100, 3101, 3200 afterwards (netstat + command lines)
 
-P1.4 checks:
-  type safety       → mutation on the real files: renamed `home.status` in it.json -> typecheck failed in
-                      4 places (the page's t("status"), the en/it parity assertion, a test, and the
-                      request.ts loader `satisfies`); removed `notFound.backHome` from en.json only ->
-                      typecheck failed in 2 places AND the runtime key-parity test failed. Both reverted.
-                      `@ts-expect-error` cases in messages.test.ts make "a missing key is a compile error"
-                      part of every `pnpm typecheck`
-  proxy / redirects → unit (real NextRequest): / -> /en, /it, default /it for fr or no header, path kept,
-                      no redirect when prefixed, never a Set-Cookie. e2e on the real server: 307 with
-                      Location, no set-cookie header on /, /it, /en, /foo; a browser with en-GB lands on /en
-  static assets     → /favicon.ico and /next.svg 200 without redirect, a missing /x.png is a plain 404,
-                      a script under /_next/static is 200; matcher unit-tested against 18 paths
-  guards can fail   → mutation: `localeCookie: true` + matcher without the dot exclusion -> 8 unit tests
-                      (cookie, 6 asset paths, routing config) and 4 e2e tests failed; both reverted
-  pages             → /it and /en: html lang, localized title, description, canonical, hreflang it/en/
-                      x-default (absolute URLs), one h1, axe clean; 404s localized (title, heading, status
-                      404, axe clean); /foo redirects by browser language and ends as a 404; /xx/about 404
-  switcher          → labelled nav (Lingua / Language), aria-current on the active link, lang + hreflang,
-                      prefetch off, >= 44 px, keyboard Enter + 2 px focus ring; switches / and back; keeps
-                      /it/pagina/non-esiste -> /en/pagina/non-esiste; keeps /it/_dev/ui -> /en/_dev/ui
-  bugs found by the tests (all fixed) → home page title had no brand suffix (layout `title.template` does
-                      not apply to the same segment); a nested not-found.tsx cannot set <title> (moved to
-                      the catch-all route); stale `.next/dev/types` broke typecheck after routes moved
-                      (tsconfig now excludes `.next/dev`); first-compile race on the dev gallery in Playwright
-                      (readiness probe now hits the gallery); `next/server` import broke the proxy unit test
-                      (Vitest inlines next-intl); a font test assumed JetBrains Mono is always fetched
-  visual            → production build at 1280 and 360 px inspected: /it dark, /en light, 404 in both
-                      languages and themes; found and fixed switcher text indentation
-  NOT done          → hover states visually; 200 % zoom; real-browser check of Accept-Language other than
-                      en/it variants; screen-reader listening test; Firefox/WebKit; the live Vercel
-                      deployment (Accept-Language redirect, canonical, hreflang) after you push
+P1.5 checks:
+  single loop        → unit: only the live Lenis instance receives ticker frames, none after unmount, also under
+                       StrictMode; lagSmoothing restored on cleanup
+  registration       → plugins registered once (idempotent), no-op on the server (gsap.ssr test), eases created
+                       from the CSS bezier tokens; tokens.test.ts fails if tokens.ts and globals.css drift
+  reduced motion     → unit (hook, useMotion, provider: engine chunk not rendered) and e2e with
+                       `reducedMotion: "reduce"`: no `lenis` class, engine chunk never requested (prod build),
+                       no pin spacers, no scrubbed triggers, content visible; live preference flips x3 give
+                       stable trigger counts
+  leaks              → e2e on the motion page: exactly 7 ScrollTriggers and 1 pin-spacer, 0 after navigating
+                       away, exactly 7 / 1 again on return, x3 round trips, Back/Forward, scroll back at top;
+                       counts proven by mutation
+  CLS                → measured 0.0000 on /it, /en, /it/non-esiste (prod) and on the motion page full and
+                       reduced (dev), each over load + Lenis start-up + a full scroll; negative control (an
+                       injected shift is detected); mutation: the old `h-full` layout + upstream
+                       `html.lenis{height:auto}` gave CLS 0.0617 and the test failed; layout fix kept
+  lazy engine        → not in the initial script list, arrives after idle (prod); ≈ 46.9 KB transferred /
+                       118.9 KB raw
+  scroll lock        → a dialog stops the page behind it (Lenis stopped) and scrolling resumes on close
+  bugs found by the tests (all fixed) → CLS 0.0617 from the Lenis height rule (layout change above); dev-server
+                       first-compile crash under parallel workers (globalSetup warm-up); a "leak" test that
+                       scrolled to top before navigating (rewritten); matchMedia dedupe within 2 ms in unit
+                       tests (clock advanced); gallery select test race (section 8)
+  NOT done           → Firefox/WebKit/iOS; mid-range mobile CLS/LCP; INP; screen-reader pass; human review of the
+                       GSAP licence; the live Vercel deployment after you push
 ```
 
 ---
@@ -247,27 +248,33 @@ P1.4 checks:
 ## 10. Proposed commit(s) for the work above
 
 ```
-feat(i18n): add italian and english routing with next-intl
+feat(motion): add lenis and gsap motion system with reduced-motion support
 
-Route every page under [locale] with Italian as default and English
-as secondary. proxy.ts (the Next 16 name for middleware) redirects
-/ and locale-less paths by Accept-Language, and leaves api routes,
-Next and Vercel internals and anything with a file extension alone.
-No locale cookie is set, so nothing is stored about the visitor.
+Run smooth scrolling and GSAP in a single loop: gsap.ticker drives
+Lenis, and Lenis scroll events drive ScrollTrigger. GSAP and its
+plugins are registered once in lib/motion/gsap.ts, which is also the
+only place components import GSAP from. useMotion wraps useGSAP and
+gsap.matchMedia so every tween and ScrollTrigger is reverted on
+unmount, dependency change and when the reduced-motion preference
+flips. ScrollTrigger is refreshed on route change and after fonts load.
 
-The locale comes from next/root-params, which Cache Components
-requires; the root layout moves to app/[locale]/layout.tsx. Messages
-live in messages/it.json and en.json. A key that is missing from
-it.json, or an en.json that drifts from it, fails typecheck, and
-tests guard parity and placeholders.
+useReducedMotion follows the OS setting live. Under reduce, Lenis is
+never loaded and timelines become final states or fades of at most
+0.16 s; no pinning, scrubbing or loops. The engine is a lazy chunk
+loaded after idle. Radix scroll locks pause Lenis, and scrollable
+overlays opt out of smooth scrolling.
 
-Add an accessible language switcher that keeps the current path,
-localized 404 pages, and canonical and hreflang metadata built from
-an absolute site URL. Replace the Create Next App placeholder with a
-neutral one. Exclude .next/dev from tsconfig so stale dev types
-cannot break verify. Document the setup in docs/I18N.md.
+Layout shift: body uses min-h-dvh and html has no height, because the
+upstream html.lenis height:auto rule produced CLS 0.062 with the old
+h-full layout. Measured CLS is 0 on the pages and the motion test page.
 
-Task: P1.4
+Add a dev-only motion page, unit tests, and Playwright specs for CLS,
+ScrollTrigger and pin counts across navigations, live preference
+changes and scroll lock. Wait for the Radix highlight in the select
+keyboard test (Radix moves it in a setTimeout). Document it in
+docs/MOTION.md and record the GSAP licence for review.
+
+Task: P1.5
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

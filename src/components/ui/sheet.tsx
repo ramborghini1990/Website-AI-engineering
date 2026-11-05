@@ -64,6 +64,7 @@ function SheetContent({
       <SheetOverlay />
       <SheetPrimitive.Content
         className={cn(sheetVariants({ side }), className)}
+        data-lenis-prevent
         {...props}
       >
         {children}

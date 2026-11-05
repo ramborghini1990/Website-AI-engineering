@@ -52,6 +52,7 @@ function DialogContent({
           "fixed top-1/2 left-1/2 z-(--z-modal) grid max-h-[85dvh] w-[calc(100%-var(--spacing-gutter)*2)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-md border border-border-subtle bg-surface-1 p-6 shadow-modal data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in",
           className,
         )}
+        data-lenis-prevent
         {...props}
       >
         {children}

@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 
 import { isDevelopment } from "@/lib/env";
 
+import { MotionProbe } from "./motion-probe";
+
 // Public URL is /[locale]/_dev/..., rewritten to this folder in next.config.ts.
 export const metadata: Metadata = {
   title: "Dev tools",
@@ -13,5 +15,10 @@ export const metadata: Metadata = {
 /** Everything under /[locale]/dev-tools (and its /_dev alias) is development-only: 404 in production builds. */
 export default function DevLayout({ children }: { children: ReactNode }) {
   if (!isDevelopment) notFound();
-  return children;
+  return (
+    <>
+      {children}
+      <MotionProbe />
+    </>
+  );
 }

@@ -371,3 +371,17 @@
     outline-offset: 2px;
   }
 }
+
+/*
+ * Lenis (src/lib/motion). A subset of upstream's lenis.css. Deliberately NOT
+ * included: `html.lenis, html.lenis body { height: auto }` (it changes the
+ * document height when Lenis starts: a layout shift) and the `lenis-stopped`
+ * overflow rule (Radix already locks page scroll and compensates the scrollbar).
+ */
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}

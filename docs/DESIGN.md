@@ -197,6 +197,8 @@ Raw `rgb()` is acceptable inside these shadow tokens (they cannot be expressed a
 
 ## 6. Motion
 
+Implemented in P1.5 (Lenis, GSAP, ScrollTrigger, reduced motion, cleanup): see [MOTION.md](MOTION.md). The values below exist twice, as CSS tokens in `globals.css` and as GSAP tokens in `src/lib/motion/tokens.ts`; a test keeps them identical.
+
 Principles (CLAUDE.md §8 governs; this section sets the values):
 
 - Animate **`transform` and `opacity`** only (`clip-path` and filters sparingly). Never `width`, `height`, `top`, `left`.
