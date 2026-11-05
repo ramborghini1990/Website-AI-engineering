@@ -42,6 +42,12 @@ jobs:
       # typecheck + lint + unit tests + production build
       - name: Verify
         run: pnpm verify
+        env:
+          # This job has no secrets, so `next build` must not demand them.
+          # The flag is honoured only during the build (src/lib/env-schema.ts):
+          # it is ignored at runtime. The unit tests still validate the env
+          # contract (.env.example parses). docs/SECURITY.md §2.
+          SKIP_ENV_VALIDATION: "1"
 
       - name: Dead code (knip)
         run: pnpm knip
@@ -82,6 +88,10 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
+      # Deliberately WITHOUT SKIP_ENV_VALIDATION: this job builds and starts the
+      # app with an empty environment, which proves a fresh clone validates.
+      # When a variable becomes required in production (docs/SECURITY.md §2),
+      # give this job synthetic test values for it here.
       - name: End-to-end and accessibility tests
         run: pnpm test:e2e
 

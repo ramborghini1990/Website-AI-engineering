@@ -28,6 +28,27 @@ const eslintConfig = defineConfig([
     files: ["**/*.{jsx,tsx}"],
     rules: jsxA11y.flatConfigs.strict.rules,
   },
+  {
+    // CLAUDE.md §6: the environment is read in exactly two modules.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/lib/env.ts",
+      "src/lib/env.client.ts",
+      "src/**/*.test.{ts,tsx}",
+      "src/test-utils/**",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "MemberExpression[object.name='process'][property.name='env']",
+          message:
+            "Do not read process.env here. Use `env` from @/lib/env (server) or `publicEnv` from @/lib/env.client (CLAUDE.md §6).",
+        },
+      ],
+    },
+  },
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",

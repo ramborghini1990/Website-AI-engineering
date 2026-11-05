@@ -41,7 +41,7 @@ What `fra1` does and does not cover: it sets where **Vercel Functions** execute.
 
 ## 3. Environment variables
 
-Source of truth for names: [`.env.example`](../.env.example). The current app reads **none** of them yet (`src/lib/env.ts` arrives in P1.7), so the scaffold deploys with no variables. Create the scoping now; add each variable when the task that consumes it lands.
+Source of truth for names: [`.env.example`](../.env.example); the rules are in `src/lib/env-schema.ts` and explained in [SECURITY.md](SECURITY.md) §2. Since P1.7 every variable is validated when the app builds and starts: a malformed value fails `next build` (and a malformed value or half-set group fails at startup), and nothing is *required* yet, so the current deployment works with no variables at all. Each task that adds a consumer moves its variables into `REQUIRED_IN_PRODUCTION`; until then the table below is what to set before that task ships.
 
 Rules:
 
@@ -64,8 +64,15 @@ Rules:
 | `INQUIRY_NOTIFY_TO` | your own inbox | your own inbox, never a client mailbox | real inbox |
 | `ANTHROPIC_API_KEY` | empty (simulation) | empty | empty until P3.0, then a dedicated key with a spend cap |
 | `DEMOS_LIVE_ENABLED` | `false` | `false` | `false` (kill switch; flip deliberately) |
+| `CSP_MODE` | `report-only` (default) | `report-only` (default) | `report-only` first, then `enforce` once a deployment shows no violations (SECURITY.md §4) |
+| `CSP_REPORT_URI` | empty | empty | empty unless you run a collector; a third-party collector is a processor (privacy notice) |
+| `NEXT_PUBLIC_PLAUSIBLE_ORIGIN` | empty | empty | set only when analytics is wired (P2.6): an origin like `https://plausible.io`, no path |
 
 Build-only setting, deliberately not in `.env.example` because app code never reads it: `ENABLE_EXPERIMENTAL_COREPACK=1`.
+
+CI-only setting: `SKIP_ENV_VALIDATION=1` lets `next build` run in a job that has no secrets (the `verify` job in `.github/workflows/ci.yml` sets it). It is honoured only while `next build` runs and ignored at runtime, so **never set it on Vercel**: there the build should validate, and at runtime it would do nothing anyway.
+
+**Rendering and region (P1.7):** every page is now rendered per request (a nonce-based CSP needs it, SECURITY.md §3), so HTML comes from Vercel Functions in `fra1`, not from the CDN. That also makes the function region observable: check `x-vercel-id` on the first deployed page.
 
 Commands (each prompts for the value; the optional third argument limits a Preview variable to one branch, leave it out for "all preview branches"):
 

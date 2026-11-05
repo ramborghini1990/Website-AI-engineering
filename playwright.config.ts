@@ -36,7 +36,13 @@ export default defineConfig({
       command: `pnpm build && pnpm start --port ${String(prodPort)}`,
       // Canonical and hreflang URLs come from the configured site URL, so the
       // test server must be told its own origin (see src/lib/env.ts).
-      env: { NEXT_PUBLIC_SITE_URL: prodURL },
+      env: {
+        NEXT_PUBLIC_SITE_URL: prodURL,
+        // The test server ENFORCES the CSP (the default is report-only), so a
+        // script, style or request the policy would block fails these tests
+        // instead of only logging a report. See e2e/security.spec.ts.
+        CSP_MODE: "enforce",
+      },
       url: prodURL,
       reuseExistingServer: !isCI,
       timeout: 180_000,

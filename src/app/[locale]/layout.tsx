@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { connection } from "next/server";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
@@ -24,7 +25,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-// Required for static rendering with a dynamic `[locale]` root segment.
+// The known locales (pages render per request, see LocaleLayout).
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
@@ -41,6 +42,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LocaleLayout({
   children,
 }: LayoutProps<"/[locale]">) {
+  // Render every page per request. The CSP nonce (src/proxy.ts) is generated
+  // per request and Next stamps it on its scripts while rendering; a
+  // prerendered page would carry none and an enforced CSP would block it.
+  await connection();
   const locale = await getLocale();
   const messages = await getMessages();
 

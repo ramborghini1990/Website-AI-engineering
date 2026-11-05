@@ -7,6 +7,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // The real package throws outside a Server Component; `next build` is what
+      // proves the guard (src/lib/env.guard.test.ts and the build mutation).
+      "server-only": fileURLToPath(
+        new URL("./src/test-utils/server-only.ts", import.meta.url),
+      ),
     },
   },
   test: {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveSiteUrl } from "@/lib/env";
+import { resolveSiteUrl } from "@/lib/env-schema";
 
 describe("resolveSiteUrl", () => {
   it("prefers an explicit NEXT_PUBLIC_SITE_URL over everything", () => {

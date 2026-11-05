@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.5 committed as `f41ee66`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.6 committed as `e398ebd`)_
 
 ---
 
@@ -11,20 +11,20 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.5 committed a
 | Field | Value |
 |---|---|
 | Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.6` — FX library: text reveal, magnetic button, marquee, spotlight card, gradient mesh, scroll-pinned section (static fallbacks, lazy, documented, showcased, tested) |
-| Status | **acceptance criteria met, awaiting review (not committed)** |
-| Next task | `P1.7` — security headers, CSP with nonce, validated env; do not start unprompted |
+| Active task | `P1.7` — Security headers, nonce-based CSP (Report-Only by default) in `proxy.ts`, Zod-validated env with a server/client split and `server-only` |
+| Status | **acceptance criteria met, awaiting review (not committed)**; two decisions need you (below) |
+| Next task | `P1.8` — layout shell (header, footer with company legal data, skip link, 404/500); do not start unprompted |
 
 **Plan for the active task**
-1. `src/components/fx/`: six components, all written in-house (no code copied, no new dependency). Four are client wrappers + a lazy `*.motion.tsx` chunk that uses `useMotion` (`TextReveal`, `MagneticButton`, `SpotlightCard`, `ScrollPinnedSection`); two are CSS-only server components (`Marquee`, `GradientMesh`).
-2. Code splitting: wrapper = markup + `ref` + `next/dynamic(ssr:false)`, mounted by `useFxReady()` (idle, not reduced, mouse for pointer effects). `useMotion` gained a cleanup return and `contextSafe`.
-3. CSS: `--animate-marquee` / `--animate-mesh-*` tokens (off under reduced motion), `animation-paused` utility.
-4. Showcase at `/[locale]/_dev/fx` (linked from the UI gallery and the motion page).
-5. Tests: unit (contrast, structure, wrappers, motion modules, integration with real lazy chunks), e2e `fx.spec.ts` (dev) and `fx-bundle.spec.ts` (prod); mutations; screenshots; docs (`MOTION.md`, `THIRD_PARTY.md`).
+1. `src/lib/env-schema.ts` (pure Zod schemas and rules), `src/lib/env.ts` (`server-only`, validated at import), `src/lib/env.client.ts` (public only, lenient). ESLint rule: `process.env` only in those two.
+2. `SKIP_ENV_VALIDATION`: honoured only during `next build`, ignored at runtime; set in the CI `verify` job.
+3. `src/lib/security/csp.ts` (pure) + `src/proxy.ts`: per-request nonce, CSP (`CSP_MODE` = `report-only` default | `enforce` | `off`), fixed security headers, composed with next-intl's redirect. Turnstile and the analytics origin only when configured.
+4. Rendering: a nonce needs per-request HTML, so `cacheComponents` / `partialPrefetching` are off and the root layout calls `await connection()` (see D24).
+5. Tests: unit (env, guard, CSP, proxy), e2e on the production build **in enforce mode**; build-level mutations; `docs/SECURITY.md`.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. The dev server I started for screenshots was stopped by PID; no `next` / `playwright` process and no listener on 3100, 3101, 3200 (netstat + command-line check). The temporary mutation of the home page was reverted (`git diff` on it is empty).
-- **Your review items:** the look of the effects (I could only judge screenshots: dark, light, 1280 and 360 px; see section 8, "P1.6 / the mesh is subtle"), and the deviations from the roadmap wording (section 8: separate showcase page, mesh is CSS not canvas, no code taken from React Bits).
+- Nothing half-done. All throwaway files (lint probe, client-leak probe) and temporary edits (layout `connection()` mutation, home-page mutations in the previous task) were removed or restored; no `next` / `playwright` process and no listener on 3100, 3101, 3200 (netstat + command-line check). A stale server of mine on 3101 once gave a false 200 in a runtime check; I found it, stopped it by PID and redid the check.
+- **Decisions needed from you:** (1) **every page is now dynamic and Cache Components is off** (D24, section 8 "P1.7 / decision 1"): the price of a strict nonce CSP; (2) **nothing is "required" in production yet** (section 8 "P1.7 / decision 2"), so "build fails if a required var is missing" holds for incomplete groups and malformed values, not for absent services.
 
 ---
 
@@ -33,7 +33,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.5 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 5/8 | P1.1–P1.5 committed; P1.6 awaiting review/commit |
+| 1 Core, design system, motion | ◐ | 6/8 | P1.1–P1.6 committed; P1.7 awaiting review/commit |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -56,6 +56,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.5 committed a
 | 2026-11-05 | P1.3 | Accessible UI primitives on Radix, dev-only gallery, keyboard/axe/reduced-motion e2e | `15ba83f` |
 | 2026-11-05 | P1.4 | next-intl routing (it/en), proxy, typed messages, switcher, hreflang | `7fc6b2d` |
 | 2026-11-05 | P1.5 | Lenis + GSAP in one loop, `useMotion` / `useReducedMotion`, lazy engine, CLS 0, no ScrollTrigger leaks | `f41ee66` |
+| 2026-11-05 | P1.6 | FX library: text reveal, magnetic button, marquee, spotlight card, gradient mesh, pinned section; static fallbacks, lazy chunks | `e398ebd` |
 
 ---
 
@@ -88,6 +89,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D21 | 2026-11-05 | i18n (P1.4): next-intl 4.14.9; locales `it` (default) and `en`; prefix always; locale from `next/root-params` (Cache Components); `proxy.ts` (Next 16 name) with matcher `/((?!api\|trpc\|_next\|_vercel\|.*\\..*).*)`; **`localeCookie: false`** and **`alternateLinks: false`** (hreflang only in HTML metadata); typed messages with Italian as the source shape; root layout is `app/[locale]/layout.tsx` and there is no `app/layout.tsx`; canonical and hreflang are absolute via `siteUrl` (`resolveSiteUrl`: explicit var, Vercel production domain, `VERCEL_URL`, localhost); `tsconfig` excludes `.next/dev`; `@parcel/watcher` and `@swc/core` build scripts stay disabled | The URL carries the language so no storage is needed (GDPR); a pass-through root layout would break root params; stale dev types broke `verify` after every route change; the two scripts only serve next-intl features we do not use (CLAUDE.md §5) | — |
 | D22 | 2026-11-05 | Motion (P1.5): `gsap`, `@gsap/react`, `lenis` (named in CLAUDE.md §5). `src/lib/motion/gsap.ts` is the only GSAP import point and registers once (no-op on the server). **One loop:** Lenis `autoRaf:false`, `gsap.ticker` drives `lenis.raf`, Lenis `scroll` drives `ScrollTrigger.update()`, `lagSmoothing(0)` while running and restored on cleanup; touch stays native (`syncTouch:false`). Components write animations only through `useMotion` (`useGSAP` + `gsap.matchMedia` with `reduced` / `full`), so all tweens and triggers are reverted on unmount, deps change and live preference flips. Reduced contract: final state or ≤ 0.16 s opacity fade, no pin/scrub/loops. **Lazy engine:** `LenisProvider` loads the chunk after idle (≈ 47 KB transferred, 119 KB raw) and not at all under reduced motion. Radix scroll lock (`body[data-scroll-locked]`) stops Lenis; scrollable overlays carry `data-lenis-prevent`. Motion tokens are mirrored in `tokens.ts` and parity-tested against `globals.css`. Layout: `min-h-dvh` on `<body>`, no height on `<html>`, upstream `html.lenis{height:auto}` not copied (it measured CLS 0.062 with the previous `h-full` layout; with the fix 0.0000). Playwright runs a `globalSetup` that warms the dev routes sequentially | Meets CLAUDE.md §8 literally (single loop, single registration, cleanup via `useGSAP`, reduced motion implemented in the hook and the provider); the lazy chunk keeps motion code off the critical path; mirrored tokens avoid two sources of truth drifting silently; parallel first compiles of new `next dev` routes crashed with `Unexpected end of JSON input` | — |
 | D23 | 2026-11-05 | FX library (P1.6): six components in `src/components/fx/`, **all written in-house** (no React Bits / 21st.dev code, no new dependency). **Split by weight:** `TextReveal`, `MagneticButton`, `SpotlightCard`, `ScrollPinnedSection` are a small client wrapper (final-state markup + ref + `next/dynamic(ssr:false)`) plus a lazy `*.motion.tsx` that calls `useMotion`; `Marquee` and `GradientMesh` are server components with zero JS (CSS keyframes from `--animate-*` tokens, off under reduced motion). The motion chunk mounts only through `useFxReady()`: after idle, never under reduced motion, and for cursor effects only with hover + fine pointer. `useMotion` now lets `build` return a cleanup and passes `contextSafe` (tweens created in event handlers escape the revert otherwise). Static fallbacks: no JS, reduced motion and touch all show the plain final state. Specific choices: mesh is three CSS blobs, not a `<canvas>` (no second frame loop); mesh peak 5 % because the contrast test fails above about 10 % for the strongest overlap; marquee pause is a native checkbox (WCAG 2.2.2, works without JS); marquee copies stretch to `min-w-screen`; the pinned section lives in an unpinned wrapper div and refuses to pin content taller than the viewport; text reveal leaves headlines already on screen alone; showcase is a separate dev page, not part of the UI gallery | Meets the roadmap acceptance (each has a static fallback; FX JS is not in pages that do not use it, proven on the production build); the gallery's per-theme axe suite is untouched by a pinned scene; no licence or supply-chain exposure | — |
+| D24 | 2026-11-05 | Security (P1.7). **Env:** Zod schemas in pure `env-schema.ts`; `env.ts` is `import "server-only"` (a client import fails `next build`), `env.client.ts` holds `NEXT_PUBLIC_*` only and never throws; `process.env` is read only in those two (ESLint rule + test); errors name variables, never values; blank = unset; groups complete-or-absent (Turnstile, Upstash, email); `DEMOS_LIVE_ENABLED` fails closed and requires the key and Redis; `REQUIRED_IN_PRODUCTION` exists and is **empty** (no consumer yet); `SKIP_ENV_VALIDATION=1` only during `next build`, never at runtime; new deps `zod` 4.6.7 and `server-only` 0.0.1 (both MIT, zero dependencies; the task named both). **Headers/CSP in `proxy.ts`:** nonce per request (128-bit), `script-src 'self' 'nonce-…' 'strict-dynamic'`, `style-src` with nonce plus `style-src-attr 'unsafe-inline'`, `connect/frame/object/base/form/frame-ancestors` locked to `'self'`/`'none'`; Turnstile and the analytics origin only when configured; `CSP_MODE` default `report-only`; fixed headers (nosniff, Referrer-Policy, X-Frame-Options, Permissions-Policy, COOP, HSTS in production). **Rendering:** `cacheComponents` and `partialPrefetching` OFF and `await connection()` in the root layout, so every page is rendered per request | A nonce can only be stamped while rendering; measured on this app: with Cache Components on, `/it` was cached with zero `nonce=` attributes, and the `instant = false` variant turned unknown paths into soft 200s. With the chosen setup every script carries the nonce, unknown paths return 404, redirects work, and an enforced policy runs the whole site with zero violations. Cost: HTML no longer comes from the CDN (docs/SECURITY.md §3) | — |
 
 ---
 
@@ -118,7 +120,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | Claude API | | | | budget alert set? |
 | 21st MCP | `.mcp.json` committed; `API_KEY_21ST` user env var, **not confirmed set**; project-server approval pending | n/a | n/a | key never in repo; see `docs/TOOLING_SETUP.md` |
 
-Env vars added this session (names only, never values; all in `.env.example` with placeholders; `src/lib/env.ts` does not exist yet, P1.7 must mirror this list):
+Env vars (names only, never values; all in `.env.example` with placeholders; `src/lib/env-schema.ts` is the schema and a test keeps the two in sync). Added in P1.7: `NEXT_PUBLIC_PLAUSIBLE_ORIGIN`, `CSP_MODE`, `CSP_REPORT_URI`; `SKIP_ENV_VALIDATION` is CI-only and documented in `.env.example`, not listed there as a variable:
 - Public: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
 - Server: `DATABASE_URL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `TURNSTILE_SECRET_KEY`, `RATE_LIMIT_IP_SALT`, `EMAIL_API_KEY`, `EMAIL_FROM`, `INQUIRY_NOTIFY_TO`, `ANTHROPIC_API_KEY`, `DEMOS_LIVE_ENABLED`
 - Not in the file on purpose: `API_KEY_21ST` (shell env, P0.7)
@@ -137,6 +139,17 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P1.7 / decision 1 (yours): every page is rendered per request, Cache Components is off.** A strict nonce CSP cannot work with prerendered HTML (Next's docs say PPR is incompatible; I measured it: the cached `/it` had **zero** `nonce=` on 15 scripts, so an enforced policy would have blocked its own bootstrap). Tried: `connection()` with Cache Components on (build error), plus `instant = false` (builds, but unknown paths answered **200**, a soft 404, and the catch-all stayed a prerendered shell), then Cache Components off + `await connection()` in the root layout (nonce on every script, real 404s, redirects unchanged): that ships. Costs: HTML comes from a `fra1` Function, not the CDN (higher TTFB, more invocations; **not measured**, Core Web Vitals not re-measured), `Cache-Control: private, no-cache, no-store` on HTML, and `generateStaticParams` in the layout is now only informational. `next/root-params` (i18n) works without the two settings. The alternative is Next's experimental SRI hash CSP, which keeps static pages but needs `'unsafe-inline'` for Next's inline bootstrap scripts, i.e. a weak script policy. If you prefer that, say so; `e2e/security.spec.ts` would then change. A mutation test shows the suite fails if static rendering returns unnoticed (5 of 7 selected tests failed).
+- **P1.7 / decision 2 (yours): nothing is required in production yet.** The roadmap says "build fails if a required env var is missing". Requiring `DATABASE_URL`, Redis, Turnstile, email now would fail your live Vercel build (no variables set, services not created). So `REQUIRED_IN_PRODUCTION` is empty and the build fails for what it can check today: malformed values, half-set groups (a Turnstile key without its secret, a Redis URL without its token, partial email), and `DEMOS_LIVE_ENABLED=true` without the Anthropic key and Redis. Proven by real builds: `DEMOS_LIVE_ENABLED=true pnpm build` exits 1 naming `ANTHROPIC_API_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`; `NEXT_PUBLIC_SITE_URL="not a url"` exits 1. The mechanism for "required" is tested with an injected list. **Each task that adds a consumer must add its variables to `REQUIRED_IN_PRODUCTION` (P2.5: `DATABASE_URL`, `UPSTASH_*`, `TURNSTILE_*`, `EMAIL_*`, `RATE_LIMIT_IP_SALT`) and give the CI `e2e` job synthetic values.** Locally, copy `.env.example` to `.env.local` (its placeholders pass the strict schema; a test proves it).
+- **P1.7 / new dependencies** (named in the task and in CLAUDE.md §6): `zod` 4.6.7 (MIT, ~452 M weekly downloads, zero dependencies, was already a transitive dev dependency) and `server-only` 0.0.1 (MIT, ~33 M weekly, zero dependencies, last published 2022; Next aliases it itself, the package supplies the types and the Vitest alias). Registry data from 2026-11-05.
+- **P1.7 / I changed existing things:** `next.config.ts` (the two options removed, with a comment), `src/app/[locale]/layout.tsx` (`await connection()`), `src/lib/env.ts` (now the validated server module; `resolveSiteUrl` moved to `env-schema.ts`, `env.test.ts` import updated), `src/proxy.ts` (nonce, CSP, headers; the matcher and the redirect behaviour are unchanged and their tests still pass), `src/i18n/request.ts` and `docs/I18N.md` (a stale "required by Cache Components" claim), `.env.example` (3 variables, comments), `eslint.config.mjs` (the `process.env` rule), `vitest.config.mts` (`server-only` alias to an empty module), `playwright.config.ts` (the production test server runs `CSP_MODE=enforce`), `.github/workflows/ci.yml` (`SKIP_ENV_VALIDATION` on the verify job; deliberately not on e2e), `docs/DEPLOYMENT.md`. New: `knip.json` (a top-level file, 3 lines: `env.client.ts` is an entry because its first consumers arrive in P2.5/P2.6; CLAUDE.md §2 asks before new top-level files), `docs/SECURITY.md`, `src/lib/security/`.
+- **P1.7 / `style-src-attr 'unsafe-inline'` is a deliberate looseness.** React renders `style="…"` attributes (Radix, the FX layers) and a nonce cannot be put on an attribute. Style elements need the nonce. Attributes cannot run script. `strict-dynamic` also means a script created by already-running trusted code is allowed whatever its host; hostile parser-inserted tags and inline handlers are blocked (tested).
+- **P1.7 / CSP rollout (yours, BLUEPRINT: Report-Only for one deploy):** the default is `report-only`. There is **no report collector**, so violations are visible only in a browser console (`[Report Only] Refused to …`); set `CSP_REPORT_URI` to a collector you control (a third-party collector is a processor: privacy notice) or ask me for a Zod-validated report route handler later (needs rate limiting from P2.5 and a redacting logger, which do not exist yet). Flip to `enforce` in Vercel Production when a deployment shows no violations. In the e2e production server the policy is already enforced and the site runs with zero violations in Chromium.
+- **P1.7 / Turnstile and Plausible:** Turnstile's origin (`challenges.cloudflare.com`, `script-src` + `frame-src`, nonce on the `api.js` tag) is from Cloudflare's CSP page; it is added only when both Turnstile keys are set. **Plausible's exact CSP directives are unverified** (its docs only say to allow plausible.io): I assumed `script-src` and `connect-src` for `NEXT_PUBLIC_PLAUSIBLE_ORIGIN`; verify in a browser when P2.6 wires analytics. Neither loads anything today. CLAUDE.md §10 asks that a new origin updates the cookie/privacy docs together: do that in P2.5 / P2.6 / P4.2.
+- **P1.7 / HSTS `includeSubDomains; preload`** is the BLUEPRINT value and is sent in production. Preload only matters on your own domain (B6 undecided); do not submit the domain to the preload list before it is final, because every subdomain must then stay on HTTPS.
+- **P1.7 / scope and limits.** Headers come from the proxy, whose matcher skips static files (`/_next/static`, `/favicon.ico`, `robots.txt`, `.well-known`), so those do not get the app's headers (Vercel adds HSTS at the edge); add `headers()` in `next.config.ts` if a scanner flags `nosniff` on assets. Verified only in Chromium. Not done: the `securityheaders.com` grade A the roadmap asks for (needs a deployed preview: yours), Firefox/Safari CSP behaviour, the Plausible/Turnstile origins in a real page, a TTFB/CWV comparison of dynamic vs the earlier static pages.
+- **P1.7 / for P1.8:** the root layout is dynamic now, so the theme pre-paint script (DESIGN.md §8) can carry the nonce (`(await headers()).get("x-nonce")` in the layout) instead of needing a cookie; `Toaster`/`TooltipProvider` and the header/footer go in the same layout. Any `<Script>` for a third party needs `nonce={nonce}` and a `ConsentGate`.
+- **P1.7 / bugs found while building (all fixed):** (a) Zod runs every refinement even after the URL check failed, so a malformed `NEXT_PUBLIC_PLAUSIBLE_ORIGIN` made `new URL()` throw a raw `TypeError` instead of a clean error (`isOrigin` is now non-throwing; caught by the negative test); (b) the dynamic-rendering experiments exposed the soft-404 and the missing nonce described above; (c) in tests, `vi.resetModules()` creates a second copy of `EnvValidationError`, so `instanceof` failed (assert on the name); (d) shell quoting corrupted a regex in one of my test files (rewritten with the file tools).
 - **P1.6 / deviations from the roadmap wording (your call):** (1) **Showcase** is its own dev page `/[locale]/_dev/fx`, linked from the UI gallery and the motion page, not a section of `/_dev/ui`: a pinned scene and ambient animation would interfere with the gallery's per-theme axe and keyboard tests. (2) **"adapted from React Bits or custom-built"**: all six are custom-built; I did not read React Bits or 21st.dev, so no licence applies and `docs/THIRD_PARTY.md` says so. (3) **Gradient mesh is CSS blobs, not a canvas** (the task text said "ambient canvas"): no frame loop of its own, no pixel cost, static fallback is the same markup. Say if you want a real canvas or shader.
 - **P1.6 / the mesh is subtle, by a hard limit.** At the strongest blob overlap, text keeps 4.5 : 1 only up to about 10 % accent; the first values (10/10/7 %) failed `fx-contrast.test.ts` for muted and accent text (dark 3.84, light 4.05 at the strongest pair), so the peaks are 5/5/4 %. In the screenshots it reads as a faint warm drift on dark and almost nothing on light. A stronger look needs a different token approach (for example a darker text token over it), a design decision.
 - **P1.6 / nothing in production uses the FX yet.** The only consumer is the dev page; the first real use is P2.x. "Not downloaded under reduced motion" is therefore proven by unit tests (the wrapper never mounts the chunk) and by the same mechanism measured for Lenis in P1.5, not by a production page. `next dev` preloads dynamic chunks whatever the preference, so the dev e2e cannot show it (my first request-based check was vacuous: a positive control caught it, then I removed it).
@@ -149,7 +162,7 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 - **P1.5 / things I changed outside `src/lib/motion`:** `[locale]/layout.tsx` (LenisProvider; `h-full` removed from `<html>`, body `min-h-dvh`), `globals.css` (Lenis rule subset), `dialog.tsx` / `sheet.tsx` / `select.tsx` (`data-lenis-prevent`), `dev-tools/layout.tsx` + `motion-probe.tsx` + `motion/` (dev page), `ui-gallery.tsx` (link to the motion page), `vitest.setup.ts` (matchMedia / `document.fonts` stubs, `src/test-utils/match-media.ts`), `playwright.config.ts` (`globalSetup`, `e2e/support/servers.ts`; the prod project ignores `gallery|motion` specs, the dev project runs them), `docs/DESIGN.md` §6 (pointer), `docs/THIRD_PARTY.md`. New dirs `src/lib/motion/` and `src/test-utils/` (CLAUDE.md §2: ask before new top-level directories; both are under `src/`).
 - **P1.5 / for P1.6+:** write every GSAP animation through `useMotion` (see `docs/MOTION.md`); never import `gsap` directly; animate transform/opacity only; do not put a height on `html`/`body` that depends on the `lenis` class. The motion dev page and `__motionDebug` are 404 / absent in production (asserted in `scroll.spec.ts`).
 - **P1.4 decisions for you:** (1) **No locale cookie.** next-intl's default `NEXT_LOCALE` cookie is off: the URL is the preference. Trade-off: someone who picks English on a bookmark-less visit is redirected by browser language again on their next `/` visit. Say if you want the cookie; it would then need a row in the cookie policy (P4.2). (2) **Placeholder copy** in `messages/*.json` is mine: company name, "site under construction", a one-line description derived from CLAUDE.md, and the 404 text. Treat it as a stand-in for P2.1. (3) **Production domain (B6):** until `NEXT_PUBLIC_SITE_URL` is set, canonical and hreflang use Vercel's production domain; set it before the site is indexed.
-- **P1.4 / "preserving security headers" is only structural for now.** No security headers exist yet (they are P1.7), so I could not test their survival. `src/proxy.ts` returns next-intl's own response object, so headers and the CSP nonce added there in P1.7 apply to redirects too; keep that shape. Verify with a real header once P1.7 lands (securityheaders.com on a redirect: `/`).
+- **P1.4 / "preserving security headers" is now proven (P1.7).** `proxy.ts` still returns the response object from `handleI18nRouting` (on a request that carries the nonce) and sets the security headers and the CSP on it: unit tests assert them on redirects and pages, and `e2e/security.spec.ts` asserts them on `/`'s 307, pages and the 404 against the real server. securityheaders.com on a deployed preview is still yours to run.
 - **P1.4 / I changed existing things to make this work:** `app/layout.tsx`, `app/page.tsx` and the scaffold page test are gone (replaced under `[locale]`); `tsconfig.json` now excludes `.next/dev` (IDE route types now come from `.next/types`, i.e. after `pnpm typecheck` or a build, not from a dev session); `vitest.config.mts` inlines `next-intl`; `playwright.config.ts` gives the production test server `NEXT_PUBLIC_SITE_URL`, and probes the gallery URL for dev readiness; `pnpm-workspace.yaml` records `allowBuilds: false` for `@parcel/watcher` and `@swc/core` (pnpm 12 fails the install otherwise); `docs/DEPLOYMENT.md` and `.env.example` text about the site URL updated; `src/components/ui/button.test.tsx` uses an external href because a catch-all route makes every internal-looking `<a href>` trip `@next/next/no-html-link-for-pages`.
 - **P1.4 / known limits:** the switcher keeps the path, not the query string or hash; `next/root-params` does not work in Route Handlers or Server Actions yet (pass the locale explicitly, see `docs/I18N.md`); `global-not-found.tsx` is experimental and not enabled, so requests that the proxy skips and that match no file (e.g. `/x.png`) get Next's plain built-in 404, not a localized one; the 404 title lives in the catch-all route because nested `not-found.tsx` cannot set it; `public/*.svg` from the scaffold are now unused (remove with the home page in P2.2); Italian is the source of the message types, so a string that exists only in English is not caught by types, only by the parity test.
 - **P1.4 / for P1.8 and P2.x:** mount `Toaster` and `TooltipProvider` and add the header with the switcher and skip link in `[locale]/layout.tsx` (the switcher takes a `className`; `-ml-3` is used at left-aligned call sites to cancel its padding). Pass any new client-component namespace through the provider in the layout. Add `title: { absolute }` only for same-segment pages (home, 404); child segments get the template.
@@ -178,7 +191,7 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 - **P0.7: proposal, needs your approval (CLAUDE.md §13):** add deny rules in `.claude/settings.json` for the design skill's risky scripts (`design` skill generators and `ui-styling/scripts/shadcn_add.py`), so the "not without asking" rule is enforced and not only written. Not done.
 - **P0.7: 21st.dev is a remote service that receives prompts and tool context.** It should never see visitor personal data (dev tool only), so I did not add it to the GDPR processors list or ROPA. Say if you want it listed anyway. Project MCP servers also load without a prompt in non-interactive runs (`claude -p`, SDK, cloud); none are used here.
 - **P0.6: pnpm 12 on Vercel is unverified (main risk).** The lockfile says `lockfileVersion: '9.0'`; Vercel picks pnpm from that unless Corepack is on, and its Corepack support is documented as experimental. Check the first build log for pnpm 12.16.1 and Node 24; fallbacks are in `docs/DEPLOYMENT.md` §6. Moving the repo to another pnpm major is a decision for you, not something to do silently.
-- **P0.6: `fra1` cannot be observed yet.** Both routes are static (CDN), so no function runs. Verify on the first dynamic route (inquiry handler, P2.5). `fra1` covers function execution only; CDN/edge is global, so the privacy notice must not claim EU-only hosting.
+- **P0.6: `fra1` is observable from P1.7.** Every page is now rendered by a Vercel Function (D24), so check `x-vercel-id` on the first deployed page: it should name `fra1` as the function region (the edge location at the start of the id is not proof). `fra1` still covers only function execution; static assets are global CDN, so the privacy notice must not claim EU-only hosting.
 - **P0.6: Vercel as processor.** `docs/GDPR_CHECKLIST.md` processor line (tagged `[P0.6, P4.2]`) is **not ticked**: DPA acceptance, transfer mechanism (DPF/SCC, unverified here), sub-processors and log retention are yours to confirm; record in `docs/ROPA.md` (does not exist yet, P4.3).
 - **P0.6: for P1.7.** `env.ts` must not make `NEXT_PUBLIC_SITE_URL` mandatory in Preview (derive it from Vercel's deployment URL), or every PR preview fails the missing-env build check. `engines.node` change (`>=24 <25` → `24.x`) is equivalent for Node 24 and avoids Vercel's default of a newer major.
 - **P0.6: Hobby plan.** It builds fine but breaches Vercel's terms for a company site; use Pro.
@@ -204,7 +217,7 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 - **No `no-console` rule yet:** the roadmap Definition of Done says no `console.log` in `src/`. Not part of the P0.3 spec so not added; consider it together with the logger in P1.7.
 - **knip scope:** still green with zero config after P0.4; its Vitest and Playwright plugins pick up the new entry files. Add a `knip.json` only if it starts reporting false positives.
 - **Prettier line endings:** this Windows checkout has `core.autocrlf` behaviour (git warns LF→CRLF); no `.gitattributes` / `.editorconfig` exists. Consider adding one so files do not flip line endings between machines.
-- **Decision for you — `next.config.ts`:** the generator enabled `cacheComponents: true` and `partialPrefetching: true` (kept as generated). Cache Components changes how dynamic data/Suspense work and may interact with the P1.4 (next-intl) and P1.7 (CSP nonce) tasks. Keep or turn off before Phase 1.
+- **Superseded by P1.7 / D24 — `next.config.ts`:** `cacheComponents` and `partialPrefetching` (generator defaults) are now off on purpose; see section 8 "P1.7 / decision 1".
 - **Decision for you — `AGENTS.md`:** generated by `create-next-app`/`next dev` (re-created if deleted); it points to docs in `node_modules/next/dist/docs/`. CLAUDE.md remains the authority. Keep, or add to `.gitignore`.
 - **CLAUDE.md §5 wording:** it refers to `pnpm.onlyBuiltDependencies`; pnpm 12 uses `allowBuilds` in `pnpm-workspace.yaml` (currently `sharp: false`, `unrs-resolver: false`). Note `sharp: false` means `next/image` uses no native sharp build; revisit when image optimisation matters.
 - **Scaffold leftovers to replace later:** default `README.md`, default page, `Create Next App` metadata and `lang="en"` (P1.4/P2), raw hex in `globals.css` and `next/font/google` Geist (P1.2).
@@ -215,57 +228,45 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass (no dependency changed)
-pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 27 files,
-                    244 tests (152 before P1.6)
-pnpm test:e2e     → pass, 124 tests (Chromium), twice in a row (no flake): production build + `next dev`
-                    projects; new: 30 in e2e/fx.spec.ts, 4 in e2e/fx-bundle.spec.ts
-pnpm knip         → pass
+pnpm install --frozen-lockfile → pass (after `pnpm add zod server-only`; lockfile +11 lines)
+pnpm verify       → pass, exit 0 with NO env file or variables (typecheck → lint --max-warnings=0 → test →
+                    build); test step: 32 files, 379 tests (244 before P1.7)
+pnpm test:e2e     → pass, 148 tests (Chromium), twice in a row (no flake): 124 existing + 24 in
+                    e2e/security.spec.ts; the production test server runs CSP_MODE=enforce
+pnpm knip         → pass (knip.json: env.client.ts is an entry)
 pnpm format:check → pass (does not cover *.md)
 no `next` / `playwright` process and no listener on 3100, 3101, 3200 afterwards
 
-P1.6 checks:
-  static fallback    → e2e with JavaScript disabled: headline complete and visible, marquee list with 10 items
-                       and still looping, its pause switch still works (CSS only), cards readable with discs at
-                       opacity 0, pinned steps stacked and visible, no pin spacer, progress bar hidden. Unit:
-                       server-rendered markup of every component has no hiding style
-  reduced motion     → e2e (`reducedMotion: reduce`): 0 ScrollTriggers and 0 pins, every word and step opacity 1,
-                       marquee animation none / wrapped / copy and switch hidden / no clipping and no
-                       horizontal scroll at 360 px, mesh still, no lean, no glow; unit: wrappers never mount the
-                       chunk; live flips x3 give stable counts (3 triggers + 1 pin when full, 0 when reduced);
-                       a lit card goes dark on the flip and stays dark
-  touch / small      → mobile context: `(hover: hover) and (pointer: fine)` false, tap leaves the button and
-                       card untouched, scroll effects still run; 740 x 300 viewport: no pin (content taller than
-                       the viewport), 2 reveals only, steps visible
-  leaks              → exact counts across 3 round trips between the FX page and the gallery, and across Back /
-                       Forward after leaving mid-pin: 0 / 0 away, 3 / 1 on return (1 / 1 after Back because the
-                       restored scroll is past the headlines, which stay as rendered); unit: unmounting the
-                       pinned wrapper on its own leaves no trigger, no spacer
-  code splitting     → `fx-structure.test.ts`: no wrapper statically imports GSAP, `useMotion` or a `.motion`
-                       module; each `.motion` is reached only via `next/dynamic` with `ssr:false`; the CSS-only
-                       components have no hooks. `fx-bundle.spec.ts` (production build): FX markers exist in the
-                       build (control: 5 chunks, 21 KB raw / 8.9 KB gzip in total, each motion module 1-2 KB raw;
-                       15 KB of that is the dev page) and none is downloaded by /it, /en or the 404, at load or
-                       after idle. Mutation: importing `TextReveal` into the home page made all 3 route tests
-                       fail; reverted
-  contrast           → `fx-contrast.test.ts`: every text colour (text, secondary, muted, accent) on bg, surface-1
-                       and surface-2 under the strongest mesh overlap (alpha 0.0975) and under the spotlight
-                       glow, both themes, real tokens; the test is not vacuous (30 % would fail). It FAILED on my
-                       first values (see section 8) and drove them down. axe (WCAG 2.0-2.2 A/AA, zero
-                       violations) on the page in dark, light, reduced motion, and with a card lit + the scene
-                       pinned
-  layout shift       → CLS 0.0000 over load, motion start-up and a full scroll, full motion and reduced motion
-                       (same tracker as P1.5, negative control in motion.spec.ts)
-  keyboard           → the pause switch is reachable (Shift+Tab from the next control), shows the 2 px focus
-                       ring and toggles with Space; the wrapped button keeps its normal focus ring and does not
-                       move on focus
-  visual             → screenshots of the dev page in dark and light at 1280 x 720 (top, marquee, leaning button,
-                       text, lit card, pinned mid-scene), reduced motion (marquee wrapped, steps stacked) and
-                       360 px (top, marquee full and reduced); nothing looked broken
-  bugs found by the tests (all fixed) → see section 8, "P1.6 / bugs the tests found"
-  NOT done           → Firefox / WebKit / iOS; real mid-range mobile performance (the ambient loops and the
-                       pointer effects were not profiled); a screen-reader pass of the marquee switch and the
-                       split headline; a human visual review of how the effects feel; the live Vercel deployment
+P1.7 checks:
+  client imports server env → mutation: a "use client" component importing @/lib/env made `pnpm build` exit 1:
+                       "You're importing a module that depends on server-only" with the import trace
+                       ./src/lib/env.ts <- ./src/components/<file>. The unit guard (env.guard.test.ts) failed on
+                       the same files in milliseconds. Removed afterwards. The guard has negative controls
+                       (direct, indirect, lazy `import()`, bare `server-only`)
+  missing / invalid vars → real builds: `DEMOS_LIVE_ENABLED=true` -> exit 1, names ANTHROPIC_API_KEY and
+                       UPSTASH_REDIS_REST_URL/TOKEN; `NEXT_PUBLIC_SITE_URL="not a url"` -> exit 1 ("Invalid URL",
+                       no value printed); plain build with no env -> exit 0
+  SKIP_ENV_VALIDATION → build with the bad URL + flag -> exit 0 (also with the demos misconfigured); the same flag
+                       and bad value on `next start` -> HTTP 500 with a clean EnvValidationError (ignored at
+                       runtime, so it cannot serve an unvalidated app)
+  lint rule          → `process.env.X` in a src file fails eslint with the CLAUDE.md §6 message
+  rendering          → experiments (section 8 / docs/SECURITY.md §3): Cache Components on = cached HTML, 0 of 15
+                       scripts with a nonce; with `instant = false` = soft 200 for unknown paths; shipped setup =
+                       all scripts carry the nonce, unknown paths 404, redirects 307
+  CSP in a browser   → e2e on the enforced production build: every <script> carries the response's nonce on /it,
+                       /en and the 404; a fresh nonce per request (6/6 distinct); HTML not cached; client-supplied
+                       x-nonce / CSP headers ignored; /it, /en and the 404 load, hydrate and start Lenis with ZERO
+                       violations and no console errors; client-side language switch too; no request to any other
+                       origin. Blocked (negative tests): injected inline handler, injected <base>, fetch to another
+                       origin, third-party image, iframe, cross-origin form post, and the site inside another page
+  mutation           → removing `connection()` from the layout: 5 of 7 selected security tests failed (cache
+                       header, nonce on /it and /en, and the pages no longer hydrate under the enforced CSP).
+                       Restored
+  headers            → unit and e2e: nosniff, X-Frame-Options, Referrer-Policy, COOP, Permissions-Policy and HSTS
+                       on pages, the 404 and the `/` redirect
+  NOT done           → securityheaders.com / Observatory grade (needs a deployment: yours); Firefox/WebKit; TTFB and
+                       Core Web Vitals of per-request rendering vs the earlier static pages; Plausible and
+                       Turnstile origins in a real page; a report collector; the live Vercel deployment
 ```
 
 ---
@@ -273,38 +274,34 @@ P1.6 checks:
 ## 10. Proposed commit(s) for the work above
 
 ```
-feat(fx): add fx library with static fallbacks and lazy motion
+feat(security): add validated env, nonce csp and security headers
 
-Add six effects in src/components/fx, all written for this project:
-text reveal, magnetic button, marquee, spotlight card, gradient mesh
-and a scroll-pinned section. Each renders its final state on the
-server, so it reads correctly without JavaScript, with reduced motion
-and on touch devices.
+Validate the environment with Zod. env-schema.ts holds the schemas and
+rules as pure functions; env.ts is import "server-only", so a client
+component importing it fails next build; env.client.ts exposes only
+NEXT_PUBLIC_* values and never throws. process.env is read in those two
+modules only (ESLint rule and tests). Errors name the variable, never
+the value. Variables that belong together (Turnstile, Upstash, email)
+must be set together, and live demos need the API key and Redis.
+SKIP_ENV_VALIDATION lets CI build without secrets, during next build
+only: it is ignored at runtime. Nothing is required in production yet.
 
-The four that need GSAP are a small client wrapper plus a *.motion
-chunk loaded through next/dynamic once the browser is idle, never under
-reduced motion and, for cursor effects, only with a mouse. Pages that
-do not import an effect get none of its code; a production-build test
-proves it. The marquee and the mesh are CSS only and add no JavaScript.
-The marquee pauses on hover and through a native checkbox.
+Generate a CSP nonce per request in proxy.ts and send the policy
+(Report-Only unless CSP_MODE=enforce) with the fixed security headers,
+redirects included. Scripts need the nonce plus strict-dynamic;
+Turnstile and the analytics origin are allowed only when configured.
 
-useMotion now accepts a cleanup function from build and passes
-contextSafe, so tweens created in event handlers are reverted with the
-rest. useReducedMotion and LenisProvider move onto shared
-useMediaQuery and useAfterIdle hooks. Add animation tokens and
-keyframes, switched off under reduced motion.
+A nonce can only be stamped while rendering, so turn off
+cacheComponents and partialPrefetching and render every page per
+request from the root layout. Prerendered HTML carried no nonce and an
+enforced policy would have blocked it.
 
-The mesh is capped at 5 % per blob: a contrast test proves text keeps
-4.5:1 over it and over the spotlight glow in both themes. Pinned
-sections sit in an unpinned wrapper so React can remove them, and do
-not pin content taller than the viewport.
+Add tests, including e2e on a production server that enforces the
+policy: zero violations, injected handlers, base, fetch, frames and
+forms blocked, real 404s kept. Document it in docs/SECURITY.md and
+set SKIP_ENV_VALIDATION on the CI verify job.
 
-Add a dev showcase at /_dev/fx, unit tests, and Playwright specs for
-no-JS, reduced motion, touch, live preference changes, route-change
-leaks, axe in both themes and CLS. Document sources and adaptation
-notes in docs/THIRD_PARTY.md and docs/MOTION.md.
-
-Task: P1.6
+Task: P1.7
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

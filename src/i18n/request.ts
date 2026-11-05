@@ -14,9 +14,8 @@ const loaders = {
 } satisfies Record<Locale, () => Promise<{ default: Messages }>>;
 
 export default getRequestConfig(async ({ locale }) => {
-  // The locale comes from the `[locale]` root parameter (Next 16.3+ with
-  // Cache Components); `dynamicParams = false` is not available there, so an
-  // unknown value is rejected at runtime.
+  // The locale comes from the `[locale]` root parameter (Next 16.3+);
+  // an unknown value is rejected at runtime.
   if (!locale) {
     const fromUrl = await rootParams.locale();
     if (!hasLocale(routing.locales, fromUrl)) notFound();
