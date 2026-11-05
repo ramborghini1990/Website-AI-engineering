@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.1 committed as `0a62012`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.2 committed as `9263b31`)_
 
 ---
 
@@ -11,21 +11,20 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.1 committed a
 | Field | Value |
 |---|---|
 | Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.2` — Design tokens in Tailwind v4 `@theme`, self-hosted fonts, contrast test, no raw hex |
+| Active task | `P1.3` — Accessible UI primitives (Button, Input, Textarea, Select, Checkbox, Dialog, Sheet, Tabs, Tooltip, Toast) + dev gallery |
 | Status | **acceptance criteria met, awaiting review (not committed)** |
-| Next task | `P1.3` — shadcn/ui primitives restyled to tokens; do not start unprompted |
+| Next task | `P1.4` — next-intl i18n (`[locale]` segment, middleware, messages); do not start unprompted |
 
 **Plan for the active task**
-1. `src/app/globals.css`: tokens from the approved `docs/DESIGN.md` (colours for both themes, fluid type scale, radii, motion, spacing, layers), theme swapping by class and by system preference, small base layer (body, headings, focus ring).
-2. `src/app/layout.tsx`: replace Geist with Instrument Sans (`wght`, `wdth` axes) and JetBrains Mono via `next/font/google`.
-3. Restyle the scaffold page with tokens only (content and structure unchanged, so existing tests stay valid).
-4. Vitest guards: WCAG 2.2 AA contrast on the real tokens + doc/CSS sync; no raw colours in `src`.
-5. Playwright: both themes (system and explicit class), axe in each, self-hosted fonts.
-6. Visual check at 360 and 1280 px, both themes; `pnpm verify`.
+1. Hand-write the primitives in shadcn's pattern on Radix (no shadcn CLI), restyled to the approved tokens: `src/components/ui/*`, `src/lib/utils.ts` (`cn`).
+2. Dev gallery at `/[locale]/_dev/ui`, 404 outside development; every component and state, plus a dev-only theme switch.
+3. Playwright (against `next dev`): keyboard behaviour, focus rings, 44 px targets, reduced motion, axe in both themes with each overlay open.
+4. Vitest: `cn`, Button, toast store, dialog/sheet names, reduced-motion token guard.
+5. Mutation-test the guards; visual check of every overlay at 1280 and 360 px; `pnpm verify`.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Throwaway files (Tailwind probe, mutation edits) were reverted or deleted; no `next start` process is left running.
-- `src/app/page.tsx` is still the scaffold content (restyled); the real home page is P2.2.
+- Nothing half-done. Throwaway probe specs and mutations were reverted/deleted; no `next dev`/`next start` process is running (checked with `netstat` and process command lines).
+- Primitives are not used by any real page yet; the home page is still the scaffold (P2.2). `Toaster` and `TooltipProvider` are mounted only inside the gallery; mount them in the root layout when P1.8 builds the shell.
 
 ---
 
@@ -34,7 +33,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.1 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 1/8 | P1.1 approved and committed; P1.2 awaiting review/commit |
+| 1 Core, design system, motion | ◐ | 2/8 | P1.1, P1.2 committed; P1.3 awaiting review/commit |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -53,6 +52,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.1 committed a
 | 2026-11-04 | P0.6 | Vercel `fra1` config, `engines.node` 24.x, deployment runbook; production deployment Ready at https://website-ai-engineering.vercel.app/ (reported by you) | `282dcbb` |
 | 2026-11-04 | P0.7 | 21st MCP in `.mcp.json` (key by reference), `docs/TOOLING_SETUP.md`, Phase 0 closed | `18fb0dd` |
 | 2026-11-05 | P1.1 | `docs/DESIGN.md`: approved design direction, tokens and contrast tables | `0a62012` |
+| 2026-11-05 | P1.2 | Design tokens in `globals.css`, self-hosted Instrument Sans + JetBrains Mono, contrast and raw-colour guards | `9263b31` |
 
 ---
 
@@ -80,6 +80,8 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D16 | 2026-11-04 | Tooling: 21st MCP is committed in `.mcp.json` as a project server (remote HTTP, key from `${API_KEY_21ST}`); `enableAllProjectMcpServers` stays off and the server is not pre-approved in `.claude/settings.json`. UI/UX Pro Max is installed by you from your own fork pinned to the reviewed commit `713eef5` (or `ccce51c`, README-only delta); Claude does not install plugins or skills. Other audited tools stay uninstalled | Audit §1–§2, §8; CLAUDE.md §13 | — |
 | D17 | 2026-11-05 | **Approved by you 2026-11-05:** design direction "instrument panel" in `docs/DESIGN.md`. Palette Ink / Bone / Signal (amber `#FFB347` dark, `#9C4700` light) / Trace; Instrument Sans + JetBrains Mono; fluid scale 360→1440 px with 16→18 px body; 4 px base unit; radii 2/4/8 px; motion tokens 80–1100 ms with `expo.out`-style `ease-out`; dark baseline, system preference respected | Dark-first technical identity that avoids the template look (CLAUDE.md §7); every required pair computed ≥ 4.5 : 1 (text) or ≥ 3 : 1 (UI) in both themes | — |
 | D18 | 2026-11-05 | Token implementation (P1.2): `@theme static` holds the dark baseline and Tailwind's default scales are cleared; light theme via `:root.light` plus an identical `prefers-color-scheme: light` block; shadows as plain variables + `@utility` (not `@theme`); `dark:` variant defined to match the same model, reserved for assets that cannot use tokens; guards in `verify`: `src/app/globals.test.ts` (WCAG 2.2 AA on real tokens, doc/CSS sync) and `src/no-raw-colors.test.ts` | Single source of truth that tests can parse; Tailwind inlines theme shadows at build time, which broke theming; clearing defaults makes "semantic tokens only" structural | — |
+| D19 | 2026-11-05 | UI primitives (P1.3): hand-written in the shadcn pattern on individual `@radix-ui/react-*` packages, **no shadcn CLI**; `cn()` = clsx + tailwind-merge extended with our custom token names; Toast = Radix Toast + own tiny store (no Sonner); every string a component needs (close, viewport label) is a **required prop** because copy must come from i18n; sizes never below 44 px (checkbox: 24 px box with an invisible 44 px hit area); component animations are `--animate-*` tokens, all switched to `none` under `prefers-reduced-motion` in `globals.css`; errors persist until dismissed, other toasts close after 8 s | CLAUDE.md §5, §9, §12, §13; WCAG 2.2.1, 2.5.8; the audit flags `npx shadcn add` as unpinned code execution | — |
+| D20 | 2026-11-05 | Dev gallery: code in `src/app/[locale]/dev-tools/`, public URL `/[locale]/_dev/ui` via a rewrite in `next.config.ts`; layout calls `notFound()` unless `isDevelopment` (`src/lib/env.ts`, the only `process.env` read, a stand-in until P1.7's Zod env). Playwright has two projects/servers: production build on 3100 (what users get; also asserts the 404s) and `next dev` on 3200 (gallery) | A `_dev` folder is a private folder (never routable); a `%5Fdev` folder makes `next dev` and `next build` emit conflicting route types (`"/[locale]/%5Fdev"` vs `"/[locale]/_dev"`), which broke `pnpm verify` after any dev session. Next 16 writes dev output to `.next/dev`, so both servers can run together | — |
 
 ---
 
@@ -129,10 +131,16 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P1.3 / deviations from the roadmap wording:** the gallery is served at `/_dev` by a rewrite from `dev-tools` (see D20), and `src/lib/env.ts` now exists as a stand-in that reads `NODE_ENV`, which CLAUDE.md §6 would otherwise reserve for the Zod module (P1.7 must absorb it and keep the `isDevelopment` export). The roadmap says "shadcn/ui init"; nothing was initialised or generated by the CLI, there is no `components.json`, so `shadcn add` later would need one and a diff review (record it in `docs/THIRD_PARTY.md`).
+- **P1.3 / new dependencies** (named by you or by CLAUDE.md's stack): `@radix-ui/react-{dialog,select,checkbox,tabs,tooltip,toast,label,slot}` (MIT), `lucide-react` (ISC; pnpm resolved 1.68.0 because 1.69.0 was published the same day and the release-age policy held it back), `class-variance-authority` (Apache-2.0), `clsx`, `tailwind-merge` (MIT). Licences from the registry on 2026-11-05; download counts not checked.
+- **P1.3 / axe exception, deliberate and narrow:** while a Select listbox is open Radix sets `aria-hidden` on the page and keeps focus inside the listbox; axe only treats `role="dialog"` as modal and reports `aria-hidden-focus`. The open-Select scan disables that one rule, and the test asserts the premise (Tab cannot leave the listbox). Dialog and Sheet are scanned with all rules.
+- **P1.3 / dev indicator oddity, unexplained:** in two 360 px screenshots (dialog and sheet open) Next's dev indicator showed "1 Issue". I could not reproduce it in two instrumented runs (no console errors or warnings, clean dev-server log, no issue button in the overlay). Dev-only; revisit if it reappears, ideally with the overlay's issue panel open.
+- **P1.3 / things for the real pages:** mount `Toaster` and `TooltipProvider` once in the root layout (P1.8) with translated labels; the primitives carry no copy and no i18n; icon-only controls need an `aria-label` (see the gallery's copy button); tooltips must never be the only source of information. The gallery's English copy is dev-only and exempt from CLAUDE.md §12.
+- **P1.3 / local and CI notes:** `pnpm test:e2e` now starts two servers (a full `next build` plus `next dev`); CI needs nothing extra but the run is longer, and `reuseExistingServer` is on locally, so a stale server on 3100 or 3200 will be reused (see the Windows process note below). After `pnpm dev`, `pnpm verify` is safe again because the route types no longer conflict.
 - **P1.2 / Windows process hygiene (my mistake, fixed in my workflow).** `Get-NetTCPConnection -State Listen` does not see Node's listeners on this machine, so my "stop the server" checks falsely reported 0. A stale `next start` kept serving an old build's HTML after a rebuild (unstyled page, CSS 500). If a local server seems to serve old output, check `netstat -ano | findstr :PORT` and kill by command line. No `next` processes are running now (verified).
 - **P1.2 / theme model to remember.** Dark is the `@theme` baseline; light is `:root.light` plus a duplicate under `@media (prefers-color-scheme: light) { :root:not(.dark) }`. The test enforces that the two light blocks are identical. Tailwind inlines theme shadow values at build time, so shadows are plain variables plus `@utility` rules (otherwise the light override is ignored). Tailwind's default palette, radii, shadows, text sizes, fonts and easings are cleared: using `bg-zinc-50` or `text-white` silently produces nothing, which `src/no-raw-colors.test.ts` now rejects.
 - **P1.2 / token names differ slightly from `docs/DESIGN.md` §10 as first written** (`--spacing-section`, `--spacing-gutter`, `--container-page`, forced by Tailwind namespaces; shadows via `@utility`). §10 was updated to describe what was built.
-- **P1.2 / not guarded:** arbitrary pixel values in components (CLAUDE.md §7 allows them only with a comment); the no-raw-colour scan treats a 3-letter hex-looking anchor such as `#add` as a colour (none exist today). Reduced-motion CSS safety net is left to P1.5.
+- **P1.2 / not guarded:** arbitrary pixel values in components (CLAUDE.md §7 allows them only with a comment); the no-raw-colour scan treats a 3-letter hex-looking anchor such as `#add` as a colour (none exist today). Reduced motion for component animations is now handled at token level (P1.3); P1.5 still owns Lenis, scroll-linked and FX motion.
 - **P1.2 / not verified visually:** hover and focus states (only static renders in both themes at 360 and 1280 px were inspected); 200 % zoom; `wdth` condensed display look was confirmed in the screenshots but not compared against alternatives. Theme toggle, pre-paint theme script and the storage key come with P1.7/P1.8.
 - **P1.2 / scaffold page** still carries scaffold copy, `lang="en"` and the "Create Next App" title (P1.4, P2.1/P2.2); it only had its colours, radii and button sizing moved to tokens (buttons now `whitespace-nowrap`, `md:min-w-40`, because Instrument Sans made "Deploy Now" wrap at the old fixed width).
 - **P1.1 / thin margins:** light theme `text-muted` and `accent` on `surface-3` are 4.81 and 4.80 : 1; any tweak to those colours needs recomputation. `border-subtle` (1.31–1.46 : 1) is decorative only by design.
@@ -185,34 +193,42 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ```
 pnpm install --frozen-lockfile → pass
-pnpm verify       → pass (typecheck → lint --max-warnings=0 → test → build); test step: 3 files, 28 tests
-pnpm test:e2e     → pass, 8 tests (Chromium): smoke, axe in system dark / system light / explicit
-                    .light over dark / explicit .dark over light, fonts self-hosted + loaded
+pnpm verify       → pass (typecheck → lint --max-warnings=0 → test → build); test step: 7 files, 50 tests
+pnpm test:e2e     → pass, 35 tests (Chromium): 12 against the production build (smoke, themes, fonts,
+                    dev routes are 404) + 23 against `next dev` (gallery: both themes + reduced motion)
 pnpm knip         → pass
 pnpm format:check → pass (does not cover *.md)
 
-P1.2 checks:
-  contrast guard    → src/app/globals.test.ts parses the real tokens: 17 colours as 6-digit hex in both
-                      themes; every pair from DESIGN.md §2.2-2.3 passes (text >= 4.5, UI >= 3);
-                      light block == media block; hex table in DESIGN.md == CSS
-  guards can fail   → mutation check on the real files: dark text-muted -> #4a505b made the contrast
-                      test (2.40 : 1) and the doc-sync test fail; `bg-[#123456]` in page.tsx made the
-                      raw-colour test fail; both reverted, suite green again
-  raw colours       → Vitest scan and an independent grep both report none in src (globals.css and
-                      tests excluded)
-  Tailwind output   → built CSS inspected: default palette gone (no zinc/red/text-6xl), token
-                      utilities generated, alpha modifiers use color-mix on the live variable, `dark:`
-                      emits both class and media selectors, shadow utilities read the runtime variable
-                      and the light overrides are present in both light blocks
-  fonts             → @font-face for Instrument Sans has `font-stretch: 75% 100%` (wdth axis loaded);
-                      Playwright: no request outside our origin, font requests all same-origin,
-                      both families report status "loaded"
-  visual            → screenshots of the production build at 360 and 1280 px, dark and light, inspected:
-                      tokens, condensed headings, mono chip, 4 px radii, inverted logos all as designed.
-                      Found and fixed one defect: "Deploy Now" wrapped at 1280 px
-  hygiene           → temporary Tailwind probe file deleted; stale `next start` processes found and
-                      killed; none running now
-  NOT done          → hover/focus states visually; 200 % zoom; comparison with design-skill output
+P1.3 checks:
+  gallery (23 e2e)  → per theme (dark and light): axe clean at rest; Button/Tab/field heights >= 44 px;
+                      labelled fields, aria-invalid + described error; every control shows a 2 px solid
+                      ring in the focus token colour (computed style of the focused element); checkbox
+                      hit area reaches 20 px beyond the 24 px box; Space toggles, group shows aria-checked
+                      "mixed"; select opens/chooses by keyboard and its highlighted option has the ring;
+                      tabs: arrows and End; tooltip opens on keyboard focus, Escape closes; dialog: focus
+                      moves in, 8 Tabs + Shift+Tab stay inside, Escape closes and returns focus, axe clean
+                      while open; sheet: all four sides open/close/return focus, axe clean; toast: live
+                      region announcements (polite / assertive), error stays after +10 s on a fake clock
+                      while the success toast expires, close button works. Reduced motion: dialog and
+                      overlay computed animation-name is `none`
+  production 404    → /it/_dev/ui, /en/_dev/ui, /it/_dev, /it/dev-tools/ui all 404 on `next start`
+                      (e2e, and by hand with PowerShell)
+  guards can fail   → mutation: `outline-none` on Button, `min-h-8` on Button, empty dialog close label ->
+                      exactly the focus-ring, size and dialog-axe tests failed (both themes), resting-axe
+                      tests correctly stayed green; all reverted
+  bugs found by the tests (all fixed) → Select item had NO visible focus outline (`outline-none` in
+                      Tailwind v4 sets the shared style variable to none; axe cannot see this);
+                      `motion-reduce:animate-none` never applied (specificity of data-attribute variants),
+                      now a token-level override + guard test; dev and build generated conflicting route
+                      types for a `%5Fdev` folder, breaking `pnpm verify` after any `pnpm dev`
+  unit (50)         → cn() incl. custom tokens, Button, toast store (fake timers), dialog/sheet names,
+                      reduced-motion token guard (plus negative cases); knip clean (5 needless exports removed)
+  visual            → screenshots of the dev gallery inspected: full page in both themes at 1280 px; dialog,
+                      select, sheet and toast stack at 1280 px (dark, light sheet); dialog, sheet and
+                      toast at 360 px. All as designed; no layout defects found
+  NOT done          → hover states visually; light-theme dialog/select/toast at 1280 px and dark/light
+                      tooltip screenshots; touch/pointer-only testing; 200 % zoom; screen-reader
+                      (NVDA/VoiceOver) listening test; Firefox/WebKit
 ```
 
 ---
@@ -220,24 +236,25 @@ P1.2 checks:
 ## 10. Proposed commit(s) for the work above
 
 ```
-feat(design): implement design tokens and self-hosted fonts
+feat(ui): add accessible primitives and a dev-only gallery
 
-Turn the approved design document into Tailwind v4 tokens in
-globals.css: semantic colours for dark (baseline) and light themes,
-the fluid type scale, radii, motion, spacing and layers. Default
-Tailwind scales are cleared so only design tokens exist. Shadows
-are runtime variables exposed through utilities because Tailwind
-inlines theme shadow values at build time. Replace the scaffold
-fonts with Instrument Sans and JetBrains Mono via next/font, served
-from our own origin. Restyle the scaffold page with tokens only.
+Add Button, Input, Textarea, Label, Checkbox, Select, Dialog, Sheet,
+Tabs, Tooltip and Toast, written by hand in the shadcn pattern on
+Radix primitives and restyled to the design tokens: 44px targets,
+focus rings from the focus token, no copy inside components (close
+and viewport labels are required props), and animations driven by
+tokens that switch off under prefers-reduced-motion.
 
-Add Vitest guards that assert WCAG 2.2 AA contrast on the real
-token values, keep the design document's token table in sync with
-the CSS, and reject raw colours in src. Extend the Playwright smoke
-spec with both themes, axe in each, and a check that no request
-leaves our origin.
+Add a gallery at /[locale]/_dev/ui that returns 404 outside
+development. It lives in a normal dev-tools folder and is exposed
+through a rewrite, because a %5Fdev folder makes next dev and next
+build emit conflicting route types and breaks verify after dev.
 
-Task: P1.2
+Cover everything with Playwright against next dev (keyboard, focus
+ring, target size, reduced motion, axe in both themes with each
+overlay open) and Vitest. Record provenance in docs/THIRD_PARTY.md.
+
+Task: P1.3
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

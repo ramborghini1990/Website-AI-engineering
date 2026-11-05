@@ -112,11 +112,155 @@
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
+  /*
+   * Component animations (docs/DESIGN.md §6.3): opacity and transform only.
+   * Exits are shorter than entrances. Reduced motion turns all of these off
+   * (see the prefers-reduced-motion block below).
+   */
+  --animate-overlay-in: overlay-in var(--duration-base) var(--ease-out);
+  --animate-overlay-out: overlay-out var(--duration-fast) var(--ease-in)
+    forwards;
+  --animate-dialog-in: dialog-in var(--duration-slow) var(--ease-out);
+  --animate-dialog-out: dialog-out var(--duration-base) var(--ease-in) forwards;
+  --animate-popover-in: popover-in var(--duration-base) var(--ease-out);
+  --animate-popover-out: popover-out var(--duration-fast) var(--ease-in)
+    forwards;
+  --animate-sheet-right-in: sheet-right-in var(--duration-slow) var(--ease-out);
+  --animate-sheet-right-out: sheet-right-out var(--duration-base) var(--ease-in)
+    forwards;
+  --animate-sheet-left-in: sheet-left-in var(--duration-slow) var(--ease-out);
+  --animate-sheet-left-out: sheet-left-out var(--duration-base) var(--ease-in)
+    forwards;
+  --animate-sheet-top-in: sheet-top-in var(--duration-slow) var(--ease-out);
+  --animate-sheet-top-out: sheet-top-out var(--duration-base) var(--ease-in)
+    forwards;
+  --animate-sheet-bottom-in: sheet-bottom-in var(--duration-slow)
+    var(--ease-out);
+  --animate-sheet-bottom-out: sheet-bottom-out var(--duration-base)
+    var(--ease-in) forwards;
+  --animate-toast-in: toast-in var(--duration-base) var(--ease-out);
+  --animate-toast-out: toast-out var(--duration-fast) var(--ease-in) forwards;
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes overlay-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  @keyframes popover-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.25rem);
+    }
+  }
+  @keyframes popover-out {
+    to {
+      opacity: 0;
+      transform: translateY(0.25rem);
+    }
+  }
+  @keyframes sheet-right-in {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes sheet-right-out {
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes sheet-left-in {
+    from {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes sheet-left-out {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes sheet-top-in {
+    from {
+      transform: translateY(-100%);
+    }
+  }
+  @keyframes sheet-top-out {
+    to {
+      transform: translateY(-100%);
+    }
+  }
+  @keyframes sheet-bottom-in {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes sheet-bottom-out {
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
   /* Layers */
   --z-sticky: 10;
   --z-popover: 40;
   --z-modal: 50;
   --z-toast: 60;
+}
+
+/*
+ * Reduced motion (CLAUDE.md §8, docs/DESIGN.md §6.4): every component
+ * animation is driven by an --animate-* token, so turning the tokens off here
+ * covers all of them. Per-component `motion-reduce:` classes do not work for
+ * these: `data-[state=open]:animate-*` has higher specificity. Radix unmounts
+ * immediately when no animation is running.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animate-overlay-in: none;
+    --animate-overlay-out: none;
+    --animate-dialog-in: none;
+    --animate-dialog-out: none;
+    --animate-popover-in: none;
+    --animate-popover-out: none;
+    --animate-sheet-right-in: none;
+    --animate-sheet-right-out: none;
+    --animate-sheet-left-in: none;
+    --animate-sheet-left-out: none;
+    --animate-sheet-top-in: none;
+    --animate-sheet-top-out: none;
+    --animate-sheet-bottom-in: none;
+    --animate-sheet-bottom-out: none;
+    --animate-toast-in: none;
+    --animate-toast-out: none;
+  }
 }
 
 /*

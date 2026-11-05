@@ -128,6 +128,13 @@ const COLOR_TOKENS = [
   "focus",
 ] as const;
 
+/** Animation tokens that are not set to `none` in the reduced-motion block. */
+function animationsStillOn(theme: Tokens, reduced: Tokens): string[] {
+  return Object.keys(theme)
+    .filter((name) => name.startsWith("--animate-"))
+    .filter((name) => reduced[name] !== "none");
+}
+
 /** One readable line per pair that misses its threshold (or whose token is missing). */
 function failingPairs(theme: Tokens): string[] {
   const failures: string[] = [];
@@ -159,6 +166,13 @@ const lightMediaBlock = declarations(
   blockBody(
     blockBody(css, "@media (prefers-color-scheme: light) {"),
     ":root:not(.dark) {",
+  ),
+);
+
+const reducedMotionBlock = declarations(
+  blockBody(
+    blockBody(css, "@media (prefers-reduced-motion: reduce) {"),
+    ":root {",
   ),
 );
 
@@ -195,6 +209,13 @@ describe("design tokens in globals.css", () => {
   it("declare color-scheme so native controls follow each theme", () => {
     expect(css).toMatch(/:root\s*\{[^}]*color-scheme:\s*dark;/);
     expect(blockBody(css, ":root.light {")).toMatch(/color-scheme:\s*light;/);
+  });
+
+  it("switch every component animation off under prefers-reduced-motion", () => {
+    expect(
+      Object.keys(darkTheme).filter((n) => n.startsWith("--animate-")).length,
+    ).toBeGreaterThan(0);
+    expect(animationsStillOn(darkTheme, reducedMotionBlock)).toEqual([]);
   });
 
   it("keep body copy at 16px or more on the smallest viewport", () => {
@@ -245,6 +266,16 @@ describe("contrast guard (negative cases)", () => {
     const incomplete: Tokens = { ...darkTheme };
     delete incomplete["--color-focus"];
     expect(failingPairs(incomplete)).toContain("focus on bg: token missing");
+  });
+
+  it("reports an animation token that reduced motion forgot to turn off", () => {
+    const withNewAnimation: Tokens = {
+      ...darkTheme,
+      "--animate-brand-new": "brand-new 1s linear",
+    };
+    expect(animationsStillOn(withNewAnimation, reducedMotionBlock)).toEqual([
+      "--animate-brand-new",
+    ]);
   });
 
   it("detects drift between the class block and the media block", () => {

@@ -37,6 +37,21 @@ test.describe("smoke", () => {
   });
 });
 
+test.describe("dev-only routes", () => {
+  for (const path of [
+    "/it/_dev/ui",
+    "/en/_dev/ui",
+    "/it/_dev",
+    "/it/dev-tools/ui", // the real route behind the /_dev rewrite
+  ]) {
+    test(`${path} is a 404 in the production build`, async ({ request }) => {
+      const response = await request.get(path);
+
+      expect(response.status()).toBe(404);
+    });
+  }
+});
+
 test.describe("theme: system dark", () => {
   test.use({ colorScheme: "dark" });
 
