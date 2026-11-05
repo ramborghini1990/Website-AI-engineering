@@ -1,26 +1,229 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Design tokens. Source of truth: docs/DESIGN.md (approved). Change a value
+ * there and here together; src/app/globals.test.ts fails if they drift or if a
+ * colour pair drops below WCAG 2.2 AA.
+ *
+ * Theme model
+ *   - Dark is the baseline (the @theme block below).
+ *   - `:root.light` forces light; `:root.dark` forces dark.
+ *   - With no class, `prefers-color-scheme: light` switches to light and
+ *     everything else stays dark.
+ * Components use semantic tokens only (bg-bg, text-text, border-border-strong,
+ * ...). The light block and the media block below must stay identical.
+ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* `dark:` is only for assets that cannot use tokens (e.g. a black SVG logo). */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light, .light *)) {
+      @slot;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme static {
+  /* Remove Tailwind's default scales so only design tokens exist. */
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --text-*: initial;
+  --font-*: initial;
+  --ease-*: initial;
+
+  /* Colour: dark baseline */
+  --color-bg: #0b0d10;
+  --color-surface-1: #11141a;
+  --color-surface-2: #171b22;
+  --color-surface-3: #1f242d;
+  --color-border-subtle: #262c36;
+  --color-border-strong: #6b7482;
+  --color-text: #f2efe8;
+  --color-text-secondary: #b7bcc6;
+  --color-text-muted: #8f96a3;
+  --color-accent: #ffb347;
+  --color-accent-hover: #ffc470;
+  --color-on-accent: #0b0d10;
+  --color-trace: #6ccbdb;
+  --color-success: #5fd38d;
+  --color-warning: #f2d14b;
+  --color-danger: #ff7b72;
+  --color-focus: #ffb347;
+
+  /* Typography */
+  --font-sans:
+    var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    monospace;
+
+  --text-xs: clamp(0.75rem, 0.7292rem + 0.0926vw, 0.8125rem);
+  --text-xs--line-height: 1.4;
+  --text-xs--letter-spacing: 0.06em;
+  --text-sm: clamp(0.875rem, 0.8542rem + 0.0926vw, 0.9375rem);
+  --text-sm--line-height: 1.5;
+  --text-base: clamp(1rem, 0.9583rem + 0.1852vw, 1.125rem);
+  --text-base--line-height: 1.6;
+  --text-lg: clamp(1.125rem, 1.0625rem + 0.2778vw, 1.3125rem);
+  --text-lg--line-height: 1.5;
+  --text-xl: clamp(1.3125rem, 1.2083rem + 0.463vw, 1.625rem);
+  --text-xl--line-height: 1.35;
+  --text-xl--letter-spacing: -0.005em;
+  --text-2xl: clamp(1.5625rem, 1.3958rem + 0.7407vw, 2.0625rem);
+  --text-2xl--line-height: 1.25;
+  --text-2xl--letter-spacing: -0.01em;
+  --text-3xl: clamp(1.875rem, 1.625rem + 1.1111vw, 2.625rem);
+  --text-3xl--line-height: 1.15;
+  --text-3xl--letter-spacing: -0.015em;
+  --text-4xl: clamp(2.25rem, 1.8333rem + 1.8519vw, 3.5rem);
+  --text-4xl--line-height: 1.08;
+  --text-4xl--letter-spacing: -0.02em;
+  --text-5xl: clamp(2.75rem, 2rem + 3.3333vw, 5rem);
+  --text-5xl--line-height: 1.02;
+  --text-5xl--letter-spacing: -0.03em;
+
+  /* Spacing: 4px base unit comes from Tailwind's --spacing (0.25rem). */
+  --spacing-section: clamp(4rem, 3rem + 5vw, 8rem);
+  --spacing-gutter: clamp(1rem, 0.5rem + 2.2vw, 2.5rem);
+  --container-page: 80rem;
+
+  /* Radii: deliberately small (docs/DESIGN.md §5) */
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-full: 9999px;
+
+  /* Motion */
+  --duration-instant: 80ms;
+  --duration-fast: 160ms;
+  --duration-base: 280ms;
+  --duration-slow: 480ms;
+  --duration-reveal: 720ms;
+  --duration-narrative: 1100ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Layers */
+  --z-sticky: 10;
+  --z-popover: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+/*
+ * Elevation: only for things that float above the page. These are plain
+ * variables, not @theme entries: Tailwind inlines theme shadow values at build
+ * time, which would freeze the dark values and ignore the light override. The
+ * @utility rules below read the variable at runtime instead.
+ */
+:root {
+  color-scheme: dark;
+  --shadow-popover: 0 8px 24px -8px rgb(0 0 0 / 0.6);
+  --shadow-modal: 0 24px 64px -16px rgb(0 0 0 / 0.7);
+  --shadow-glow-accent:
+    0 0 0 1px rgb(255 179 71 / 0.4), 0 0 32px -8px rgb(255 179 71 / 0.35);
+}
+
+@utility shadow-popover {
+  box-shadow: var(--shadow-popover);
+}
+
+@utility shadow-modal {
+  box-shadow: var(--shadow-modal);
+}
+
+@utility shadow-glow-accent {
+  box-shadow: var(--shadow-glow-accent);
+}
+
+/* Light theme, explicit choice */
+:root.light {
+  color-scheme: light;
+  --color-bg: #f6f4ee;
+  --color-surface-1: #fbfaf6;
+  --color-surface-2: #eeebe2;
+  --color-surface-3: #e4e0d4;
+  --color-border-subtle: #d6d1c3;
+  --color-border-strong: #6b7280;
+  --color-text: #12151a;
+  --color-text-secondary: #414852;
+  --color-text-muted: #59606b;
+  --color-accent: #9c4700;
+  --color-accent-hover: #7f3a00;
+  --color-on-accent: #fbfaf6;
+  --color-trace: #00677a;
+  --color-success: #0e6b39;
+  --color-warning: #7a5600;
+  --color-danger: #b3261e;
+  --color-focus: #9c4700;
+  --shadow-popover:
+    0 1px 0 rgb(18 21 26 / 0.04), 0 8px 24px -12px rgb(18 21 26 / 0.18);
+  --shadow-modal: 0 24px 64px -20px rgb(18 21 26 / 0.28);
+  --shadow-glow-accent: none;
+}
+
+/* Light theme, system preference with no explicit choice (same values as above) */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) {
+    color-scheme: light;
+    --color-bg: #f6f4ee;
+    --color-surface-1: #fbfaf6;
+    --color-surface-2: #eeebe2;
+    --color-surface-3: #e4e0d4;
+    --color-border-subtle: #d6d1c3;
+    --color-border-strong: #6b7280;
+    --color-text: #12151a;
+    --color-text-secondary: #414852;
+    --color-text-muted: #59606b;
+    --color-accent: #9c4700;
+    --color-accent-hover: #7f3a00;
+    --color-on-accent: #fbfaf6;
+    --color-trace: #00677a;
+    --color-success: #0e6b39;
+    --color-warning: #7a5600;
+    --color-danger: #b3261e;
+    --color-focus: #9c4700;
+    --shadow-popover:
+      0 1px 0 rgb(18 21 26 / 0.04), 0 8px 24px -12px rgb(18 21 26 / 0.18);
+    --shadow-modal: 0 24px 64px -20px rgb(18 21 26 / 0.28);
+    --shadow-glow-accent: none;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-bg font-sans text-base text-text;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  /* Slightly condensed display headings (Instrument Sans wdth axis) */
+  h1,
+  h2 {
+    font-stretch: 90%;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
 }

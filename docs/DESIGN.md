@@ -1,10 +1,10 @@
 # DESIGN.md — INAMBIENTE design direction and system
 
-**Status: DRAFT, awaiting your approval** (ROADMAP P1.1 acceptance: "DESIGN.md approved by you; contrast pairs ≥ 4.5:1 documented"). Decisions you may want to change are collected in §11. This file is the design authority (CLAUDE.md §7); design-skill or 21st output is advice only.
+**Status: APPROVED as proposed on 2026-11-05** (ROADMAP P1.1 acceptance: "DESIGN.md approved by you; contrast pairs ≥ 4.5:1 documented"): Signal amber accent, Instrument Sans + JetBrains Mono, dark-first instrument-panel direction, sharp radii. The decisions that were open are kept in §11 for the record. This file is the design authority (CLAUDE.md §7); design-skill or 21st output is advice only.
 
 Scope of P1.1: direction and tokens as values. Nothing here is implemented yet. P1.2 turns §2–§6 into `@theme` tokens in `src/app/globals.css` and loads the fonts; P1.5/P1.6 implement the motion system and FX components.
 
-How the numbers were produced: every colour pair below was computed with the WCAG 2.x relative-luminance formula on the exact sRGB hex values (not estimated by eye). P1.2 must re-prove them in a Vitest test that reads the real tokens (§10), so this document cannot drift from the code.
+How the numbers were produced: every colour pair below was computed with the WCAG 2.x relative-luminance formula on the exact sRGB hex values (not estimated by eye). Since P1.2 they are re-proved on every `pnpm test` by `src/app/globals.test.ts`, which reads the real tokens from `globals.css` and also compares the §2.1 table below with them, so this document cannot drift from the code.
 
 ---
 
@@ -300,10 +300,13 @@ When `prefers-reduced-motion: reduce`:
 
 ## 10. Hand-off to P1.2 and later tasks
 
-- **Token names** to implement in `@theme` (colours as CSS variables so themes swap by class): `--color-bg`, `--color-surface-1…3`, `--color-border-subtle`, `--color-border-strong`, `--color-text`, `--color-text-secondary`, `--color-text-muted`, `--color-accent`, `--color-accent-hover`, `--color-on-accent`, `--color-trace`, `--color-success`, `--color-warning`, `--color-danger`, `--color-focus`; `--font-sans`, `--font-mono`; `--text-xs…5xl`; `--radius-*`; `--shadow-*`; `--duration-*`; `--ease-*`; `--spacing`, `--space-section`, `--gutter`, `--container`.
-- **Contrast guard:** add a Vitest test that parses the real token values from `globals.css` and asserts every pair in §2.2–§2.3 (≥ 4.5 : 1 for text, ≥ 3 : 1 for control boundaries and focus). This is the executable form of this document.
-- **No-raw-colour guard:** the P1.2 acceptance asks for a lint rule or a grep check in `verify`; scope it to `src/components/**` so `globals.css` can hold the values.
-- **Fonts:** `next/font/google` for Instrument Sans (axes `wght`, `wdth`) and JetBrains Mono, `display: 'swap'`, exposed as CSS variables; remove the scaffold's Geist fonts and its raw hex colours.
+- **Implemented in P1.2** (`src/app/globals.css`). Token names as built: `--color-bg`, `--color-surface-1…3`, `--color-border-subtle`, `--color-border-strong`, `--color-text`, `--color-text-secondary`, `--color-text-muted`, `--color-accent`, `--color-accent-hover`, `--color-on-accent`, `--color-trace`, `--color-success`, `--color-warning`, `--color-danger`, `--color-focus`; `--font-sans`, `--font-mono`; `--text-xs…5xl` with `--text-*--line-height` and `--text-*--letter-spacing`; `--radius-none|xs|sm|md|full`; `--duration-*`; `--ease-*`; `--z-*`. Tailwind's namespaces forced three names: the section rhythm, gutter and container are `--spacing-section`, `--spacing-gutter` and `--container-page` (utilities `py-section`, `gap-gutter`, `max-w-page`).
+- **Shadows are not `@theme` entries.** Tailwind inlines theme shadow values at build time, which froze the dark value and ignored the light override. They are plain variables (`--shadow-popover`, `--shadow-modal`, `--shadow-glow-accent`) exposed through `@utility shadow-popover|modal|glow-accent`.
+- **Default scales are cleared** (`--color-*`, `--radius-*`, `--shadow-*`, `--text-*`, `--font-*`, `--ease-*` set to `initial`). Only design tokens exist; a leftover `bg-zinc-50` or `text-white` generates no CSS.
+- **Theme switching:** dark values are the baseline; `:root.light` forces light, `:root.dark` forces dark; with no class, `prefers-color-scheme: light` applies the same light values (that block must stay identical to `:root.light`, which the test enforces). The `dark:` Tailwind variant follows the same rule and is only for assets that cannot use tokens, such as the black SVG logos.
+- **Contrast guard (done):** `src/app/globals.test.ts` parses the real tokens and asserts every pair in §2.2–§2.3 (≥ 4.5 : 1 text, ≥ 3 : 1 control boundaries and focus), compares the §2.1 table with the CSS, and has negative cases.
+- **No-raw-colour guard (done):** `src/no-raw-colors.test.ts` runs in `pnpm verify`; it rejects hex, `rgb()`/`hsl()`/`oklch()` and default-palette classes anywhere in `src` except `globals.css` and tests.
+- **Fonts (done):** `next/font/google` for Instrument Sans (axes `wght`, `wdth`; the `wdth` axis is confirmed in the generated `@font-face`) and JetBrains Mono, `display: 'swap'`, exposed as `--font-instrument-sans` and `--font-jetbrains-mono`. Playwright asserts that no request leaves our origin.
 - **Page language and metadata** (`lang="en"` and the "Create Next App" title in the scaffold) belong to P1.4 / P2.1.
 - Record anything copied from React Bits or 21st in `docs/THIRD_PARTY.md` (CLAUDE.md §5).
 

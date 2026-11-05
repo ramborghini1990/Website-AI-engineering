@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P0.7 committed as `18fb0dd`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.1 committed as `0a62012`)_
 
 ---
 
@@ -11,20 +11,21 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P0.7 committed a
 | Field | Value |
 |---|---|
 | Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.1` — Design direction & system document (`docs/DESIGN.md`) |
-| Status | **draft written, awaiting your approval (not committed).** ROADMAP acceptance for P1.1 is "approved by you" plus contrast pairs documented; the second part is done, the first is yours |
-| Next task | `P1.2` — tokens in `@theme`, fonts via `next/font`; do not start before P1.1 is approved |
+| Active task | `P1.2` — Design tokens in Tailwind v4 `@theme`, self-hosted fonts, contrast test, no raw hex |
+| Status | **acceptance criteria met, awaiting review (not committed)** |
+| Next task | `P1.3` — shadcn/ui primitives restyled to tokens; do not start unprompted |
 
 **Plan for the active task**
-1. Decide direction manually: the UI/UX Pro Max skill is **not installed** on this machine (checked), so the roadmap's `--design-system` search step was skipped.
-2. Compute every colour pair with the WCAG formula (script in the session scratchpad, not in the repo) and iterate until all pass in both themes.
-3. Compute the fluid type scale (`clamp()`, 360→1440 px) and confirm fonts exist in Next 16.4.5's bundled font data.
-4. Write `docs/DESIGN.md`: identity, colour tokens + contrast tables, typography, spacing/layout, radii/borders/elevation, motion tokens and reduced-motion rules, components/imagery, themes, do/don't, hand-off to P1.2, decisions for you.
-5. Cross-check the document against the script; run `pnpm verify`.
+1. `src/app/globals.css`: tokens from the approved `docs/DESIGN.md` (colours for both themes, fluid type scale, radii, motion, spacing, layers), theme swapping by class and by system preference, small base layer (body, headings, focus ring).
+2. `src/app/layout.tsx`: replace Geist with Instrument Sans (`wght`, `wdth` axes) and JetBrains Mono via `next/font/google`.
+3. Restyle the scaffold page with tokens only (content and structure unchanged, so existing tests stay valid).
+4. Vitest guards: WCAG 2.2 AA contrast on the real tokens + doc/CSS sync; no raw colours in `src`.
+5. Playwright: both themes (system and explicit class), axe in each, self-hosted fonts.
+6. Visual check at 360 and 1280 px, both themes; `pnpm verify`.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done, and no code or tokens were implemented: `docs/DESIGN.md` is the only new file.
-- **Your step:** read `docs/DESIGN.md` §11 and approve or change the open decisions (accent hue, fonts, default theme, radii, brand assets). Any change to a colour requires recomputing its contrast pairs.
+- Nothing half-done. Throwaway files (Tailwind probe, mutation edits) were reverted or deleted; no `next start` process is left running.
+- `src/app/page.tsx` is still the scaffold content (restyled); the real home page is P2.2.
 
 ---
 
@@ -33,7 +34,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P0.7 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 0/8 | P1.1 draft awaiting your approval (counts as done once approved and committed) |
+| 1 Core, design system, motion | ◐ | 1/8 | P1.1 approved and committed; P1.2 awaiting review/commit |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -51,6 +52,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P0.7 committed a
 | 2026-11-04 | P0.5 | CI workflows (SHA-pinned), gitleaks security workflow, Dependabot | `9d7338c` |
 | 2026-11-04 | P0.6 | Vercel `fra1` config, `engines.node` 24.x, deployment runbook; production deployment Ready at https://website-ai-engineering.vercel.app/ (reported by you) | `282dcbb` |
 | 2026-11-04 | P0.7 | 21st MCP in `.mcp.json` (key by reference), `docs/TOOLING_SETUP.md`, Phase 0 closed | `18fb0dd` |
+| 2026-11-05 | P1.1 | `docs/DESIGN.md`: approved design direction, tokens and contrast tables | `0a62012` |
 
 ---
 
@@ -76,7 +78,8 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D14 | 2026-11-04 | CI: GitHub Actions only; every action pinned to a full commit SHA with a version comment (`checkout` v7.0.1, `setup-node` v7.1.0, `cache` v6.1.0, `upload-artifact` v7.0.2); pnpm via Corepack from `packageManager`; Node from `.nvmrc`. Secret scanning = gitleaks 8.30.1 binary pinned by version + sha256 (no third-party action); CodeQL and dependency-review excluded because the repo is private without GHAS | Supply-chain hygiene; the official gitleaks action needs a paid licence once the repo is owned by an organisation | — |
 | D15 | 2026-11-04 | Vercel: `vercel.json` pins `regions: ["fra1"]`, `framework: nextjs`, `installCommand: pnpm install --frozen-lockfile`; `engines.node` is `24.x`; Pro plan required (Hobby is non-commercial only); `ENABLE_EXPERIMENTAL_COREPACK=1` to honour `packageManager`; Preview and Production use separate DB/Redis/keys per the matrix in `docs/DEPLOYMENT.md` §3; Vercel Authentication on for Previews; Web Analytics / Speed Insights off | Region and Node version are then reproducible from the repo; Vercel's default Node is a newer major than the one we pin; commercial site needs Pro; Preview must never touch production data (BLUEPRINT) | — |
 | D16 | 2026-11-04 | Tooling: 21st MCP is committed in `.mcp.json` as a project server (remote HTTP, key from `${API_KEY_21ST}`); `enableAllProjectMcpServers` stays off and the server is not pre-approved in `.claude/settings.json`. UI/UX Pro Max is installed by you from your own fork pinned to the reviewed commit `713eef5` (or `ccce51c`, README-only delta); Claude does not install plugins or skills. Other audited tools stay uninstalled | Audit §1–§2, §8; CLAUDE.md §13 | — |
-| D17 | 2026-11-05 | **Proposed, not yet approved:** design direction "instrument panel" in `docs/DESIGN.md`. Palette Ink / Bone / Signal (amber `#FFB347` dark, `#9C4700` light) / Trace; Instrument Sans + JetBrains Mono; fluid scale 360→1440 px with 16→18 px body; 4 px base unit; radii 2/4/8 px; motion tokens 80–1100 ms with `expo.out`-style `ease-out`; dark baseline, system preference respected | Dark-first technical identity that avoids the template look (CLAUDE.md §7); every required pair computed ≥ 4.5 : 1 (text) or ≥ 3 : 1 (UI) in both themes | — |
+| D17 | 2026-11-05 | **Approved by you 2026-11-05:** design direction "instrument panel" in `docs/DESIGN.md`. Palette Ink / Bone / Signal (amber `#FFB347` dark, `#9C4700` light) / Trace; Instrument Sans + JetBrains Mono; fluid scale 360→1440 px with 16→18 px body; 4 px base unit; radii 2/4/8 px; motion tokens 80–1100 ms with `expo.out`-style `ease-out`; dark baseline, system preference respected | Dark-first technical identity that avoids the template look (CLAUDE.md §7); every required pair computed ≥ 4.5 : 1 (text) or ≥ 3 : 1 (UI) in both themes | — |
+| D18 | 2026-11-05 | Token implementation (P1.2): `@theme static` holds the dark baseline and Tailwind's default scales are cleared; light theme via `:root.light` plus an identical `prefers-color-scheme: light` block; shadows as plain variables + `@utility` (not `@theme`); `dark:` variant defined to match the same model, reserved for assets that cannot use tokens; guards in `verify`: `src/app/globals.test.ts` (WCAG 2.2 AA on real tokens, doc/CSS sync) and `src/no-raw-colors.test.ts` | Single source of truth that tests can parse; Tailwind inlines theme shadows at build time, which broke theming; clearing defaults makes "semantic tokens only" structural | — |
 
 ---
 
@@ -90,7 +93,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B4 | Legal review of privacy/cookie policy texts | you / counsel | P4.2 |
 | B5 | Vercel: confirm the team is on **Pro** (not Hobby; Hobby is non-commercial only), MFA is on, and the DPA is accepted. Deployment itself is done | you | before launch (P4.7) |
 | B7 | Do the P0.7 machine steps (`docs/TOOLING_SETUP.md` §1–§2). Partly visible: `mcp__21st__*` tools are now registered in this session, so the server was approved; not exercised, and `claude mcp list` output / the design-skill fork are unconfirmed | you | P1.3+ (21st), optional second opinion for P1.1 (design skill) |
-| B8 | Approve or change `docs/DESIGN.md` §11 (accent hue, fonts, default theme, radii) and say whether INAMBIENTE already has a logo / brand colours | you | P1.1 acceptance, then P1.2 |
+| B8 | ~~Approve `docs/DESIGN.md` §11~~ approved 2026-11-05 (amber, Instrument Sans + JetBrains Mono, dark-first, sharp radii). **Still open:** does INAMBIENTE already have a logo / brand colours? If yes, reconcile with the tokens before P1.8 (header) | you | P1.8 |
 | B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production) | you | P1.7 / P2.6 |
 
 ---
@@ -126,10 +129,15 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
-- **P1.1 / for P1.2: executable contrast guard.** The contrast numbers in `docs/DESIGN.md` come from a throwaway script that lives in the session scratchpad, not the repo. P1.2 must add a Vitest test reading the real tokens from `globals.css` and asserting every pair (≥ 4.5 : 1 text, ≥ 3 : 1 control boundaries and focus), plus the no-raw-colour check in `verify`. Until then the document is the only record.
+- **P1.2 / Windows process hygiene (my mistake, fixed in my workflow).** `Get-NetTCPConnection -State Listen` does not see Node's listeners on this machine, so my "stop the server" checks falsely reported 0. A stale `next start` kept serving an old build's HTML after a rebuild (unstyled page, CSS 500). If a local server seems to serve old output, check `netstat -ano | findstr :PORT` and kill by command line. No `next` processes are running now (verified).
+- **P1.2 / theme model to remember.** Dark is the `@theme` baseline; light is `:root.light` plus a duplicate under `@media (prefers-color-scheme: light) { :root:not(.dark) }`. The test enforces that the two light blocks are identical. Tailwind inlines theme shadow values at build time, so shadows are plain variables plus `@utility` rules (otherwise the light override is ignored). Tailwind's default palette, radii, shadows, text sizes, fonts and easings are cleared: using `bg-zinc-50` or `text-white` silently produces nothing, which `src/no-raw-colors.test.ts` now rejects.
+- **P1.2 / token names differ slightly from `docs/DESIGN.md` §10 as first written** (`--spacing-section`, `--spacing-gutter`, `--container-page`, forced by Tailwind namespaces; shadows via `@utility`). §10 was updated to describe what was built.
+- **P1.2 / not guarded:** arbitrary pixel values in components (CLAUDE.md §7 allows them only with a comment); the no-raw-colour scan treats a 3-letter hex-looking anchor such as `#add` as a colour (none exist today). Reduced-motion CSS safety net is left to P1.5.
+- **P1.2 / not verified visually:** hover and focus states (only static renders in both themes at 360 and 1280 px were inspected); 200 % zoom; `wdth` condensed display look was confirmed in the screenshots but not compared against alternatives. Theme toggle, pre-paint theme script and the storage key come with P1.7/P1.8.
+- **P1.2 / scaffold page** still carries scaffold copy, `lang="en"` and the "Create Next App" title (P1.4, P2.1/P2.2); it only had its colours, radii and button sizing moved to tokens (buttons now `whitespace-nowrap`, `md:min-w-40`, because Instrument Sans made "Deploy Now" wrap at the old fixed width).
 - **P1.1 / thin margins:** light theme `text-muted` and `accent` on `surface-3` are 4.81 and 4.80 : 1; any tweak to those colours needs recomputation. `border-subtle` (1.31–1.46 : 1) is decorative only by design.
-- **P1.1 / unverified assumptions:** 200 % browser zoom of the fluid type was not tested (no page exists yet, add to Playwright with the first real page); `wdth` axis must be requested in `next/font` or the condensed display style is silently not loaded; the theme pre-paint script needs a CSP nonce (P1.7) or a server-resolved cookie; the theme choice is a storage key that must appear in the cookie/storage table (P4.2).
-- **P1.1 / `docs/DESIGN.md` is outside Prettier** (`*.md` ignored, D12), so its formatting is not machine-enforced. I validated its hex values, quoted ratios and table structure with a script instead.
+- **P1.1 / still open for later tasks:** 200 % zoom of fluid type belongs in Playwright once real pages exist; the theme pre-paint script needs a CSP nonce (P1.7) or a server-resolved cookie; the theme choice is a storage key that must appear in the cookie/storage table (P4.2).
+- **`docs/DESIGN.md` is outside Prettier** (`*.md` ignored, D12). Its hex table is now machine-checked against the CSS by `globals.test.ts`; the contrast tables (§2.2–§2.3) are not, but the same pairs are asserted by the test.
 - **Phase 0 carry-overs (phase closed at your instruction; these acceptance items are not evidenced).**
   - P0.5: CI green on `main` and "a PR shows all checks" not seen by me; branch protection on `main` not enabled; the fake-secret PR test not run (steps in the CI bullets below).
   - P0.6: "a PR gets a preview URL" not evidenced; build-log Node and pnpm versions not reported (pnpm 12 risk below); `fra1` function region unobservable on a static site. What I did see on 2026-11-04: `https://website-ai-engineering.vercel.app/` answers HTTP 200 from `Server: Vercel` with HSTS, serves the scaffold page (title "Create Next App", one `h1`), and `x-vercel-id` starts with `fra1::`, which names the edge location serving my request and is **not** proof of the function region.
@@ -177,25 +185,34 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ```
 pnpm install --frozen-lockfile → pass
-pnpm verify       → pass (typecheck → lint → test → build); test step: 1 file, 2 tests passed
+pnpm verify       → pass (typecheck → lint --max-warnings=0 → test → build); test step: 3 files, 28 tests
+pnpm test:e2e     → pass, 8 tests (Chromium): smoke, axe in system dark / system light / explicit
+                    .light over dark / explicit .dark over light, fonts self-hosted + loaded
 pnpm knip         → pass
-pnpm format:check → pass (does not cover *.md, so not docs/DESIGN.md)
-pnpm test:e2e     → not run: no UI or code changed in P1.1
+pnpm format:check → pass (does not cover *.md)
 
-P1.1 checks (docs/DESIGN.md; scripts are in the session scratchpad, not the repo):
-  contrast          → all required pairs pass in both themes (WCAG 2.x luminance formula on exact hex):
-                      text >= 4.5 : 1 (lowest: light text-muted/accent on surface-3, 4.80-4.81),
-                      control boundaries and focus >= 3 : 1 (lowest: dark border-strong on surface-2, 3.66)
-                      One first-draft failure was fixed: light-theme amber fill was 2.24 : 1 against
-                      the background, so the light accent became the deep burnt orange #9C4700
-                      with a paper label (6.07 : 1)
-  doc vs script     → 17/17 token hex values match the palette used; all 66 quoted ratios are values
-                      the script produced; every markdown table row has the right column count
-  type scale        → clamp() strings computed by script; endpoints verified (@360 and @1440 px)
-  fonts             → Instrument Sans (wght 400-700, wdth 75-100) and JetBrains Mono (wght 100-800)
-                      present in Next 16.4.5 font-data.json with latin / latin-ext subsets
-  NOT done          → design-skill `--design-system` search (skill not installed); visual check
-                      (nothing rendered yet); 200 % zoom test; your approval
+P1.2 checks:
+  contrast guard    → src/app/globals.test.ts parses the real tokens: 17 colours as 6-digit hex in both
+                      themes; every pair from DESIGN.md §2.2-2.3 passes (text >= 4.5, UI >= 3);
+                      light block == media block; hex table in DESIGN.md == CSS
+  guards can fail   → mutation check on the real files: dark text-muted -> #4a505b made the contrast
+                      test (2.40 : 1) and the doc-sync test fail; `bg-[#123456]` in page.tsx made the
+                      raw-colour test fail; both reverted, suite green again
+  raw colours       → Vitest scan and an independent grep both report none in src (globals.css and
+                      tests excluded)
+  Tailwind output   → built CSS inspected: default palette gone (no zinc/red/text-6xl), token
+                      utilities generated, alpha modifiers use color-mix on the live variable, `dark:`
+                      emits both class and media selectors, shadow utilities read the runtime variable
+                      and the light overrides are present in both light blocks
+  fonts             → @font-face for Instrument Sans has `font-stretch: 75% 100%` (wdth axis loaded);
+                      Playwright: no request outside our origin, font requests all same-origin,
+                      both families report status "loaded"
+  visual            → screenshots of the production build at 360 and 1280 px, dark and light, inspected:
+                      tokens, condensed headings, mono chip, 4 px radii, inverted logos all as designed.
+                      Found and fixed one defect: "Deploy Now" wrapped at 1280 px
+  hygiene           → temporary Tailwind probe file deleted; stale `next start` processes found and
+                      killed; none running now
+  NOT done          → hover/focus states visually; 200 % zoom; comparison with design-skill output
 ```
 
 ---
@@ -203,20 +220,24 @@ P1.1 checks (docs/DESIGN.md; scripts are in the session scratchpad, not the repo
 ## 10. Proposed commit(s) for the work above
 
 ```
-docs(design): add design direction and system document
+feat(design): implement design tokens and self-hosted fonts
 
-Define the visual identity as a dark-first technical "instrument
-panel": Ink/Bone neutrals, a single Signal amber accent and a cool
-Trace secondary, with semantic light and dark tokens. Document
-every text and UI contrast pair with ratios computed from the
-exact hex values (text >= 4.5:1, control boundaries and focus
->= 3:1), the fluid type scale with Instrument Sans and JetBrains
-Mono, spacing and layout rhythm, radii and elevation, motion
-duration and easing tokens with reduced-motion rules, and a
-do/don't list. Marked as a draft pending approval; tokens are
-implemented in P1.2.
+Turn the approved design document into Tailwind v4 tokens in
+globals.css: semantic colours for dark (baseline) and light themes,
+the fluid type scale, radii, motion, spacing and layers. Default
+Tailwind scales are cleared so only design tokens exist. Shadows
+are runtime variables exposed through utilities because Tailwind
+inlines theme shadow values at build time. Replace the scaffold
+fonts with Instrument Sans and JetBrains Mono via next/font, served
+from our own origin. Restyle the scaffold page with tokens only.
 
-Task: P1.1
+Add Vitest guards that assert WCAG 2.2 AA contrast on the real
+token values, keep the design document's token table in sync with
+the CSS, and reject raw colours in src. Extend the Playwright smoke
+spec with both themes, axe in each, and a check that no request
+leaves our origin.
+
+Task: P1.2
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```
