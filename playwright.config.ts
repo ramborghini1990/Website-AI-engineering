@@ -33,6 +33,9 @@ export default defineConfig({
     {
       // Production build: no dev overlay, and what users actually get is what axe scans.
       command: `pnpm build && pnpm start --port ${String(prodPort)}`,
+      // Canonical and hreflang URLs come from the configured site URL, so the
+      // test server must be told its own origin (see src/lib/env.ts).
+      env: { NEXT_PUBLIC_SITE_URL: prodURL },
       url: prodURL,
       reuseExistingServer: !isCI,
       timeout: 180_000,
@@ -40,7 +43,9 @@ export default defineConfig({
     {
       // Next 16 writes dev output to .next/dev, so this can run next to `next build`.
       command: `pnpm exec next dev --port ${String(devPort)}`,
-      url: devURL,
+      // Probe the gallery itself: the first request compiles the route, and
+      // parallel first requests from several workers raced during compilation.
+      url: `${devURL}/it/_dev/ui`,
       reuseExistingServer: !isCI,
       timeout: 180_000,
     },

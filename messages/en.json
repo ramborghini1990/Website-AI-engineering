@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "siteName": "INAMBIENTE",
+    "home": {
+      "title": "AI engineering and full-stack development",
+      "description": "INAMBIENTE designs AI agents, workflow automation and production web applications for startups, SMEs and enterprises."
+    },
+    "notFound": {
+      "title": "Page not found"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "names": {
+      "it": "Italiano",
+      "en": "English"
+    }
+  },
+  "home": {
+    "title": "INAMBIENTE",
+    "status": "The new website is under construction."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The address you requested does not exist or has been moved.",
+    "backHome": "Back to the home page"
+  }
+}

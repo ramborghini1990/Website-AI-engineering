@@ -23,7 +23,7 @@ async function expectNoAxeViolations(page: Page) {
 
 test.describe("smoke", () => {
   test("home page loads with a single h1", async ({ page }) => {
-    const response = await page.goto("/");
+    const response = await page.goto("/it");
 
     expect(response?.status()).toBe(200);
     await expect(page).toHaveTitle(/.+/);
@@ -31,7 +31,7 @@ test.describe("smoke", () => {
   });
 
   test("home page has no axe violations (WCAG 2.2 AA)", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/it");
 
     await expectNoAxeViolations(page);
   });
@@ -43,6 +43,7 @@ test.describe("dev-only routes", () => {
     "/en/_dev/ui",
     "/it/_dev",
     "/it/dev-tools/ui", // the real route behind the /_dev rewrite
+    "/_dev/ui", // no locale: redirected to /it/_dev/ui, then 404
   ]) {
     test(`${path} is a 404 in the production build`, async ({ request }) => {
       const response = await request.get(path);
@@ -56,7 +57,7 @@ test.describe("theme: system dark", () => {
   test.use({ colorScheme: "dark" });
 
   test("uses the dark tokens and passes axe", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/it");
 
     expect(await bodyBackground(page)).toBe(DARK_BG);
     await expectNoAxeViolations(page);
@@ -65,7 +66,7 @@ test.describe("theme: system dark", () => {
   test("an explicit .light class overrides the system preference", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/it");
     await setThemeClass(page, "light");
 
     expect(await bodyBackground(page)).toBe(LIGHT_BG);
@@ -77,7 +78,7 @@ test.describe("theme: system light", () => {
   test.use({ colorScheme: "light" });
 
   test("uses the light tokens and passes axe", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/it");
 
     expect(await bodyBackground(page)).toBe(LIGHT_BG);
     await expectNoAxeViolations(page);
@@ -86,7 +87,7 @@ test.describe("theme: system light", () => {
   test("an explicit .dark class overrides the system preference", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/it");
     await setThemeClass(page, "dark");
 
     expect(await bodyBackground(page)).toBe(DARK_BG);
@@ -110,7 +111,7 @@ test.describe("fonts", () => {
       if (request.resourceType() === "font") fontUrls.push(url);
     });
 
-    await page.goto("/");
+    await page.goto("/it");
     await page.evaluate(() => document.fonts.ready);
 
     expect(foreign).toEqual([]);
@@ -118,16 +119,25 @@ test.describe("fonts", () => {
     for (const url of fontUrls) expect(new URL(url).origin).toBe(origin);
   });
 
-  test("load Instrument Sans and JetBrains Mono", async ({ page }) => {
-    await page.goto("/");
-    const loaded = await page.evaluate(async () => {
+  test("Instrument Sans loads; JetBrains Mono is declared and fetched only when used", async ({
+    page,
+  }) => {
+    await page.goto("/it");
+    const faces = await page.evaluate(async () => {
       await document.fonts.ready;
-      return [...document.fonts]
-        .filter((face) => face.status === "loaded")
-        .map((face) => face.family.replace(/["']/g, ""));
+      return [...document.fonts].map((face) => ({
+        family: face.family.replace(/["']/g, ""),
+        status: face.status,
+      }));
     });
+    const loaded = faces
+      .filter((face) => face.status === "loaded")
+      .map((face) => face.family);
+    const declared = faces.map((face) => face.family);
 
     expect(loaded).toContain("Instrument Sans");
-    expect(loaded).toContain("JetBrains Mono");
+    // The placeholder page has no monospaced text, so the browser (correctly)
+    // never downloads it; it is still wired up for when a page uses it.
+    expect(declared).toContain("JetBrains Mono");
   });
 });

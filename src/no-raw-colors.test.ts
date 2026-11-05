@@ -41,8 +41,8 @@ function sourceFiles(): string[] {
 describe("no raw colours in components", () => {
   it("scans a non-empty set of source files", () => {
     const files = sourceFiles();
-    expect(files).toContain("app/page.tsx");
-    expect(files).toContain("app/layout.tsx");
+    expect(files).toContain("app/[locale]/page.tsx");
+    expect(files).toContain("app/[locale]/layout.tsx");
     expect(files).not.toContain("app/globals.css");
   });
 

@@ -25,12 +25,12 @@ describe("Button", () => {
   it("renders the child element with button styles when asChild is set", () => {
     render(
       <Button asChild variant="secondary">
-        <a href="/contact">Contact</a>
+        <a href="https://example.com/contact">Contact</a>
       </Button>,
     );
 
     const link = screen.getByRole("link", { name: "Contact" });
-    expect(link).toHaveAttribute("href", "/contact");
+    expect(link).toHaveAttribute("href", "https://example.com/contact");
     expect(link).not.toHaveAttribute("type");
     expect(link).toHaveClass("border-border-strong");
   });

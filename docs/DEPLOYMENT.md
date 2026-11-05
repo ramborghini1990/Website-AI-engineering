@@ -53,7 +53,7 @@ Rules:
 
 | Variable | Development (`.env.local`) | Preview | Production |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | do **not** hardcode: derive from Vercel's per-deployment URL variable in `env.ts` (P1.7) | `https://<production domain>` |
+| `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | leave **unset**: `src/lib/env.ts` (`resolveSiteUrl`, since P1.4) uses Vercel's per-deployment `VERCEL_URL` | `https://<production domain>`; if unset, falls back to Vercel's `VERCEL_PROJECT_PRODUCTION_URL` (needs "Automatically expose System Environment Variables") until the domain is decided |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare test site key | Cloudflare test site key | production widget key |
 | `TURNSTILE_SECRET_KEY` | Cloudflare test secret | Cloudflare test secret | production secret |
 | `DATABASE_URL` | local or dev EU Postgres | dedicated EU Postgres **branch** for previews | production EU Postgres |
@@ -112,7 +112,7 @@ To do in Vercel (you):
 - **pnpm 12 on Vercel is unverified.** `pnpm-lock.yaml` has `lockfileVersion: '9.0'`, which Vercel uses to choose a pnpm version when Corepack is not active, and Vercel's docs call Corepack support experimental. Community reports show `packageManager` being ignored in some projects. If the build log shows a different pnpm than 12.16.1: (a) confirm `ENABLE_EXPERIMENTAL_COREPACK=1` is set for that environment; (b) override Install/Build commands in the dashboard with a pinned runner, e.g. `npx pnpm@12.16.1 install --frozen-lockfile` and `npx pnpm@12.16.1 build`; (c) as a last resort, discuss moving the repo to a pnpm major that Vercel supports natively. Do not do (c) silently.
 - **Plan lock-in:** Hobby will work technically but breaches its terms for this use.
 - **Function regions on plans:** one region (`fra1`) is fine; Vercel's docs disagree on multi-region limits per plan, so check before adding a failover region.
-- **Preview URL for `NEXT_PUBLIC_SITE_URL`:** `env.ts` (P1.7) must not make the variable mandatory in Preview, or previews will fail the "missing env" build check.
+- **Preview URL for `NEXT_PUBLIC_SITE_URL`:** the P1.7 Zod `env.ts` must not make the variable mandatory in Preview, or previews will fail the "missing env" build check. Until P1.7, `resolveSiteUrl` in `src/lib/env.ts` implements the fallback order (explicit variable, Vercel production domain on production deployments, `VERCEL_URL`, localhost) and throws on an invalid explicit value. canonical and hreflang URLs are built from it, so a wrong value is an SEO bug: check the `<link rel="canonical">` of the first production deployment.
 
 ## 7. GDPR: Vercel as a processor
 

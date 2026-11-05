@@ -352,6 +352,27 @@ for (const theme of ["dark", "light"] as const) {
   });
 }
 
+test.describe("gallery (language switcher)", () => {
+  test("keeps the /_dev/ui path when switching language", async ({ page }) => {
+    await openGallery(page);
+    await expect(page).toHaveURL(/\/it\/_dev\/ui$/);
+
+    await page
+      .getByRole("navigation", { name: "Lingua" })
+      .getByRole("link", { name: "English" })
+      .click();
+
+    await expect(page).toHaveURL(/\/en\/_dev\/ui$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "UI primitives" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "Language" }),
+    ).toBeVisible();
+  });
+});
+
 test.describe("gallery (reduced motion)", () => {
   test.use({ reducedMotion: "reduce" });
 

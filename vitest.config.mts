@@ -15,5 +15,8 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     // Seeded/mocked inputs only: no real network in unit tests (CLAUDE.md §11).
     restoreMocks: true,
+    // next-intl's middleware imports `next/server` without a file extension,
+    // which Node's strict ESM resolver rejects; let Vite resolve it instead.
+    server: { deps: { inline: ["next-intl"] } },
   },
 });

@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.2 committed as `9263b31`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.3 committed as `15ba83f`)_
 
 ---
 
@@ -11,20 +11,21 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.2 committed a
 | Field | Value |
 |---|---|
 | Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.3` — Accessible UI primitives (Button, Input, Textarea, Select, Checkbox, Dialog, Sheet, Tabs, Tooltip, Toast) + dev gallery |
+| Active task | `P1.4` — Internationalisation with next-intl (`[locale]` routing, proxy redirect, typed messages, language switcher, hreflang) |
 | Status | **acceptance criteria met, awaiting review (not committed)** |
-| Next task | `P1.4` — next-intl i18n (`[locale]` segment, middleware, messages); do not start unprompted |
+| Next task | `P1.5` — motion system (Lenis + GSAP, reduced motion); do not start unprompted |
 
 **Plan for the active task**
-1. Hand-write the primitives in shadcn's pattern on Radix (no shadcn CLI), restyled to the approved tokens: `src/components/ui/*`, `src/lib/utils.ts` (`cn`).
-2. Dev gallery at `/[locale]/_dev/ui`, 404 outside development; every component and state, plus a dev-only theme switch.
-3. Playwright (against `next dev`): keyboard behaviour, focus rings, 44 px targets, reduced motion, axe in both themes with each overlay open.
-4. Vitest: `cn`, Button, toast store, dialog/sheet names, reduced-motion token guard.
-5. Mutation-test the guards; visual check of every overlay at 1280 and 360 px; `pnpm verify`.
+1. next-intl 4.14.9: `src/i18n/{routing,request,navigation,messages}.ts`, `src/proxy.ts`, plugin in `next.config.ts`; locale from `next/root-params` (Cache Components); `it` default, `en`; prefix always; **no locale cookie**.
+2. Root layout moves to `src/app/[locale]/layout.tsx` (no `app/layout.tsx`); placeholder home, localized 404 (catch-all + `not-found.tsx`).
+3. `messages/it.json` + `messages/en.json`; `AppConfig` augmentation so a missing key is a type error; parity guarded by types and by tests.
+4. `LanguageSwitcher` (labelled nav of links, path preserved); hreflang + canonical via `localeAlternates` and an absolute `siteUrl`.
+5. Tests: unit (messages parity + `@ts-expect-error`, proxy, matcher, seo, env, switcher, routing) and e2e (redirects, no cookie, static assets, hreflang, 404s, switcher, axe); mutation checks; visual check; `pnpm verify`.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Throwaway probe specs and mutations were reverted/deleted; no `next dev`/`next start` process is running (checked with `netstat` and process command lines).
-- Primitives are not used by any real page yet; the home page is still the scaffold (P2.2). `Toaster` and `TooltipProvider` are mounted only inside the gallery; mount them in the root layout when P1.8 builds the shell.
+- Nothing half-done. Throwaway mutations were reverted; no `next dev`/`next start` process is running (`netstat` + command-line check).
+- The home page is a **neutral placeholder** I wrote (company name + "site under construction" in both languages); I removed the Create-Next-App content and its external Vercel/Next links. Real copy is P2.1, real home P2.2. `Toaster` and `TooltipProvider` are still not mounted in the real layout (P1.8).
+- **Your decisions needed:** see section 8, "P1.4 decisions for you" (no locale cookie; placeholder copy; production domain for canonical/hreflang).
 
 ---
 
@@ -33,7 +34,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.2 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 2/8 | P1.1, P1.2 committed; P1.3 awaiting review/commit |
+| 1 Core, design system, motion | ◐ | 3/8 | P1.1–P1.3 committed; P1.4 awaiting review/commit |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -53,6 +54,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.2 committed a
 | 2026-11-04 | P0.7 | 21st MCP in `.mcp.json` (key by reference), `docs/TOOLING_SETUP.md`, Phase 0 closed | `18fb0dd` |
 | 2026-11-05 | P1.1 | `docs/DESIGN.md`: approved design direction, tokens and contrast tables | `0a62012` |
 | 2026-11-05 | P1.2 | Design tokens in `globals.css`, self-hosted Instrument Sans + JetBrains Mono, contrast and raw-colour guards | `9263b31` |
+| 2026-11-05 | P1.3 | Accessible UI primitives on Radix, dev-only gallery, keyboard/axe/reduced-motion e2e | `15ba83f` |
 
 ---
 
@@ -82,6 +84,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D18 | 2026-11-05 | Token implementation (P1.2): `@theme static` holds the dark baseline and Tailwind's default scales are cleared; light theme via `:root.light` plus an identical `prefers-color-scheme: light` block; shadows as plain variables + `@utility` (not `@theme`); `dark:` variant defined to match the same model, reserved for assets that cannot use tokens; guards in `verify`: `src/app/globals.test.ts` (WCAG 2.2 AA on real tokens, doc/CSS sync) and `src/no-raw-colors.test.ts` | Single source of truth that tests can parse; Tailwind inlines theme shadows at build time, which broke theming; clearing defaults makes "semantic tokens only" structural | — |
 | D19 | 2026-11-05 | UI primitives (P1.3): hand-written in the shadcn pattern on individual `@radix-ui/react-*` packages, **no shadcn CLI**; `cn()` = clsx + tailwind-merge extended with our custom token names; Toast = Radix Toast + own tiny store (no Sonner); every string a component needs (close, viewport label) is a **required prop** because copy must come from i18n; sizes never below 44 px (checkbox: 24 px box with an invisible 44 px hit area); component animations are `--animate-*` tokens, all switched to `none` under `prefers-reduced-motion` in `globals.css`; errors persist until dismissed, other toasts close after 8 s | CLAUDE.md §5, §9, §12, §13; WCAG 2.2.1, 2.5.8; the audit flags `npx shadcn add` as unpinned code execution | — |
 | D20 | 2026-11-05 | Dev gallery: code in `src/app/[locale]/dev-tools/`, public URL `/[locale]/_dev/ui` via a rewrite in `next.config.ts`; layout calls `notFound()` unless `isDevelopment` (`src/lib/env.ts`, the only `process.env` read, a stand-in until P1.7's Zod env). Playwright has two projects/servers: production build on 3100 (what users get; also asserts the 404s) and `next dev` on 3200 (gallery) | A `_dev` folder is a private folder (never routable); a `%5Fdev` folder makes `next dev` and `next build` emit conflicting route types (`"/[locale]/%5Fdev"` vs `"/[locale]/_dev"`), which broke `pnpm verify` after any dev session. Next 16 writes dev output to `.next/dev`, so both servers can run together | — |
+| D21 | 2026-11-05 | i18n (P1.4): next-intl 4.14.9; locales `it` (default) and `en`; prefix always; locale from `next/root-params` (Cache Components); `proxy.ts` (Next 16 name) with matcher `/((?!api\|trpc\|_next\|_vercel\|.*\\..*).*)`; **`localeCookie: false`** and **`alternateLinks: false`** (hreflang only in HTML metadata); typed messages with Italian as the source shape; root layout is `app/[locale]/layout.tsx` and there is no `app/layout.tsx`; canonical and hreflang are absolute via `siteUrl` (`resolveSiteUrl`: explicit var, Vercel production domain, `VERCEL_URL`, localhost); `tsconfig` excludes `.next/dev`; `@parcel/watcher` and `@swc/core` build scripts stay disabled | The URL carries the language so no storage is needed (GDPR); a pass-through root layout would break root params; stale dev types broke `verify` after every route change; the two scripts only serve next-intl features we do not use (CLAUDE.md §5) | — |
 
 ---
 
@@ -96,7 +99,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B5 | Vercel: confirm the team is on **Pro** (not Hobby; Hobby is non-commercial only), MFA is on, and the DPA is accepted. Deployment itself is done | you | before launch (P4.7) |
 | B7 | Do the P0.7 machine steps (`docs/TOOLING_SETUP.md` §1–§2). Partly visible: `mcp__21st__*` tools are now registered in this session, so the server was approved; not exercised, and `claude mcp list` output / the design-skill fork are unconfirmed | you | P1.3+ (21st), optional second opinion for P1.1 (design skill) |
 | B8 | ~~Approve `docs/DESIGN.md` §11~~ approved 2026-11-05 (amber, Instrument Sans + JetBrains Mono, dark-first, sharp radii). **Still open:** does INAMBIENTE already have a logo / brand colours? If yes, reconcile with the tokens before P1.8 (header) | you | P1.8 |
-| B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production) | you | P1.7 / P2.6 |
+| B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production). **Now also drives canonical and hreflang URLs** (P1.4); until it is set they use Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`) | you | P1.7 / P2.6 / before indexing |
 
 ---
 
@@ -131,6 +134,12 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P1.4 decisions for you:** (1) **No locale cookie.** next-intl's default `NEXT_LOCALE` cookie is off: the URL is the preference. Trade-off: someone who picks English on a bookmark-less visit is redirected by browser language again on their next `/` visit. Say if you want the cookie; it would then need a row in the cookie policy (P4.2). (2) **Placeholder copy** in `messages/*.json` is mine: company name, "site under construction", a one-line description derived from CLAUDE.md, and the 404 text. Treat it as a stand-in for P2.1. (3) **Production domain (B6):** until `NEXT_PUBLIC_SITE_URL` is set, canonical and hreflang use Vercel's production domain; set it before the site is indexed.
+- **P1.4 / "preserving security headers" is only structural for now.** No security headers exist yet (they are P1.7), so I could not test their survival. `src/proxy.ts` returns next-intl's own response object, so headers and the CSP nonce added there in P1.7 apply to redirects too; keep that shape. Verify with a real header once P1.7 lands (securityheaders.com on a redirect: `/`).
+- **P1.4 / I changed existing things to make this work:** `app/layout.tsx`, `app/page.tsx` and the scaffold page test are gone (replaced under `[locale]`); `tsconfig.json` now excludes `.next/dev` (IDE route types now come from `.next/types`, i.e. after `pnpm typecheck` or a build, not from a dev session); `vitest.config.mts` inlines `next-intl`; `playwright.config.ts` gives the production test server `NEXT_PUBLIC_SITE_URL`, and probes the gallery URL for dev readiness; `pnpm-workspace.yaml` records `allowBuilds: false` for `@parcel/watcher` and `@swc/core` (pnpm 12 fails the install otherwise); `docs/DEPLOYMENT.md` and `.env.example` text about the site URL updated; `src/components/ui/button.test.tsx` uses an external href because a catch-all route makes every internal-looking `<a href>` trip `@next/next/no-html-link-for-pages`.
+- **P1.4 / known limits:** the switcher keeps the path, not the query string or hash; `next/root-params` does not work in Route Handlers or Server Actions yet (pass the locale explicitly, see `docs/I18N.md`); `global-not-found.tsx` is experimental and not enabled, so requests that the proxy skips and that match no file (e.g. `/x.png`) get Next's plain built-in 404, not a localized one; the 404 title lives in the catch-all route because nested `not-found.tsx` cannot set it; `public/*.svg` from the scaffold are now unused (remove with the home page in P2.2); Italian is the source of the message types, so a string that exists only in English is not caught by types, only by the parity test.
+- **P1.4 / for P1.8 and P2.x:** mount `Toaster` and `TooltipProvider` and add the header with the switcher and skip link in `[locale]/layout.tsx` (the switcher takes a `className`; `-ml-3` is used at left-aligned call sites to cancel its padding). Pass any new client-component namespace through the provider in the layout. Add `title: { absolute }` only for same-segment pages (home, 404); child segments get the template.
+- **P1.4 / dependency facts:** `next-intl` MIT (registry, 2026-11-05), peers cover Next 16 and React 19; it pulls 24 packages, two with install scripts that stay disabled. Download counts not checked.
 - **P1.3 / deviations from the roadmap wording:** the gallery is served at `/_dev` by a rewrite from `dev-tools` (see D20), and `src/lib/env.ts` now exists as a stand-in that reads `NODE_ENV`, which CLAUDE.md §6 would otherwise reserve for the Zod module (P1.7 must absorb it and keep the `isDevelopment` export). The roadmap says "shadcn/ui init"; nothing was initialised or generated by the CLI, there is no `components.json`, so `shadcn add` later would need one and a diff review (record it in `docs/THIRD_PARTY.md`).
 - **P1.3 / new dependencies** (named by you or by CLAUDE.md's stack): `@radix-ui/react-{dialog,select,checkbox,tabs,tooltip,toast,label,slot}` (MIT), `lucide-react` (ISC; pnpm resolved 1.68.0 because 1.69.0 was published the same day and the release-age policy held it back), `class-variance-authority` (Apache-2.0), `clsx`, `tailwind-merge` (MIT). Licences from the registry on 2026-11-05; download counts not checked.
 - **P1.3 / axe exception, deliberate and narrow:** while a Select listbox is open Radix sets `aria-hidden` on the page and keeps focus inside the listbox; axe only treats `role="dialog"` as modal and reports `aria-hidden-focus`. The open-Select scan disables that one rule, and the test asserts the premise (Tab cannot leave the listbox). Dialog and Sheet are scanned with all rules.
@@ -192,43 +201,45 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass
-pnpm verify       → pass (typecheck → lint --max-warnings=0 → test → build); test step: 7 files, 50 tests
-pnpm test:e2e     → pass, 35 tests (Chromium): 12 against the production build (smoke, themes, fonts,
-                    dev routes are 404) + 23 against `next dev` (gallery: both themes + reduced motion)
+pnpm install --frozen-lockfile → pass (exit 0 after recording `@parcel/watcher` and `@swc/core` as `allowBuilds: false`)
+pnpm verify       → pass (typecheck → lint --max-warnings=0 → test → build); test step: 13 files, 103 tests;
+                    the build lists `/it` and `/en` as static and "ƒ Proxy (Middleware)"
+pnpm test:e2e     → pass, 63 tests (Chromium): 39 against the production build + 24 against `next dev`
+                    (23 gallery tests + 1 gallery language-switcher test)
 pnpm knip         → pass
 pnpm format:check → pass (does not cover *.md)
 
-P1.3 checks:
-  gallery (23 e2e)  → per theme (dark and light): axe clean at rest; Button/Tab/field heights >= 44 px;
-                      labelled fields, aria-invalid + described error; every control shows a 2 px solid
-                      ring in the focus token colour (computed style of the focused element); checkbox
-                      hit area reaches 20 px beyond the 24 px box; Space toggles, group shows aria-checked
-                      "mixed"; select opens/chooses by keyboard and its highlighted option has the ring;
-                      tabs: arrows and End; tooltip opens on keyboard focus, Escape closes; dialog: focus
-                      moves in, 8 Tabs + Shift+Tab stay inside, Escape closes and returns focus, axe clean
-                      while open; sheet: all four sides open/close/return focus, axe clean; toast: live
-                      region announcements (polite / assertive), error stays after +10 s on a fake clock
-                      while the success toast expires, close button works. Reduced motion: dialog and
-                      overlay computed animation-name is `none`
-  production 404    → /it/_dev/ui, /en/_dev/ui, /it/_dev, /it/dev-tools/ui all 404 on `next start`
-                      (e2e, and by hand with PowerShell)
-  guards can fail   → mutation: `outline-none` on Button, `min-h-8` on Button, empty dialog close label ->
-                      exactly the focus-ring, size and dialog-axe tests failed (both themes), resting-axe
-                      tests correctly stayed green; all reverted
-  bugs found by the tests (all fixed) → Select item had NO visible focus outline (`outline-none` in
-                      Tailwind v4 sets the shared style variable to none; axe cannot see this);
-                      `motion-reduce:animate-none` never applied (specificity of data-attribute variants),
-                      now a token-level override + guard test; dev and build generated conflicting route
-                      types for a `%5Fdev` folder, breaking `pnpm verify` after any `pnpm dev`
-  unit (50)         → cn() incl. custom tokens, Button, toast store (fake timers), dialog/sheet names,
-                      reduced-motion token guard (plus negative cases); knip clean (5 needless exports removed)
-  visual            → screenshots of the dev gallery inspected: full page in both themes at 1280 px; dialog,
-                      select, sheet and toast stack at 1280 px (dark, light sheet); dialog, sheet and
-                      toast at 360 px. All as designed; no layout defects found
-  NOT done          → hover states visually; light-theme dialog/select/toast at 1280 px and dark/light
-                      tooltip screenshots; touch/pointer-only testing; 200 % zoom; screen-reader
-                      (NVDA/VoiceOver) listening test; Firefox/WebKit
+P1.4 checks:
+  type safety       → mutation on the real files: renamed `home.status` in it.json -> typecheck failed in
+                      4 places (the page's t("status"), the en/it parity assertion, a test, and the
+                      request.ts loader `satisfies`); removed `notFound.backHome` from en.json only ->
+                      typecheck failed in 2 places AND the runtime key-parity test failed. Both reverted.
+                      `@ts-expect-error` cases in messages.test.ts make "a missing key is a compile error"
+                      part of every `pnpm typecheck`
+  proxy / redirects → unit (real NextRequest): / -> /en, /it, default /it for fr or no header, path kept,
+                      no redirect when prefixed, never a Set-Cookie. e2e on the real server: 307 with
+                      Location, no set-cookie header on /, /it, /en, /foo; a browser with en-GB lands on /en
+  static assets     → /favicon.ico and /next.svg 200 without redirect, a missing /x.png is a plain 404,
+                      a script under /_next/static is 200; matcher unit-tested against 18 paths
+  guards can fail   → mutation: `localeCookie: true` + matcher without the dot exclusion -> 8 unit tests
+                      (cookie, 6 asset paths, routing config) and 4 e2e tests failed; both reverted
+  pages             → /it and /en: html lang, localized title, description, canonical, hreflang it/en/
+                      x-default (absolute URLs), one h1, axe clean; 404s localized (title, heading, status
+                      404, axe clean); /foo redirects by browser language and ends as a 404; /xx/about 404
+  switcher          → labelled nav (Lingua / Language), aria-current on the active link, lang + hreflang,
+                      prefetch off, >= 44 px, keyboard Enter + 2 px focus ring; switches / and back; keeps
+                      /it/pagina/non-esiste -> /en/pagina/non-esiste; keeps /it/_dev/ui -> /en/_dev/ui
+  bugs found by the tests (all fixed) → home page title had no brand suffix (layout `title.template` does
+                      not apply to the same segment); a nested not-found.tsx cannot set <title> (moved to
+                      the catch-all route); stale `.next/dev/types` broke typecheck after routes moved
+                      (tsconfig now excludes `.next/dev`); first-compile race on the dev gallery in Playwright
+                      (readiness probe now hits the gallery); `next/server` import broke the proxy unit test
+                      (Vitest inlines next-intl); a font test assumed JetBrains Mono is always fetched
+  visual            → production build at 1280 and 360 px inspected: /it dark, /en light, 404 in both
+                      languages and themes; found and fixed switcher text indentation
+  NOT done          → hover states visually; 200 % zoom; real-browser check of Accept-Language other than
+                      en/it variants; screen-reader listening test; Firefox/WebKit; the live Vercel
+                      deployment (Accept-Language redirect, canonical, hreflang) after you push
 ```
 
 ---
@@ -236,25 +247,27 @@ P1.3 checks:
 ## 10. Proposed commit(s) for the work above
 
 ```
-feat(ui): add accessible primitives and a dev-only gallery
+feat(i18n): add italian and english routing with next-intl
 
-Add Button, Input, Textarea, Label, Checkbox, Select, Dialog, Sheet,
-Tabs, Tooltip and Toast, written by hand in the shadcn pattern on
-Radix primitives and restyled to the design tokens: 44px targets,
-focus rings from the focus token, no copy inside components (close
-and viewport labels are required props), and animations driven by
-tokens that switch off under prefers-reduced-motion.
+Route every page under [locale] with Italian as default and English
+as secondary. proxy.ts (the Next 16 name for middleware) redirects
+/ and locale-less paths by Accept-Language, and leaves api routes,
+Next and Vercel internals and anything with a file extension alone.
+No locale cookie is set, so nothing is stored about the visitor.
 
-Add a gallery at /[locale]/_dev/ui that returns 404 outside
-development. It lives in a normal dev-tools folder and is exposed
-through a rewrite, because a %5Fdev folder makes next dev and next
-build emit conflicting route types and breaks verify after dev.
+The locale comes from next/root-params, which Cache Components
+requires; the root layout moves to app/[locale]/layout.tsx. Messages
+live in messages/it.json and en.json. A key that is missing from
+it.json, or an en.json that drifts from it, fails typecheck, and
+tests guard parity and placeholders.
 
-Cover everything with Playwright against next dev (keyboard, focus
-ring, target size, reduced motion, axe in both themes with each
-overlay open) and Vitest. Record provenance in docs/THIRD_PARTY.md.
+Add an accessible language switcher that keeps the current path,
+localized 404 pages, and canonical and hreflang metadata built from
+an absolute site URL. Replace the Create Next App placeholder with a
+neutral one. Exclude .next/dev from tsconfig so stale dev types
+cannot break verify. Document the setup in docs/I18N.md.
 
-Task: P1.3
+Task: P1.4
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

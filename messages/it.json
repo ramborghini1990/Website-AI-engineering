@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "siteName": "INAMBIENTE",
+    "home": {
+      "title": "Ingegneria AI e sviluppo full-stack",
+      "description": "INAMBIENTE progetta agenti AI, automazioni dei processi e applicazioni web in produzione per startup, PMI e grandi aziende."
+    },
+    "notFound": {
+      "title": "Pagina non trovata"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Lingua",
+    "names": {
+      "it": "Italiano",
+      "en": "English"
+    }
+  },
+  "home": {
+    "title": "INAMBIENTE",
+    "status": "Il nuovo sito è in costruzione."
+  },
+  "notFound": {
+    "title": "Pagina non trovata",
+    "body": "L'indirizzo richiesto non esiste o è stato spostato.",
+    "backHome": "Torna alla home"
+  }
+}

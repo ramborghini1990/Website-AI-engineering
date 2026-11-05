@@ -3,6 +3,7 @@
 import { Copy } from "lucide-react";
 import { useId, useState, type ComponentProps, type ReactNode } from "react";
 
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -233,6 +234,7 @@ export function UiGallery() {
             keyboard.
           </p>
           <ThemeSwitch />
+          <LanguageSwitcher />
         </header>
 
         <Section title="Button">
