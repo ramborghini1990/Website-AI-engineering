@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.6 committed as `e398ebd`)_
+_Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.7 committed as `259e34a`)_
 
 ---
 
@@ -10,21 +10,20 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.6 committed a
 
 | Field | Value |
 |---|---|
-| Phase | 1 — Core framework, design system & motion (Phase 0 closed 7/7, carry-overs in section 8) |
-| Active task | `P1.7` — Security headers, nonce-based CSP (Report-Only by default) in `proxy.ts`, Zod-validated env with a server/client split and `server-only` |
-| Status | **acceptance criteria met, awaiting review (not committed)**; two decisions need you (below) |
-| Next task | `P1.8` — layout shell (header, footer with company legal data, skip link, 404/500); do not start unprompted |
+| Phase | 1 — Core framework, design system & motion: **all 8 tasks done**, P1.8 awaiting review (Phase 0 closed 7/7; carry-overs in section 8) |
+| Active task | `P1.8` — Layout shell: accessible header (nav, localized links, theme switch, language switcher, primary CTA), skip link to `#main-content`, footer with the corrected identity and Italian location disclosures, `Toaster` and `TooltipProvider` in the root layout; plus the identity correction |
+| Status | **acceptance criteria met, awaiting review (not committed)**; three small decisions need you (below) |
+| Next task | `P2.1` — information architecture and copy deck (Phase 2); do not start unprompted |
 
 **Plan for the active task**
-1. `src/lib/env-schema.ts` (pure Zod schemas and rules), `src/lib/env.ts` (`server-only`, validated at import), `src/lib/env.client.ts` (public only, lenient). ESLint rule: `process.env` only in those two.
-2. `SKIP_ENV_VALIDATION`: honoured only during `next build`, ignored at runtime; set in the CI `verify` job.
-3. `src/lib/security/csp.ts` (pure) + `src/proxy.ts`: per-request nonce, CSP (`CSP_MODE` = `report-only` default | `enforce` | `off`), fixed security headers, composed with next-intl's redirect. Turnstile and the analytics origin only when configured.
-4. Rendering: a nonce needs per-request HTML, so `cacheComponents` / `partialPrefetching` are off and the root layout calls `await connection()` (see D24).
-5. Tests: unit (env, guard, CSP, proxy), e2e on the production build **in enforce mode**; build-level mutations; `docs/SECURITY.md`.
+1. Identity: the earlier business name was wrong. `src/lib/business.ts` is the single source (placeholder brand token `AI Solutions & Engineering`, owner `Ramin Rashidi Alavijeh`, Turin location, `vatNumber` / `reaNumber` / `pec` = `null` until registered, validated when filled). Messages use `{brand}`. The old name was removed from messages, metadata, docs, tests and CLAUDE.md; `identity.test.ts` keeps it out.
+2. Shell in `src/components/shell/`: `SkipLink`, `SiteHeader`, `MainNav`, `ThemeSwitch` + `ThemeSync`, `SiteFooter`; navigation as data (`src/lib/navigation.ts`, a link appears only when its page exists); theme logic in `src/lib/theme.ts`.
+3. Root layout owns the single `<main id="main-content">`, providers (`TooltipProvider`, `LenisProvider`, `Toaster`) and a nonce'd pre-paint theme script. Pages render a `div`, not a `main`. `error.tsx` is the 500 page.
+4. Tests: unit (config, navigation, theme, shell components, identity guard, error page) and `e2e/shell.spec.ts` (48 tests on the enforced-CSP production build); visual check in both themes and at 360 / 768 / 1280.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. All throwaway files (lint probe, client-leak probe) and temporary edits (layout `connection()` mutation, home-page mutations in the previous task) were removed or restored; no `next` / `playwright` process and no listener on 3100, 3101, 3200 (netstat + command-line check). A stale server of mine on 3101 once gave a false 200 in a runtime check; I found it, stopped it by PID and redid the check.
-- **Decisions needed from you:** (1) **every page is now dynamic and Cache Components is off** (D24, section 8 "P1.7 / decision 1"): the price of a strict nonce CSP; (2) **nothing is "required" in production yet** (section 8 "P1.7 / decision 2"), so "build fails if a required var is missing" holds for incomplete groups and malformed values, not for absent services.
+- Nothing half-done. Throwaway specs and screenshots are deleted; every server I started was stopped by PID; no `next` / `playwright` process and no listener on 3100, 3101, 3200 (netstat + command-line check).
+- **Decisions needed from you** (section 8, "P1.8 / decisions for you"): (1) the nav shows **Home only** until the P2.x pages exist; (2) the CTA points at the footer contact block (`#contact`) until the inquiry page exists; (3) I edited **CLAUDE.md** §1 (the old business name) and dropped "capitale sociale" from the footer.
 
 ---
 
@@ -33,7 +32,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.6 committed a
 | Phase | Status | Tasks done | Notes |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
-| 1 Core, design system, motion | ◐ | 6/8 | P1.1–P1.6 committed; P1.7 awaiting review/commit |
+| 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
 | 2 Landing & value proposition | ☐ | 0/7 | |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
@@ -57,6 +56,7 @@ _Last updated: 2026-11-05 · by: Claude Code · branch: `main` (P1.6 committed a
 | 2026-11-05 | P1.4 | next-intl routing (it/en), proxy, typed messages, switcher, hreflang | `7fc6b2d` |
 | 2026-11-05 | P1.5 | Lenis + GSAP in one loop, `useMotion` / `useReducedMotion`, lazy engine, CLS 0, no ScrollTrigger leaks | `f41ee66` |
 | 2026-11-05 | P1.6 | FX library: text reveal, magnetic button, marquee, spotlight card, gradient mesh, pinned section; static fallbacks, lazy chunks | `e398ebd` |
+| 2026-11-05 | P1.7 | Zod-validated env (server-only guard), nonce CSP (Report-Only default) and security headers in `proxy.ts`, per-request rendering | `259e34a` |
 
 ---
 
@@ -90,6 +90,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D22 | 2026-11-05 | Motion (P1.5): `gsap`, `@gsap/react`, `lenis` (named in CLAUDE.md §5). `src/lib/motion/gsap.ts` is the only GSAP import point and registers once (no-op on the server). **One loop:** Lenis `autoRaf:false`, `gsap.ticker` drives `lenis.raf`, Lenis `scroll` drives `ScrollTrigger.update()`, `lagSmoothing(0)` while running and restored on cleanup; touch stays native (`syncTouch:false`). Components write animations only through `useMotion` (`useGSAP` + `gsap.matchMedia` with `reduced` / `full`), so all tweens and triggers are reverted on unmount, deps change and live preference flips. Reduced contract: final state or ≤ 0.16 s opacity fade, no pin/scrub/loops. **Lazy engine:** `LenisProvider` loads the chunk after idle (≈ 47 KB transferred, 119 KB raw) and not at all under reduced motion. Radix scroll lock (`body[data-scroll-locked]`) stops Lenis; scrollable overlays carry `data-lenis-prevent`. Motion tokens are mirrored in `tokens.ts` and parity-tested against `globals.css`. Layout: `min-h-dvh` on `<body>`, no height on `<html>`, upstream `html.lenis{height:auto}` not copied (it measured CLS 0.062 with the previous `h-full` layout; with the fix 0.0000). Playwright runs a `globalSetup` that warms the dev routes sequentially | Meets CLAUDE.md §8 literally (single loop, single registration, cleanup via `useGSAP`, reduced motion implemented in the hook and the provider); the lazy chunk keeps motion code off the critical path; mirrored tokens avoid two sources of truth drifting silently; parallel first compiles of new `next dev` routes crashed with `Unexpected end of JSON input` | — |
 | D23 | 2026-11-05 | FX library (P1.6): six components in `src/components/fx/`, **all written in-house** (no React Bits / 21st.dev code, no new dependency). **Split by weight:** `TextReveal`, `MagneticButton`, `SpotlightCard`, `ScrollPinnedSection` are a small client wrapper (final-state markup + ref + `next/dynamic(ssr:false)`) plus a lazy `*.motion.tsx` that calls `useMotion`; `Marquee` and `GradientMesh` are server components with zero JS (CSS keyframes from `--animate-*` tokens, off under reduced motion). The motion chunk mounts only through `useFxReady()`: after idle, never under reduced motion, and for cursor effects only with hover + fine pointer. `useMotion` now lets `build` return a cleanup and passes `contextSafe` (tweens created in event handlers escape the revert otherwise). Static fallbacks: no JS, reduced motion and touch all show the plain final state. Specific choices: mesh is three CSS blobs, not a `<canvas>` (no second frame loop); mesh peak 5 % because the contrast test fails above about 10 % for the strongest overlap; marquee pause is a native checkbox (WCAG 2.2.2, works without JS); marquee copies stretch to `min-w-screen`; the pinned section lives in an unpinned wrapper div and refuses to pin content taller than the viewport; text reveal leaves headlines already on screen alone; showcase is a separate dev page, not part of the UI gallery | Meets the roadmap acceptance (each has a static fallback; FX JS is not in pages that do not use it, proven on the production build); the gallery's per-theme axe suite is untouched by a pinned scene; no licence or supply-chain exposure | — |
 | D24 | 2026-11-05 | Security (P1.7). **Env:** Zod schemas in pure `env-schema.ts`; `env.ts` is `import "server-only"` (a client import fails `next build`), `env.client.ts` holds `NEXT_PUBLIC_*` only and never throws; `process.env` is read only in those two (ESLint rule + test); errors name variables, never values; blank = unset; groups complete-or-absent (Turnstile, Upstash, email); `DEMOS_LIVE_ENABLED` fails closed and requires the key and Redis; `REQUIRED_IN_PRODUCTION` exists and is **empty** (no consumer yet); `SKIP_ENV_VALIDATION=1` only during `next build`, never at runtime; new deps `zod` 4.6.7 and `server-only` 0.0.1 (both MIT, zero dependencies; the task named both). **Headers/CSP in `proxy.ts`:** nonce per request (128-bit), `script-src 'self' 'nonce-…' 'strict-dynamic'`, `style-src` with nonce plus `style-src-attr 'unsafe-inline'`, `connect/frame/object/base/form/frame-ancestors` locked to `'self'`/`'none'`; Turnstile and the analytics origin only when configured; `CSP_MODE` default `report-only`; fixed headers (nosniff, Referrer-Policy, X-Frame-Options, Permissions-Policy, COOP, HSTS in production). **Rendering:** `cacheComponents` and `partialPrefetching` OFF and `await connection()` in the root layout, so every page is rendered per request | A nonce can only be stamped while rendering; measured on this app: with Cache Components on, `/it` was cached with zero `nonce=` attributes, and the `instant = false` variant turned unknown paths into soft 200s. With the chosen setup every script carries the nonce, unknown paths return 404, redirects work, and an enforced policy runs the whole site with zero violations. Cost: HTML no longer comes from the CDN (docs/SECURITY.md §3) | — |
+| D25 | 2026-11-05 | Identity and shell (P1.8). **Identity:** the site belongs to an independent AI practice in Turin owned by Ramin Rashidi Alavijeh, not a company; the earlier business name and legal form were an assumption and are gone. The trade name is a **placeholder token** (`AI Solutions & Engineering`) in `src/lib/business.ts`, the only place that spells it (messages use `{brand}`; `identity.test.ts` enforces both that and the removal of the old name). Fiscal data are `null` (rendered "not yet available", nothing invented) and validated when set (Partita IVA with its check digit, REA `TO-1234567`, PEC as email); `reaNumber: false` removes the row. **Shell:** skip link, non-sticky header (wrapping row, DOM order = visual order), one `<main id="main-content">` in the layout, footer, `TooltipProvider`, `Toaster`; navigation is data and lists only pages that exist; the CTA targets the footer contact block until `/contact` exists; theme = three native radios (automatic / dark / light) with one `theme` localStorage key written only on an explicit dark/light choice, applied before paint by a nonce'd inline script and re-applied by `ThemeSync` after a layout remount; `error.tsx` is the 500 page | A wrong legal identity in the footer of a public site is a real risk, so there is one source of truth and a guard test. No dead links in the header; a sticky header would cover focused elements (WCAG 2.2 2.4.11) and the FX pinned scenes; native radios give correct group semantics and arrow keys without ARIA code | — |
 
 ---
 
@@ -98,12 +99,12 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | # | Blocker / question | Owner | Needed by task |
 |---|---|---|---|
 | B1 | ~~Confirm decisions D1–D8~~ confirmed 2026-11-03 | you | — |
-| B2 | Company legal data for footer (sede legale, P.IVA, REA, capitale sociale, PEC) | you | P1.8 |
+| B2 | Fiscal registration data for the footer: **Partita IVA, REA (if it applies to your legal form), PEC**. The footer shows "not yet available" until you enter them in `src/lib/business.ts` (docs/IDENTITY.md). Also: street number and postcode if you want them shown, and whether the line should read "Sede" (as now) or "Sede legale" | you | before launch (P1.8 is built; values are yours) |
 | B3 | Privacy contact email + retention period for inquiries | you | P2.5 / P4.3 |
 | B4 | Legal review of privacy/cookie policy texts | you / counsel | P4.2 |
 | B5 | Vercel: confirm the team is on **Pro** (not Hobby; Hobby is non-commercial only), MFA is on, and the DPA is accepted. Deployment itself is done | you | before launch (P4.7) |
 | B7 | Do the P0.7 machine steps (`docs/TOOLING_SETUP.md` §1–§2). Partly visible: `mcp__21st__*` tools are now registered in this session, so the server was approved; not exercised, and `claude mcp list` output / the design-skill fork are unconfirmed | you | P1.3+ (21st), optional second opinion for P1.1 (design skill) |
-| B8 | ~~Approve `docs/DESIGN.md` §11~~ approved 2026-11-05 (amber, Instrument Sans + JetBrains Mono, dark-first, sharp radii). **Still open:** does INAMBIENTE already have a logo / brand colours? If yes, reconcile with the tokens before P1.8 (header) | you | P1.8 |
+| B8 | ~~Approve `docs/DESIGN.md` §11~~ approved 2026-11-05 (amber, Instrument Sans + JetBrains Mono, dark-first, sharp radii). **Still open:** the final trade name, and any logo / brand colours for it (the header wordmark is plain text in the placeholder brand today); reconcile the design direction with them when they exist | you | when the name is chosen |
 | B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production). **Now also drives canonical and hreflang URLs** (P1.4); until it is set they use Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`) | you | P1.7 / P2.6 / before indexing |
 
 ---
@@ -139,6 +140,12 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P1.8 / decisions for you.** (1) **Navigation shows Home only.** The planned IA (Services, Work, Process, About) has no pages yet and a link to a 404 is worse than a short nav, so `src/lib/navigation.ts` marks those `available: false` and the header skips them; flip a flag when its page ships (a test fails if an available item has no page). The wrapping row holds about five items; beyond that use a menu (Sheet). (2) **The primary CTA ("Parliamone" / "Get in touch") scrolls to the contact block in the footer** (`#contact`, which holds location and, once filled, PEC) because `/contact` does not exist; at P2.5 change `contactHref` and render it with the i18n `Link`. (3) **Two edits you did not literally ask for:** `CLAUDE.md` §1 named the old business, so I rewrote that one sentence (revert it if you prefer to word it yourself); and the footer has no "capitale sociale" row (it applies to companies, you listed address, Partita IVA, REA and PEC). Other docs that named the old business (BLUEPRINT, GDPR_CHECKLIST, DESIGN, I18N, THIRD_PARTY, tooling docs, `i18n.spec`) were reworded too; `docs/GDPR_CHECKLIST.md` now says which disclosures depend on the legal form.
+- **P1.8 / legal points I did not decide.** Whether an REA entry, PEC and a Registro Imprese office apply depends on your legal form (individual practice vs company): confirm with your accountant; `reaNumber: false` removes the REA row. The address is shown as you gave it (Corso Regina Margherita, Torino (TO)), without a street number or postcode, labelled "Sede" / "Location" and not "Sede legale", because I do not know it is the registered address. The Italian and English footer copy is mine and needs the same professional review as the legal pages (P4.2). No email address is published anywhere (B3 is open).
+- **P1.8 / theme storage must go in the cookie policy (P4.2).** One `localStorage` key, `theme`, written only when a visitor picks dark or light, removed when they pick automatic. It is a functional preference set by the visitor's own action; whether it needs disclosure or consent is for the policy review. The nonce'd inline script in `<head>` is the layout's first consumer of the CSP nonce.
+- **P1.8 / things I changed outside `src/components/shell`:** `src/app/[locale]/layout.tsx` (shell, providers, theme script, `generateMetadata` from the config), `page.tsx` / `not-found.tsx` / `[...rest]/page.tsx` (no own `<main>`, no own language switcher, brand from the config), new `error.tsx`, the dev pages (`ui-gallery`, `fx`, `motion`: no own `<main>`; the gallery lost its duplicate switcher, theme preview, `Toaster` and `TooltipProvider`, and its toast e2e now expects the layout's localized labels), `messages/*.json` (`siteName` removed, shell namespaces added, `{brand}`), `e2e/support/motion.ts` (`waitForHydration` now waits on a header link, because pages no longer have a link inside `main`), `e2e/i18n.spec.ts` and `e2e/security.spec.ts`, `e2e/fx.spec.ts` (one axe test now waits for headline reveals to finish: a half-faded word is a transient state), docs (`IDENTITY.md` new; DESIGN §8 and new §8b, SECURITY, GDPR_CHECKLIST, others reworded).
+- **P1.8 / bugs found by the tests (all fixed):** (a) the 404 page's title read `metadata.siteName` after I removed that key: caught by `i18n.spec`, and the incremental `tsconfig.tsbuildinfo` cache is the likely reason my local `pnpm typecheck` stayed green (a clean `tsc --incremental false` and a deliberate re-introduction of the bad key both fail correctly; CI starts from a clean checkout); (b) **switching language remounts the root layout and replaced `<html>`, dropping the theme class** until the next reload: fixed with `ThemeSync` (layout effect, before paint); (c) at 768 px the theme options were squeezed to 34 px wide and at 360 px the header was four rows: now `shrink-0` and one wrapping row in DOM order (three rows at 360, one from `lg`); (d) my own e2e clicked a visually hidden radio (visitors click the 44 px label); (e) one FX axe test scanned a half-faded headline.
+- **P1.8 / limits.** `error.tsx` covers errors under the layout; a failure in the root layout itself needs `global-error.tsx` (it must render its own `<html>`, so it cannot use the message files: follow-up, needs a decision on its copy). `Toaster` and `TooltipProvider` now load on every page (small, Radix; first-load JS not measured), and nothing in the app uses a tooltip yet. The theme options have no tooltips (the `title` attribute only). The footer's year is computed per request. The header is not sticky (if it becomes sticky: `scroll-padding-top` and a pin offset for the FX scenes). Verified only in Chromium. Legal-page links (privacy, cookies, terms) are not in the footer because the pages do not exist (P4.2): add them then; the privacy link is required on every page.
 - **P1.7 / decision 1 (yours): every page is rendered per request, Cache Components is off.** A strict nonce CSP cannot work with prerendered HTML (Next's docs say PPR is incompatible; I measured it: the cached `/it` had **zero** `nonce=` on 15 scripts, so an enforced policy would have blocked its own bootstrap). Tried: `connection()` with Cache Components on (build error), plus `instant = false` (builds, but unknown paths answered **200**, a soft 404, and the catch-all stayed a prerendered shell), then Cache Components off + `await connection()` in the root layout (nonce on every script, real 404s, redirects unchanged): that ships. Costs: HTML comes from a `fra1` Function, not the CDN (higher TTFB, more invocations; **not measured**, Core Web Vitals not re-measured), `Cache-Control: private, no-cache, no-store` on HTML, and `generateStaticParams` in the layout is now only informational. `next/root-params` (i18n) works without the two settings. The alternative is Next's experimental SRI hash CSP, which keeps static pages but needs `'unsafe-inline'` for Next's inline bootstrap scripts, i.e. a weak script policy. If you prefer that, say so; `e2e/security.spec.ts` would then change. A mutation test shows the suite fails if static rendering returns unnoticed (5 of 7 selected tests failed).
 - **P1.7 / decision 2 (yours): nothing is required in production yet.** The roadmap says "build fails if a required env var is missing". Requiring `DATABASE_URL`, Redis, Turnstile, email now would fail your live Vercel build (no variables set, services not created). So `REQUIRED_IN_PRODUCTION` is empty and the build fails for what it can check today: malformed values, half-set groups (a Turnstile key without its secret, a Redis URL without its token, partial email), and `DEMOS_LIVE_ENABLED=true` without the Anthropic key and Redis. Proven by real builds: `DEMOS_LIVE_ENABLED=true pnpm build` exits 1 naming `ANTHROPIC_API_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`; `NEXT_PUBLIC_SITE_URL="not a url"` exits 1. The mechanism for "required" is tested with an injected list. **Each task that adds a consumer must add its variables to `REQUIRED_IN_PRODUCTION` (P2.5: `DATABASE_URL`, `UPSTASH_*`, `TURNSTILE_*`, `EMAIL_*`, `RATE_LIMIT_IP_SALT`) and give the CI `e2e` job synthetic values.** Locally, copy `.env.example` to `.env.local` (its placeholders pass the strict schema; a test proves it).
 - **P1.7 / new dependencies** (named in the task and in CLAUDE.md §6): `zod` 4.6.7 (MIT, ~452 M weekly downloads, zero dependencies, was already a transitive dev dependency) and `server-only` 0.0.1 (MIT, ~33 M weekly, zero dependencies, last published 2022; Next aliases it itself, the package supplies the types and the Vitest alias). Registry data from 2026-11-05.
@@ -228,45 +235,48 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass (after `pnpm add zod server-only`; lockfile +11 lines)
-pnpm verify       → pass, exit 0 with NO env file or variables (typecheck → lint --max-warnings=0 → test →
-                    build); test step: 32 files, 379 tests (244 before P1.7)
-pnpm test:e2e     → pass, 148 tests (Chromium), twice in a row (no flake): 124 existing + 24 in
-                    e2e/security.spec.ts; the production test server runs CSP_MODE=enforce
-pnpm knip         → pass (knip.json: env.client.ts is an entry)
+pnpm install --frozen-lockfile → pass (no dependency changed)
+pnpm verify       → pass, exit 0 with NO env file (typecheck → lint --max-warnings=0 → test → build); test step:
+                    39 files, 462 tests (379 before P1.8)
+pnpm test:e2e     → pass, 196 tests (Chromium): 148 existing + 48 in e2e/shell.spec.ts; run three times, the
+                    first full run after the shell had 4 failures that were real (below), a later run 1 flaky
+                    axe test (fixed, then 3/3 alone and a clean full run), the last two full runs 196/196
+pnpm knip         → pass
 pnpm format:check → pass (does not cover *.md)
 no `next` / `playwright` process and no listener on 3100, 3101, 3200 afterwards
 
-P1.7 checks:
-  client imports server env → mutation: a "use client" component importing @/lib/env made `pnpm build` exit 1:
-                       "You're importing a module that depends on server-only" with the import trace
-                       ./src/lib/env.ts <- ./src/components/<file>. The unit guard (env.guard.test.ts) failed on
-                       the same files in milliseconds. Removed afterwards. The guard has negative controls
-                       (direct, indirect, lazy `import()`, bare `server-only`)
-  missing / invalid vars → real builds: `DEMOS_LIVE_ENABLED=true` -> exit 1, names ANTHROPIC_API_KEY and
-                       UPSTASH_REDIS_REST_URL/TOKEN; `NEXT_PUBLIC_SITE_URL="not a url"` -> exit 1 ("Invalid URL",
-                       no value printed); plain build with no env -> exit 0
-  SKIP_ENV_VALIDATION → build with the bad URL + flag -> exit 0 (also with the demos misconfigured); the same flag
-                       and bad value on `next start` -> HTTP 500 with a clean EnvValidationError (ignored at
-                       runtime, so it cannot serve an unvalidated app)
-  lint rule          → `process.env.X` in a src file fails eslint with the CLAUDE.md §6 message
-  rendering          → experiments (section 8 / docs/SECURITY.md §3): Cache Components on = cached HTML, 0 of 15
-                       scripts with a nonce; with `instant = false` = soft 200 for unknown paths; shipped setup =
-                       all scripts carry the nonce, unknown paths 404, redirects 307
-  CSP in a browser   → e2e on the enforced production build: every <script> carries the response's nonce on /it,
-                       /en and the 404; a fresh nonce per request (6/6 distinct); HTML not cached; client-supplied
-                       x-nonce / CSP headers ignored; /it, /en and the 404 load, hydrate and start Lenis with ZERO
-                       violations and no console errors; client-side language switch too; no request to any other
-                       origin. Blocked (negative tests): injected inline handler, injected <base>, fetch to another
-                       origin, third-party image, iframe, cross-origin form post, and the site inside another page
-  mutation           → removing `connection()` from the layout: 5 of 7 selected security tests failed (cache
-                       header, nonce on /it and /en, and the pages no longer hydrate under the enforced CSP).
-                       Restored
-  headers            → unit and e2e: nosniff, X-Frame-Options, Referrer-Policy, COOP, Permissions-Policy and HSTS
-                       on pages, the 404 and the `/` redirect
-  NOT done           → securityheaders.com / Observatory grade (needs a deployment: yours); Firefox/WebKit; TTFB and
-                       Core Web Vitals of per-request rendering vs the earlier static pages; Plausible and
-                       Turnstile origins in a real page; a report collector; the live Vercel deployment
+P1.8 checks:
+  identity           → `identity.test.ts` scans every text file (messages, src, e2e, docs, CLAUDE.md, config): the
+                       old business name appears nowhere (negative control: the pattern matches the word in any
+                       case) and the placeholder brand is written only in src/lib/business.ts; e2e: no page text
+                       contains the old name or "srl"; both languages show owner, brand and the Turin address
+  config             → `business.test.ts`: fiscal fields are null (nothing invented); Partita IVA validated with
+                       its check digit (every single-digit change of a valid number is rejected), REA and PEC
+                       formats, REA `false`; footer tests: three placeholders, real values and a mailto PEC when
+                       filled, REA row omitted
+  skip link          → e2e: hidden (1 px) until focused, first tab stop, 44 px, 2 px outline, Enter moves focus to
+                       `main#main-content`, the next Tab lands inside main; works without JavaScript (plain
+                       in-page link); axe clean while it is shown
+  header / nav       → landmarks on /it, /en and both 404s: one banner, one main, one contentinfo, one h1, named
+                       navigations; current page has `aria-current`; every header link returns 200; CTA scrolls to
+                       `#contact`; not sticky; 360 / 768 / 1280 / 1920 px: no horizontal scroll and every header
+                       control >= 44 px; at 360 px three rows
+  theme              → radios: automatic by default, nothing stored until a choice; dark/light set the class,
+                       `color-scheme` and ONE key; body colour really changes; automatic removes the key; a stored
+                       choice is on <html> at DOMContentLoaded (before hydration, no flash) even when the system
+                       says the opposite; survives reload and a language switch; arrow keys work; 2 px focus
+                       ring; disabled without JavaScript; zero CSP violations under the enforced policy
+  providers          → one localized toast region in the layout; the gallery's toast and tooltip tests pass on
+                       the layout's Toaster and TooltipProvider
+  a11y / CLS         → axe (WCAG 2.0-2.2 A/AA) zero violations: /it, /en and both 404s in dark and light, forced
+                       themes at 360 px; CLS < 0.05 over load, theme change and language switch
+  visual             → screenshots at 360 / 768 / 1280 px (light) and 1280 px dark with the skip link and CTA
+                       focused; the header wrapped badly at 360 and 768 before the layout rewrite
+  bugs found by the tests (all fixed) → see section 8, "P1.8 / bugs found by the tests"
+  NOT done           → Lighthouse accessibility = 100 on the shell (the roadmap's criterion; axe is clean but
+                       Lighthouse was not run); securityheaders.com grade; Firefox/WebKit; a screen-reader pass of
+                       the skip link, theme group and footer; first-load JS impact of the shell; the live Vercel
+                       deployment; CI on GitHub has still never been seen
 ```
 
 ---
@@ -274,34 +284,35 @@ P1.7 checks:
 ## 10. Proposed commit(s) for the work above
 
 ```
-feat(security): add validated env, nonce csp and security headers
+feat(shell): add layout shell and correct the business identity
 
-Validate the environment with Zod. env-schema.ts holds the schemas and
-rules as pure functions; env.ts is import "server-only", so a client
-component importing it fails next build; env.client.ts exposes only
-NEXT_PUBLIC_* values and never throws. process.env is read in those two
-modules only (ESLint rule and tests). Errors name the variable, never
-the value. Variables that belong together (Turnstile, Upstash, email)
-must be set together, and live demos need the API key and Redis.
-SKIP_ENV_VALIDATION lets CI build without secrets, during next build
-only: it is ignored at runtime. Nothing is required in production yet.
+The site belongs to an independent AI practice in Turin, not to the
+company an earlier draft assumed. Put the brand token, the owner and
+the Turin location in src/lib/business.ts, the single source for the
+header, titles and footer; Partita IVA, REA and PEC are unset and shown
+as "not yet available" until registered, and are validated (including
+the Partita IVA check digit) when filled in. Messages use a {brand}
+variable. Remove the old name from messages, metadata, docs, tests and
+CLAUDE.md, and add a test that keeps it out.
 
-Generate a CSP nonce per request in proxy.ts and send the policy
-(Report-Only unless CSP_MODE=enforce) with the fixed security headers,
-redirects included. Scripts need the nonce plus strict-dynamic;
-Turnstile and the analytics origin are allowed only when configured.
+Add the shell in the root layout: a skip link to #main-content, a
+header (navigation, theme, language, call to action), the single main
+landmark, a footer with the owner and statutory details, a
+TooltipProvider and one Toaster with translated labels. Navigation is
+data and lists only pages that exist. The call to action points at the
+footer contact block until the inquiry page exists. Add an error page.
 
-A nonce can only be stamped while rendering, so turn off
-cacheComponents and partialPrefetching and render every page per
-request from the root layout. Prerendered HTML carried no nonce and an
-enforced policy would have blocked it.
+The theme switch is three native radios (automatic, dark, light). A
+choice is stored in one localStorage key and applied before first paint
+by an inline script that carries the CSP nonce; ThemeSync restores it
+after a language switch remounts the layout. Pages render a div, no
+longer their own main.
 
-Add tests, including e2e on a production server that enforces the
-policy: zero violations, injected handlers, base, fetch, frames and
-forms blocked, real 404s kept. Document it in docs/SECURITY.md and
-set SKIP_ENV_VALIDATION on the CI verify job.
+Add unit tests and 48 Playwright tests (landmarks, skip link, theme,
+responsive layout, axe in both themes and languages, CLS) on the server
+that enforces the CSP. Document it in docs/IDENTITY.md and DESIGN.md.
 
-Task: P1.7
+Task: P1.8
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

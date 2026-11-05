@@ -1,6 +1,6 @@
 # Master Blueprint — AI Solutions & Full-Stack Engineering Website
 
-Owner: INAMBIENTE SRL · Drafted 2026-11-03 · Status: **decisions D1–D8 confirmed by owner on 2026-11-03**
+Owner: Ramin Rashidi Alavijeh (independent AI practice, Turin) · Drafted 2026-11-03 · Status: **decisions D1–D8 confirmed by owner on 2026-11-03**
 
 This folder is laid out as a repository skeleton. Copy its contents into the root of the new repo:
 

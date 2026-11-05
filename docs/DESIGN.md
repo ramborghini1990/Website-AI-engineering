@@ -1,4 +1,4 @@
-# DESIGN.md — INAMBIENTE design direction and system
+# DESIGN.md — design direction and system
 
 **Status: APPROVED as proposed on 2026-11-05** (ROADMAP P1.1 acceptance: "DESIGN.md approved by you; contrast pairs ≥ 4.5:1 documented"): Signal amber accent, Instrument Sans + JetBrains Mono, dark-first instrument-panel direction, sharp radii. The decisions that were open are kept in §11 for the record. This file is the design authority (CLAUDE.md §7); design-skill or 21st output is advice only.
 
@@ -270,11 +270,24 @@ When `prefers-reduced-motion: reduce`:
 
 - **Baseline is dark.** First visit with no stored choice follows `prefers-color-scheme`; when the system expresses no preference, dark is used.
 - The theme is selected by a class on `<html>` (`dark` / `light`) with `color-scheme` set accordingly so native controls and scrollbars match.
-- A three-state switch (system, dark, light) is part of the header (P1.8). Persisting the choice uses one storage key; because it is stored on the visitor's device, it must be listed in the cookie/storage table in the policy (P4.2). It is a functional preference, not a tracking identifier.
-- Avoid a flash of the wrong theme without breaking CSP: the tiny pre-paint script needs a nonce (P1.7) or the class must be resolved on the server from a cookie. Decide in P1.2/P1.7.
+- **Implemented in P1.8.** A three-way switch (automatic, dark, light) sits in the header: native radio buttons in a fieldset (so the group, arrow keys and selected state come from the browser), 44 px icon options with screen-reader labels, the selected one filled so it is not colour alone; disabled until hydrated because a choice cannot be applied without JavaScript.
+- **Storage:** one `localStorage` key, `theme` (`src/lib/theme.ts`), written only when the visitor picks dark or light and removed when they pick automatic. It is a functional preference set by the visitor's own action and **must appear in the storage table of the cookie policy (P4.2)**.
+- **No flash:** a 200-character inline script in `<head>` applies the stored class before first paint. It carries the CSP nonce (the root layout reads it from the request) and `<html>` has `suppressHydrationWarning`. Switching language remounts the root layout and replaces `<html>`, so `ThemeSync` (a layout effect, before paint) puts the stored class back; an e2e test found that bug.
 - Both themes must pass §2.2–§2.3. Forced-colors mode (Windows high contrast) must stay usable: keep borders and focus rings as real `border`/`outline`, not shadows only.
 
 ---
+
+## 8b. Layout shell (P1.8)
+
+Every page is rendered inside one shell, owned by `src/app/[locale]/layout.tsx`:
+
+1. **Skip link** (first tab stop, hidden until focused, 44 px, targets `#main-content`; works without JavaScript).
+2. **Header** (`src/components/shell/site-header.tsx`): wordmark, main navigation, theme switch, language switcher, primary call to action, in that order in the document and on screen. One wrapping row: three rows at 360 px, one row from `lg`. Not sticky (a sticky bar would cover focused elements, WCAG 2.2 2.4.11, and the FX pinned scenes).
+3. **`<main id="main-content" tabindex="-1">`**: the only `main` landmark. Pages render a `div`, never a `main`.
+4. **Footer** (`site-footer.tsx`): contact block (the call to action's anchor, `#contact`), then the owner and the statutory details from `src/lib/business.ts`; a muted "not yet available" for anything not registered yet (docs/IDENTITY.md).
+5. **Providers:** `TooltipProvider`, `LenisProvider`, and one `Toaster` with translated labels.
+
+Navigation is data (`src/lib/navigation.ts`): an item appears only when its page exists, so the header never links to a 404. Until the P2.x pages exist, the navigation shows Home only; flip `available` when a page ships. With more than about five items, replace the wrapping row with a menu (Sheet).
 
 ## 9. Do and don't
 
@@ -320,6 +333,6 @@ When `prefers-reduced-motion: reduce`:
 2. **Fonts:** Instrument Sans + JetBrains Mono. Other candidates checked as available: Geist (the scaffold default, very common), Hanken Grotesk, Bricolage Grotesque (more expressive, weaker for dense UI), IBM Plex Mono.
 3. **Default theme:** follow the system, dark when there is no preference. The alternative is dark for everyone until they choose.
 4. **Radii:** deliberately small (2 px cards, 4 px controls). Say if you want a softer look.
-5. **Brand assets:** I have no logo, wordmark or brand colours from INAMBIENTE. If they exist, this direction must be reconciled with them before P1.2.
+5. **Brand assets:** there is no logo, wordmark or brand colour yet, and the trade name is a placeholder (`src/lib/business.ts`, docs/IDENTITY.md). If they exist later, this direction must be reconciled with them.
 6. **Design-skill input:** the UI/UX Pro Max skill is not installed on this machine, so this system was decided manually without its `--design-system` search (the roadmap's intended first step). Once it is installed, I can run the allowed searches and compare, if you want a second opinion.
 7. **Approval:** when you approve, P1.1 is closed and P1.2 can start. Until then, treat every value above as proposed.

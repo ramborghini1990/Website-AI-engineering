@@ -49,7 +49,8 @@ export async function scrollThroughPage(page: Page): Promise<void> {
 /** Wait until React has attached handlers (events before that are lost). */
 export async function waitForHydration(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    const button = document.querySelector("main button, main a");
+    // The header (in every page) has links; a hydrated element carries React's keys.
+    const button = document.querySelector("header a, main button, main a");
     return (
       button !== null &&
       Object.keys(button).some((key) => key.startsWith("__react"))

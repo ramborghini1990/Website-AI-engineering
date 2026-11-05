@@ -3,7 +3,6 @@
 import { Copy } from "lucide-react";
 import { useId, useState, type ComponentProps, type ReactNode } from "react";
 
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,16 +39,12 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Toaster } from "@/components/ui/toaster";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/use-toast";
-
-import { ThemeSwitch } from "./theme-switch";
 
 // Dev-only page: copy is English and hard-coded on purpose (the production
 // components take every string as a prop / from i18n messages).
@@ -225,186 +220,182 @@ export function UiGallery() {
   const dialogFieldId = useId();
 
   return (
-    <TooltipProvider>
-      <main className="mx-auto grid w-full max-w-page gap-12 px-gutter py-16">
-        <header className="grid gap-4">
-          <h1 className="text-4xl text-text">UI primitives</h1>
-          <p className="max-w-prose text-lg text-text-secondary">
-            Development-only gallery. It returns 404 in production builds. Use
-            it to check every component and state in both themes, with mouse and
-            keyboard.
-          </p>
-          <ThemeSwitch />
-          <LanguageSwitcher />
-          <div className="flex flex-wrap gap-4">
-            <Button asChild variant="secondary">
-              <Link href="/_dev/motion">Motion test page</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/_dev/fx">FX library</Link>
-            </Button>
-          </div>
-        </header>
+    // The header, <main>, Toaster and TooltipProvider come from the root layout.
+    <div className="mx-auto grid w-full max-w-page gap-12 px-gutter py-16">
+      <header className="grid gap-4">
+        <h1 className="text-4xl text-text">UI primitives</h1>
+        <p className="max-w-prose text-lg text-text-secondary">
+          Development-only gallery. It returns 404 in production builds. Use it
+          to check every component and state in both themes, with mouse and
+          keyboard.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <Button asChild variant="secondary">
+            <Link href="/_dev/motion">Motion test page</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/_dev/fx">FX library</Link>
+          </Button>
+        </div>
+      </header>
 
-        <Section title="Button">
-          <div className="flex flex-wrap items-center gap-4">
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="tertiary">Tertiary</Button>
-            <Button size="lg">Large</Button>
-            <Button disabled>Disabled</Button>
-            <Button asChild variant="secondary">
-              <a href="#fields">Link as button</a>
-            </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="secondary" aria-label="Copy link">
-                  <Copy aria-hidden="true" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copy link to this page</TooltipContent>
-            </Tooltip>
-          </div>
-        </Section>
+      <Section title="Button">
+        <div className="flex flex-wrap items-center gap-4">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="tertiary">Tertiary</Button>
+          <Button size="lg">Large</Button>
+          <Button disabled>Disabled</Button>
+          <Button asChild variant="secondary">
+            <a href="#fields">Link as button</a>
+          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="secondary" aria-label="Copy link">
+                <Copy aria-hidden="true" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Copy link to this page</TooltipContent>
+          </Tooltip>
+        </div>
+      </Section>
 
-        <Section title="Input, Textarea, Select">
-          <div id="fields">
-            <FieldsDemo />
-          </div>
-        </Section>
+      <Section title="Input, Textarea, Select">
+        <div id="fields">
+          <FieldsDemo />
+        </div>
+      </Section>
 
-        <Section title="Checkbox">
-          <div className="grid gap-1">
-            <CheckboxRow label="Unchecked" />
-            <CheckboxRow label="Checked" defaultChecked />
-            <CheckboxRow label="Disabled" disabled />
-            <CheckboxRow label="Invalid" aria-invalid="true" />
-            <CheckboxGroupDemo />
-          </div>
-        </Section>
+      <Section title="Checkbox">
+        <div className="grid gap-1">
+          <CheckboxRow label="Unchecked" />
+          <CheckboxRow label="Checked" defaultChecked />
+          <CheckboxRow label="Disabled" disabled />
+          <CheckboxRow label="Invalid" aria-invalid="true" />
+          <CheckboxGroupDemo />
+        </div>
+      </Section>
 
-        <Section title="Dialog">
-          <div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>Open dialog</Button>
-              </DialogTrigger>
-              <DialogContent closeLabel={CLOSE}>
-                <DialogHeader>
-                  <DialogTitle>Request a call</DialogTitle>
-                  <DialogDescription>
-                    Focus stays inside this dialog. Escape closes it and focus
-                    returns to the button that opened it.
-                  </DialogDescription>
-                </DialogHeader>
-                <Field>
-                  <Label htmlFor={dialogFieldId}>Company</Label>
-                  <Input id={dialogFieldId} autoComplete="organization" />
-                </Field>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="secondary">Cancel</Button>
-                  </DialogClose>
-                  <Button>Send</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </Section>
+      <Section title="Dialog">
+        <div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>Open dialog</Button>
+            </DialogTrigger>
+            <DialogContent closeLabel={CLOSE}>
+              <DialogHeader>
+                <DialogTitle>Request a call</DialogTitle>
+                <DialogDescription>
+                  Focus stays inside this dialog. Escape closes it and focus
+                  returns to the button that opened it.
+                </DialogDescription>
+              </DialogHeader>
+              <Field>
+                <Label htmlFor={dialogFieldId}>Company</Label>
+                <Input id={dialogFieldId} autoComplete="organization" />
+              </Field>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="secondary">Cancel</Button>
+                </DialogClose>
+                <Button>Send</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </Section>
 
-        <Section title="Sheet">
-          <div className="flex flex-wrap gap-4">
-            <SheetDemo side="right" />
-            <SheetDemo side="left" />
-            <SheetDemo side="top" />
-            <SheetDemo side="bottom" />
-          </div>
-        </Section>
+      <Section title="Sheet">
+        <div className="flex flex-wrap gap-4">
+          <SheetDemo side="right" />
+          <SheetDemo side="left" />
+          <SheetDemo side="top" />
+          <SheetDemo side="bottom" />
+        </div>
+      </Section>
 
-        <Section title="Tabs">
-          <Tabs defaultValue="agents" className="max-w-xl">
-            <TabsList aria-label="Practice areas">
-              <TabsTrigger value="agents">Agents</TabsTrigger>
-              <TabsTrigger value="automation">Automation</TabsTrigger>
-              <TabsTrigger value="web">Web apps</TabsTrigger>
-            </TabsList>
-            <TabsContent value="agents">
-              <p className="text-base text-text-secondary">
-                Agents that read, decide and act inside your tools.
-              </p>
-            </TabsContent>
-            <TabsContent value="automation">
-              <p className="text-base text-text-secondary">
-                Workflows that remove repeated manual steps.
-              </p>
-            </TabsContent>
-            <TabsContent value="web">
-              <p className="text-base text-text-secondary">
-                Production web applications, built to last.
-              </p>
-            </TabsContent>
-          </Tabs>
-        </Section>
+      <Section title="Tabs">
+        <Tabs defaultValue="agents" className="max-w-xl">
+          <TabsList aria-label="Practice areas">
+            <TabsTrigger value="agents">Agents</TabsTrigger>
+            <TabsTrigger value="automation">Automation</TabsTrigger>
+            <TabsTrigger value="web">Web apps</TabsTrigger>
+          </TabsList>
+          <TabsContent value="agents">
+            <p className="text-base text-text-secondary">
+              Agents that read, decide and act inside your tools.
+            </p>
+          </TabsContent>
+          <TabsContent value="automation">
+            <p className="text-base text-text-secondary">
+              Workflows that remove repeated manual steps.
+            </p>
+          </TabsContent>
+          <TabsContent value="web">
+            <p className="text-base text-text-secondary">
+              Production web applications, built to last.
+            </p>
+          </TabsContent>
+        </Tabs>
+      </Section>
 
-        <Section title="Tooltip">
-          <div className="flex flex-wrap items-center gap-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="secondary">Hover or focus me</Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                Extra context, never the only source
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </Section>
+      <Section title="Tooltip">
+        <div className="flex flex-wrap items-center gap-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="secondary">Hover or focus me</Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Extra context, never the only source
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </Section>
 
-        <Section title="Toast">
-          <div className="flex flex-wrap gap-4">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                toast({
-                  title: "Saved",
-                  description: "Your draft was stored on this device.",
-                });
-              }}
-            >
-              Default toast
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                toast({
-                  variant: "success",
-                  title: "Message sent",
-                  description: "We will reply within one working day.",
-                });
-              }}
-            >
-              Success toast
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                toast({
-                  variant: "danger",
-                  title: "Could not send",
-                  description: "Check your connection and try again.",
-                  action: {
-                    label: "Retry",
-                    altText: "Retry sending the message",
-                    onClick: () => undefined,
-                  },
-                });
-              }}
-            >
-              Error toast (stays)
-            </Button>
-          </div>
-        </Section>
-      </main>
-      <Toaster viewportLabel="Notifications ({hotkey})" closeLabel={CLOSE} />
-    </TooltipProvider>
+      <Section title="Toast">
+        <div className="flex flex-wrap gap-4">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              toast({
+                title: "Saved",
+                description: "Your draft was stored on this device.",
+              });
+            }}
+          >
+            Default toast
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              toast({
+                variant: "success",
+                title: "Message sent",
+                description: "We will reply within one working day.",
+              });
+            }}
+          >
+            Success toast
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              toast({
+                variant: "danger",
+                title: "Could not send",
+                description: "Check your connection and try again.",
+                action: {
+                  label: "Retry",
+                  altText: "Retry sending the message",
+                  onClick: () => undefined,
+                },
+              });
+            }}
+          >
+            Error toast (stays)
+          </Button>
+        </div>
+      </Section>
+    </div>
   );
 }

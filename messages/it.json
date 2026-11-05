@@ -1,13 +1,34 @@
 {
   "metadata": {
-    "siteName": "INAMBIENTE",
     "home": {
       "title": "Ingegneria AI e sviluppo full-stack",
-      "description": "INAMBIENTE progetta agenti AI, automazioni dei processi e applicazioni web in produzione per startup, PMI e grandi aziende."
+      "description": "{brand} progetta agenti AI, automazioni dei processi e applicazioni web in produzione per startup, PMI e grandi aziende."
     },
     "notFound": {
       "title": "Pagina non trovata"
     }
+  },
+  "skipLink": {
+    "label": "Vai al contenuto principale"
+  },
+  "nav": {
+    "label": "Principale",
+    "items": {
+      "home": "Home",
+      "services": "Servizi",
+      "work": "Progetti",
+      "process": "Metodo",
+      "about": "Chi sono"
+    }
+  },
+  "cta": {
+    "label": "Parliamone"
+  },
+  "theme": {
+    "label": "Tema",
+    "system": "Automatico (come il dispositivo)",
+    "dark": "Scuro",
+    "light": "Chiaro"
   },
   "languageSwitcher": {
     "label": "Lingua",
@@ -16,13 +37,35 @@
       "en": "English"
     }
   },
+  "footer": {
+    "contactHeading": "Contatti",
+    "location": "Sede",
+    "address": "{street}, {municipality} ({province}), Italia",
+    "detailsHeading": "Dati dell'attività",
+    "owner": "Titolare",
+    "vat": "Partita IVA",
+    "rea": "Numero REA",
+    "pec": "PEC (posta elettronica certificata)",
+    "pending": "Non ancora disponibile",
+    "rights": "© {year} {owner}. Tutti i diritti riservati."
+  },
+  "toaster": {
+    "viewport": "Notifiche ({hotkey})",
+    "close": "Chiudi notifica"
+  },
   "home": {
-    "title": "INAMBIENTE",
+    "title": "{brand}",
     "status": "Il nuovo sito è in costruzione."
   },
   "notFound": {
     "title": "Pagina non trovata",
     "body": "L'indirizzo richiesto non esiste o è stato spostato.",
+    "backHome": "Torna alla home"
+  },
+  "error": {
+    "title": "Qualcosa è andato storto",
+    "body": "Si è verificato un errore imprevisto. Puoi riprovare oppure tornare alla home.",
+    "retry": "Riprova",
     "backHome": "Torna alla home"
   }
 }

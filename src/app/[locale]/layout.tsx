@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
+import { SiteFooter } from "@/components/shell/site-footer";
+import { SiteHeader } from "@/components/shell/site-header";
+import { MAIN_CONTENT_ID, SkipLink } from "@/components/shell/skip-link";
+import { ThemeSync } from "@/components/shell/theme-sync";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { routing } from "@/i18n/routing";
+import { business } from "@/lib/business";
 import { siteUrl } from "@/lib/env";
 import { LenisProvider } from "@/lib/motion/lenis-provider";
+import { themeInitScript } from "@/lib/theme";
 
 import "../globals.css";
 
@@ -30,15 +39,20 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("metadata");
+export function generateMetadata(): Metadata {
+  const brand = business.brand.name;
   return {
     metadataBase: siteUrl,
-    title: { default: t("siteName"), template: `%s | ${t("siteName")}` },
+    applicationName: brand,
+    title: { default: brand, template: `%s | ${brand}` },
   };
 }
 
-/** Root layout (there is no app/layout.tsx): owns <html>, fonts and the i18n provider. */
+/**
+ * Root layout (there is no app/layout.tsx): owns <html>, fonts, the providers
+ * and the page shell: skip link, header, the single <main> landmark, footer.
+ * Pages render only their own content.
+ */
 export default async function LocaleLayout({
   children,
 }: LayoutProps<"/[locale]">) {
@@ -48,20 +62,55 @@ export default async function LocaleLayout({
   await connection();
   const locale = await getLocale();
   const messages = await getMessages();
+  const toaster = await getTranslations("toaster");
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
+    // suppressHydrationWarning: the theme script below adds a class to <html>
+    // before React hydrates, on purpose.
     <html
       lang={locale}
+      suppressHydrationWarning
       className={`${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
     >
+      <head>
+        {/* Applies a stored theme before first paint. A constant (no user input), allowed by the CSP nonce. */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+      </head>
       {/* min-h-dvh, not h-full: Lenis adds a `lenis` class to <html> and must not be able to change the document height (layout shift). */}
       <body className="flex min-h-dvh flex-col">
         {/* Only the namespaces that client components read are sent to the browser. */}
         <NextIntlClientProvider
           locale={locale}
-          messages={{ languageSwitcher: messages.languageSwitcher }}
+          messages={{
+            languageSwitcher: messages.languageSwitcher,
+            nav: messages.nav,
+            theme: messages.theme,
+          }}
         >
-          <LenisProvider>{children}</LenisProvider>
+          <TooltipProvider>
+            <LenisProvider>
+              <ThemeSync />
+              <SkipLink />
+              <SiteHeader />
+              <main
+                id={MAIN_CONTENT_ID}
+                tabIndex={-1}
+                className="flex flex-1 flex-col outline-none"
+              >
+                {children}
+              </main>
+              <SiteFooter />
+            </LenisProvider>
+          </TooltipProvider>
+          <Toaster
+            // The hotkey placeholder belongs to Radix and is filled in at runtime: pass it through untouched.
+            viewportLabel={toaster("viewport", { hotkey: "{hotkey}" })}
+            closeLabel={toaster("close")}
+          />
         </NextIntlClientProvider>
       </body>
     </html>

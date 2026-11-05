@@ -167,7 +167,7 @@ test.describe("an enforced CSP in a real browser", () => {
     }) => {
       const watch = await watchViolations(page);
       await page.goto(path);
-      await waitForHydration(page).catch(() => undefined); // the 404 has no button/link in <main>
+      await waitForHydration(page);
       // Lenis (a lazy chunk, loaded after idle, adds a class and inline styles) must run too.
       await expect
         .poll(() =>

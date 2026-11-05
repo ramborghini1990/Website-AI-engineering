@@ -75,7 +75,7 @@ function Block({
 
 export default function FxPage() {
   return (
-    <main className="mx-auto w-full max-w-page px-gutter pb-section">
+    <div className="mx-auto w-full max-w-page px-gutter pb-section">
       <GradientMesh className="-mx-gutter px-gutter py-16">
         <header className="grid gap-4">
           <h1 className="text-4xl text-text">FX library</h1>
@@ -180,6 +180,6 @@ export default function FxPage() {
       >
         <div className="h-48" aria-hidden="true" />
       </Block>
-    </main>
+    </div>
   );
 }

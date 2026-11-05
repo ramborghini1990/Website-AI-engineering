@@ -31,13 +31,13 @@ Licences were read from the npm registry on 2026-11-05.
 
 **GSAP licence: needs a human check.** CLAUDE.md §5 and BLUEPRINT §2 allow GSAP and state its plugins are free for commercial use. The licence text is custom, so it has not been reviewed by a qualified professional here; read it once before launch and record the outcome below. This project uses only the plugins that ship in the public `gsap` package (`ScrollTrigger`, `CustomEase`) and does not use GSAP to build a tool that competes with GSAP.
 
-- [ ] GSAP standard licence read and accepted for INAMBIENTE's use (commercial website and demos)
+- [ ] GSAP standard licence read and accepted for this practice's use (commercial website and demos)
 
 **Lenis stylesheet.** `src/app/globals.css` contains a subset of upstream `lenis/dist/lenis.css` (MIT). Two rules were deliberately left out: `html.lenis, html.lenis body { height: auto }` (changes the document height when Lenis starts, a layout shift measured at CLS 0.062 in this project) and the `lenis-stopped` overflow rule (Radix already locks scroll).
 
 ## FX library (P1.6)
 
-All six components in `src/components/fx/` are **written in-house for this project**. No code was copied, translated or adapted from React Bits, 21st.dev, shadcn blocks or any other source, and no new dependency was added (they use GSAP, `@gsap/react` and Tailwind, already recorded above). So no third-party licence attaches to them; they are INAMBIENTE's own code.
+All six components in `src/components/fx/` are **written in-house for this project**. No code was copied, translated or adapted from React Bits, 21st.dev, shadcn blocks or any other source, and no new dependency was added (they use GSAP, `@gsap/react` and Tailwind, already recorded above). So no third-party licence attaches to them; they are this practice's own code.
 
 | Component | Pattern (concept only) | What was built here |
 |---|---|---|

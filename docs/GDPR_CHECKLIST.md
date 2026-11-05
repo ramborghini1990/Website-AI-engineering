@@ -1,6 +1,6 @@
 # GDPR Technical Checklist — Italy / EU
 
-Scope: the INAMBIENTE SRL website, inquiry funnel and public demos. Legal bases referenced: GDPR (Reg. EU 2016/679), D.Lgs. 196/2003 as amended by D.Lgs. 101/2018 (Codice Privacy), ePrivacy Directive Art. 5(3) as implemented in Art. 122 Codice Privacy, **Garante "Linee guida cookie e altri strumenti di tracciamento" (10 June 2021)**, EU AI Act (Reg. 2024/1689) Art. 50 transparency duties.
+Scope: the website of the independent AI practice (owner: Ramin Rashidi Alavijeh, Turin), inquiry funnel and public demos. Legal bases referenced: GDPR (Reg. EU 2016/679), D.Lgs. 196/2003 as amended by D.Lgs. 101/2018 (Codice Privacy), ePrivacy Directive Art. 5(3) as implemented in Art. 122 Codice Privacy, **Garante "Linee guida cookie e altri strumenti di tracciamento" (10 June 2021)**, EU AI Act (Reg. 2024/1689) Art. 50 transparency duties.
 
 > This is an engineering checklist, not legal advice. Have the privacy notice, cookie policy and retention periods reviewed by a qualified privacy professional (or a DPO service) before launch.
 
@@ -19,7 +19,7 @@ Legend: ☐ todo · ☑ done · **[P2.5]** = roadmap task that implements it.
 
 ## 2. Legal notices on the site
 
-- ☐ **Company identification in footer on every page**: ragione sociale (INAMBIENTE SRL), sede legale, **Partita IVA** (required on the website by Art. 35 DPR 633/1972), REA number and Registro Imprese office, capitale sociale (i.v.), PEC (Art. 2250 c.c. disclosures for companies). **[P1.8]**
+- ☐ **Business identification in footer on every page**: owner and location (built in P1.8, from `src/lib/business.ts`), **Partita IVA** (required on the website by Art. 35 DPR 633/1972), and, where they apply to the legal form, the REA number / Registro Imprese office and PEC. Capitale sociale and the Art. 2250 c.c. disclosures apply to companies, not to an individual practice. **Which items apply depends on the legal form: confirm with your accountant.** The footer shows "not yet available" until the numbers are entered. **[P1.8, B2]**
 - ☐ **Informativa privacy** (Art. 13) IT + EN: controller identity and contact, purposes and legal bases per purpose, recipients/processors categories, transfers, retention per purpose, rights (Arts. 15–22) and how to exercise them, right to complain to the Garante, whether providing data is mandatory, automated decision-making (none). Versioned with "last updated" date. **[P4.2]**
 - ☐ **Cookie policy** IT + EN: table of every cookie *and* localStorage/sessionStorage/IndexedDB key, with name, provider, purpose, category, duration. Generated from a single `src/lib/consent/registry.ts` so code and policy can't drift. **[P4.2]**
 - ☐ **Demo terms / AI notice**: demos are simulations or AI-generated, no reliance, what happens to text typed into live mode. **[P3.0, P4.2]**

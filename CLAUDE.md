@@ -4,7 +4,7 @@ Guidance for Claude Code in this repository. Read fully at the start of every se
 
 ## 1. Project
 
-Business website + portfolio of INAMBIENTE SRL, an Italian AI Solutions & Full-Stack engineering practice. Audience: startups, SMEs and enterprises in Italy and the EU. The site markets custom AI agents, workflow automation and production web apps, and hosts interactive demos.
+Business website + portfolio of an independent Italian AI Solutions & Full-Stack engineering practice based in Turin (owner: Ramin Rashidi Alavijeh; the trade name is still a placeholder, see docs/IDENTITY.md). Audience: startups, SMEs and enterprises in Italy and the EU. The site markets custom AI agents, workflow automation and production web apps, and hosts interactive demos.
 
 Non-negotiables, in priority order:
 1. **Legal & privacy:** GDPR, Italian Garante cookie guidelines, EU AI Act transparency. Zero PII in logs. Data minimisation by default.

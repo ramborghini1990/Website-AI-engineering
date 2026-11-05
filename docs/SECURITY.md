@@ -12,6 +12,7 @@ Rules: CLAUDE.md §6 and §10, BLUEPRINT §3 "Security baseline". This file is h
 | CSP and headers (pure) | `src/lib/security/csp.ts` | `buildCsp`, `generateNonce`, `securityHeaders`, `cspHeaderName` |
 | Applied per request | `src/proxy.ts` | Next 16's `middleware`: nonce, CSP, headers, then next-intl's redirect |
 | Rendering opt-in | `src/app/[locale]/layout.tsx` | `await connection()`: every page is rendered per request |
+| Nonce consumers in the app | `src/app/[locale]/layout.tsx` | the theme pre-paint script (`<script nonce>`, read from the `x-nonce` request header); Next stamps its own scripts itself |
 
 ## 2. Environment variables
 

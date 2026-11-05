@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { business } from "../src/lib/business";
+
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 async function expectNoAxeViolations(page: Page) {
@@ -104,11 +106,15 @@ test.describe("static assets are left alone", () => {
 });
 
 for (const [locale, title, heading] of [
-  ["it", "Ingegneria AI e sviluppo full-stack | INAMBIENTE", "INAMBIENTE"],
+  [
+    "it",
+    `Ingegneria AI e sviluppo full-stack | ${business.brand.name}`,
+    business.brand.name,
+  ],
   [
     "en",
-    "AI engineering and full-stack development | INAMBIENTE",
-    "INAMBIENTE",
+    `AI engineering and full-stack development | ${business.brand.name}`,
+    business.brand.name,
   ],
 ] as const) {
   test.describe(`/${locale}`, () => {
@@ -164,7 +170,7 @@ for (const [locale, title, heading] of [
         .locator('meta[name="description"]')
         .getAttribute("content");
 
-      expect(description).toContain("INAMBIENTE");
+      expect(description).toContain(business.brand.name);
       expect(description).toContain(
         locale === "it" ? "agenti AI" : "AI agents",
       );
@@ -181,7 +187,7 @@ test.describe("unknown pages", () => {
       const response = await page.goto(path);
 
       expect(response?.status()).toBe(404);
-      await expect(page).toHaveTitle(`${heading} | INAMBIENTE`);
+      await expect(page).toHaveTitle(`${heading} | ${business.brand.name}`);
       await expect(
         page.getByRole("heading", { level: 1, name: heading }),
       ).toBeVisible();

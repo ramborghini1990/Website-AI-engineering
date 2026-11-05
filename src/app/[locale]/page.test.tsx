@@ -1,15 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import HomePage from "@/app/[locale]/page";
+import { business } from "@/lib/business";
 import en from "../../../messages/en.json";
 import it_ from "../../../messages/it.json";
-
-// The switcher has its own tests; here it only needs to render.
-vi.mock("@/components/language-switcher", () => ({
-  LanguageSwitcher: () => <nav aria-label="stub" />,
-}));
 
 function renderHome(locale: "it" | "en") {
   return render(
@@ -23,10 +19,12 @@ function renderHome(locale: "it" | "en") {
 }
 
 describe("Home page (placeholder)", () => {
-  it("renders exactly one top-level heading", () => {
+  it("renders exactly one top-level heading, titled with the brand token from the configuration", () => {
     renderHome("it");
 
-    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    const headings = screen.getAllByRole("heading", { level: 1 });
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).toHaveTextContent(business.brand.name);
   });
 
   it("shows the Italian copy for it and the English copy for en", () => {
@@ -42,9 +40,9 @@ describe("Home page (placeholder)", () => {
     ).toBeInTheDocument();
   });
 
-  it("is a main landmark", () => {
+  it("does not render its own <main>: the single landmark comes from the root layout, so the skip link has one target", () => {
     renderHome("en");
 
-    expect(screen.getByRole("main")).toBeInTheDocument();
+    expect(screen.queryByRole("main")).not.toBeInTheDocument();
   });
 });

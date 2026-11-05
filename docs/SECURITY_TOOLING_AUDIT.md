@@ -47,7 +47,7 @@ Installing from your fork means upstream changes reach you only when you sync th
 Typical use (Claude runs it; the path is resolved by the plugin):
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" \
-  "ai engineering agency premium dark technical" --design-system -p "INAMBIENTE"
+  "ai engineering agency premium dark technical" --design-system -p "AI Solutions & Engineering"
 python3 ".../search.py" "scroll pinned section reduced motion" --domain gsap
 python3 ".../search.py" "app router server components" --stack nextjs
 ```

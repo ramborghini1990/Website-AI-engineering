@@ -479,6 +479,17 @@ test.describe("FX library: full motion", () => {
     await expect
       .poll(() => css(target.locator("[data-fx-spot='edge']"), "opacity"))
       .toBe("1");
+    // Scrolling to the card passed the headlines: let their reveals finish. Scanning
+    // a word that is half faded in is a transient state, not a contrast failure.
+    await expect
+      .poll(async () =>
+        page
+          .locator("[data-fx-word]")
+          .evaluateAll((words) =>
+            words.every((word) => getComputedStyle(word).opacity === "1"),
+          ),
+      )
+      .toBe(true);
     await expectNoAxeViolations(page);
 
     // Scan the pinned scene at its end: every step fully visible. (Halfway through

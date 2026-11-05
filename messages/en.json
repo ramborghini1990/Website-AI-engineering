@@ -1,13 +1,34 @@
 {
   "metadata": {
-    "siteName": "INAMBIENTE",
     "home": {
       "title": "AI engineering and full-stack development",
-      "description": "INAMBIENTE designs AI agents, workflow automation and production web applications for startups, SMEs and enterprises."
+      "description": "{brand} designs AI agents, workflow automation and production web applications for startups, SMEs and enterprises."
     },
     "notFound": {
       "title": "Page not found"
     }
+  },
+  "skipLink": {
+    "label": "Skip to main content"
+  },
+  "nav": {
+    "label": "Main",
+    "items": {
+      "home": "Home",
+      "services": "Services",
+      "work": "Work",
+      "process": "Process",
+      "about": "About"
+    }
+  },
+  "cta": {
+    "label": "Get in touch"
+  },
+  "theme": {
+    "label": "Theme",
+    "system": "Automatic (match my device)",
+    "dark": "Dark",
+    "light": "Light"
   },
   "languageSwitcher": {
     "label": "Language",
@@ -16,13 +37,35 @@
       "en": "English"
     }
   },
+  "footer": {
+    "contactHeading": "Contact",
+    "location": "Location",
+    "address": "{street}, {municipality} ({province}), Italy",
+    "detailsHeading": "Business details",
+    "owner": "Owner",
+    "vat": "VAT number (Partita IVA)",
+    "rea": "REA number",
+    "pec": "PEC (certified email)",
+    "pending": "Not yet available",
+    "rights": "© {year} {owner}. All rights reserved."
+  },
+  "toaster": {
+    "viewport": "Notifications ({hotkey})",
+    "close": "Dismiss notification"
+  },
   "home": {
-    "title": "INAMBIENTE",
+    "title": "{brand}",
     "status": "The new website is under construction."
   },
   "notFound": {
     "title": "Page not found",
     "body": "The address you requested does not exist or has been moved.",
+    "backHome": "Back to the home page"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "An unexpected error occurred. You can try again or go back to the home page.",
+    "retry": "Try again",
     "backHome": "Back to the home page"
   }
 }

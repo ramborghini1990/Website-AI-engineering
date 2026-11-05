@@ -76,7 +76,7 @@ describe("type-safe message keys", () => {
   const t = createTranslator({ locale: "it", messages: it });
 
   test("resolve existing keys", () => {
-    expect(t("home.title")).toBe("INAMBIENTE");
+    expect(t("home.title", { brand: "Brand Token" })).toBe("Brand Token");
     expect(t("notFound.backHome")).toBe("Torna alla home");
   });
 

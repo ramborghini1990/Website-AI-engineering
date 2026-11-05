@@ -61,7 +61,7 @@ export function MotionDemo() {
 
   return (
     <div ref={scope}>
-      <main className="mx-auto grid w-full max-w-page gap-12 px-gutter py-16">
+      <div className="mx-auto grid w-full max-w-page gap-12 px-gutter py-16">
         <header className="grid gap-4">
           <h1 className="motion-intro text-4xl text-text">Motion system</h1>
           <p className="motion-intro max-w-prose text-lg text-text-secondary">
@@ -114,7 +114,7 @@ export function MotionDemo() {
             </p>
           </section>
         ))}
-      </main>
+      </div>
     </div>
   );
 }

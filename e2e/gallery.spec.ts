@@ -324,7 +324,8 @@ for (const theme of ["dark", "light"] as const) {
       await page.getByRole("button", { name: "Error toast (stays)" }).click();
       // Toasts are list items in the labelled "Notifications" region; Radix
       // announces them through separate, short-lived live regions.
-      const region = page.getByRole("region", { name: "Notifications (F8)" });
+      // The Toaster now lives in the root layout, so its labels are localized (this page is /it).
+      const region = page.getByRole("region", { name: "Notifiche (F8)" });
       const success = region
         .getByRole("listitem")
         .filter({ hasText: "Message sent" });
@@ -352,7 +353,7 @@ for (const theme of ["dark", "light"] as const) {
       await expect(success).toBeHidden();
       await expect(error).toBeVisible();
 
-      await error.getByRole("button", { name: "Close" }).click();
+      await error.getByRole("button", { name: "Chiudi notifica" }).click();
       await expect(error).toBeHidden();
     });
   });
