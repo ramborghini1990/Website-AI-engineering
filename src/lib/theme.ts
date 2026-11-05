@@ -28,12 +28,18 @@ function setRootClass(choice: ThemeChoice) {
 }
 
 /**
- * Put the stored choice back on <html>. Needed after a client-side navigation
+ * Put a STORED choice back on <html>. Needed after a client-side navigation
  * that remounts the root layout (switching language does): the new <html>
  * element never ran the pre-paint script.
+ *
+ * With nothing stored it does nothing, on purpose: a fresh <html> has no theme
+ * class, and stripping classes here would clobber one set by anything else
+ * (devtools, an extension, a test) the moment React hydrates. Removing a class
+ * is the job of `applyTheme("system")` and of the cross-tab `storage` handler.
  */
 export function syncThemeFromStorage() {
-  setRootClass(readStoredTheme());
+  const stored = readStoredTheme();
+  if (stored !== "system") setRootClass(stored);
 }
 
 /** Apply a choice now and remember it (or forget it for "system"). */

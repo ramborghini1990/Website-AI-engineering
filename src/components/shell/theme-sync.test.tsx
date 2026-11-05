@@ -42,11 +42,21 @@ describe("ThemeSync", () => {
     expect(root().classList.contains("light")).toBe(false);
   });
 
-  it("removes a stale theme class when the stored choice is gone", () => {
+  it("leaves a class it did not set alone when nothing is stored (hydration must not clobber devtools, extensions or tests)", () => {
     root().classList.add("dark");
 
     render(<ThemeSync />);
 
+    expect(root().classList.contains("dark")).toBe(true);
+  });
+
+  it("replaces a different theme class with the stored one (never both)", () => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, "light");
+    root().classList.add("dark");
+
+    render(<ThemeSync />);
+
+    expect(root().classList.contains("light")).toBe(true);
     expect(root().classList.contains("dark")).toBe(false);
   });
 });

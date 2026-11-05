@@ -10,11 +10,37 @@ const LIGHT_BG = "rgb(246, 244, 238)"; // #F6F4EE
 const bodyBackground = (page: Page) =>
   page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
-const setThemeClass = (page: Page, theme: "light" | "dark") =>
-  page.evaluate((t) => {
+/**
+ * Switch the theme class, then wait for every colour transition to finish. The
+ * header and footer links fade their colour (160 ms), and axe measured mid-fade
+ * reads the old text colour on the new background.
+ */
+const setThemeClass = async (page: Page, theme: "light" | "dark") => {
+  // Wait for hydration first: ThemeSync (a layout effect) puts the STORED theme on
+  // <html> when React hydrates, which clears a class added by hand before that
+  // moment. The theme radios are enabled only after that commit, so they are the
+  // precise signal (a hydrated header link is not: React tags elements earlier).
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector('input[name="theme"]')
+        ?.hasAttribute("disabled") === false,
+  );
+  await page.evaluate((t) => {
     document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(t);
   }, theme);
+  await page.evaluate(() =>
+    // allSettled: a transition replaced by a newer one is cancelled, and its
+    // `finished` promise rejects with an AbortError.
+    Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished),
+    ),
+  );
+};
 
 async function expectNoAxeViolations(page: Page) {
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
