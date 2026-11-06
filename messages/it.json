@@ -155,7 +155,19 @@
       "stack": "Tecnologie",
       "client": "Cliente",
       "outcomes": "Risultati",
-      "simulation": "Simulazione con dati sintetici: nessun account reale collegato e nessun dato personale trattato."
+      "simulation": "Simulazione con dati sintetici: nessun account reale collegato e nessun dato personale trattato.",
+      "service": "Servizio",
+      "breadcrumb": "Percorso di navigazione"
+    },
+    "filters": {
+      "label": "Filtra i progetti",
+      "type": "Tipo",
+      "sector": "Settore",
+      "stack": "Tecnologie",
+      "all": "Tutti",
+      "count": "Risultati: {count}",
+      "noResults": "Nessun progetto corrisponde ai filtri scelti.",
+      "clear": "Rimuovi i filtri"
     },
     "cta": {
       "title": "Hai un caso simile?",

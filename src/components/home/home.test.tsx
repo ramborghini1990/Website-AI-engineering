@@ -253,8 +253,8 @@ describe.each(["it", "en"] as const)("Demos (%s)", (locale) => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("appears once a demo is published, with the simulation notice and no link until the pages exist", () => {
-    renderIn(locale, <HomeDemos demos={[publishedDemo]} />);
+  it("appears once a demo is published, with the simulation notice and no link when the work pages are not available", () => {
+    renderIn(locale, <HomeDemos demos={[publishedDemo]} linked={false} />);
 
     const copy = messages[locale].home.demos;
     const section = screen.getByRole("region", { name: copy.title });
@@ -263,6 +263,32 @@ describe.each(["it", "en"] as const)("Demos (%s)", (locale) => {
     ).toHaveTextContent(publishedDemo.data.title);
     expect(section).toHaveTextContent(messages[locale].work.labels.simulation);
     expect(within(section).queryAllByRole("link")).toEqual([]);
+  });
+
+  it("links to the demo and to /work by default now that the work pages exist (P2.4)", () => {
+    renderIn(locale, <HomeDemos demos={[publishedDemo]} />);
+
+    expect(
+      screen.getByRole("link", { name: publishedDemo.data.title }),
+    ).toHaveAttribute("href", "/it/work/published-demo");
+  });
+
+  it("features demos only: a published case study is not an interactive demo", () => {
+    const caseStudy = {
+      slug: "published-case-study",
+      data: workSchema.parse({
+        ...publishedDemo.data,
+        title: "A published case study for the tests",
+        kind: "project",
+        publishedAt: "2026-01-15",
+      }),
+    };
+    renderIn(locale, <HomeDemos demos={[caseStudy]} />);
+
+    expect(screen.queryByRole("region")).toBeNull();
+    cleanup();
+    renderIn(locale, <HomeDemos demos={[caseStudy, publishedDemo]} />);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(1);
   });
 
   it("links to the demo and to /work when those pages exist", () => {

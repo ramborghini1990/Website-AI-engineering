@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.2 committed as `cdc9e49`)_
+_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.3 committed as `68b122d`)_
 
 ---
 
@@ -11,20 +11,19 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.2 committed a
 | Field | Value |
 |---|---|
 | Phase | 2 — Landing page & agency value proposition |
-| Active task | `P2.3` — Services pages: `/services` index and `/services/<slug>` detail pages from `content/services/<locale>/<slug>.mdx`, with `ProfessionalService` + `Service` + `BreadcrumbList` JSON-LD |
-| Status | **built and verified, awaiting review (not committed)**; two roadmap criteria cannot be met as written and one needs you (section 8, "P2.3 / decisions for you") |
-| Next task | `P2.4` — Case studies / Work collection with an empty state (the schema exists); do not start unprompted |
+| Active task | `P2.4` — Work: `/work` index with type, sector and technology filters, and `/work/<slug>` detail pages from `content/work/<locale>/<slug>.mdx`, with the draft and client-consent guards; `work` is now available in the navigation |
+| Status | **built and verified, awaiting review (not committed)**; one design decision needs you (the header, section 8, "P2.4 / decisions for you") |
+| Next task | `P2.5` — Contact & inquiry funnel (new dependencies likely: Turnstile, rate limiting, DB; ask first); do not start unprompted |
 
 **Plan for the active task**
-1. B10 (MDX stack): no dependency. The bodies are already restricted to a small Markdown subset by the content gate (no JSX, no expressions, no imports), so a ~100-line parser and a server component render them (D28). Dependency facts for the two libraries you named are in section 8 so the choice can be reversed.
-2. Routes: `src/app/[locale]/services/page.tsx` and `services/[slug]/page.tsx` (unknown slug → real 404), components in `src/components/services/` and `src/components/content/`, JSON-LD in `src/lib/structured-data.ts`.
-3. No dead links, as in P2.2: the demo link needs a published work entry AND a `/work` page (`demoFor`); `/contact` in the text goes to `#contact`; links to `/process`, `/work`, `/about` render as plain text until those pages exist (`resolveInternalPath`). `services` is now available in the navigation, so the header and the Home cards link to the new pages.
-4. Tests: unit for the parser, the lint rules, the structured data, the link resolution and the components in both languages; `e2e/services.spec.ts` (83 tests) on the enforced-CSP production build; three mutations.
+1. Published entries only: `getWork()` already leaves drafts out, and both pages use it and nothing else, so a draft is invisible (index) and a 404 (detail), however real its file. A structure test fails if a work file asks for drafts.
+2. Client consent has two locks: the schema refuses a client without `clientConsent: true` (P2.1) and `clientDisclosure()` (`src/lib/content/work-view.ts`) returns nothing without it; a structure test fails if a work component reads `client`, `outcomes` or `clientConsent` any other way, or renders an image or a logo.
+3. Filters (type, sector, technology) live in the query string, parsed with Zod against the options the published entries actually offer (unknown values are dropped), rendered on the server as links: they work without JavaScript. With nothing published the page shows its approved empty state instead of filters for nothing.
+4. Tests: unit for the filters, the consent guard and the components (both languages); `e2e/work.spec.ts` (production, enforced CSP: the real state, which is an empty index and a 404 per draft) and `e2e/work-gallery.spec.ts` (dev only, SYNTHETIC published entries on `/_dev/work`: filters, cards, consenting client, detail template, axe in both themes); three mutations.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Mutated files were restored (checked: the full suite is green afterwards); no listener on 3100, 3101, 3200 and no leftover process.
-- The staged deletion of `src/app/[locale]/page.test.tsx` from P2.2 is committed (`cdc9e49`); this task has no staged files.
-- **Needs you:** the decisions in section 8; run Google's Rich Results Test on the deployed page (I cannot).
+- Nothing half-done. Mutated files were restored (checked: no mutation text left, full suite green afterwards); the temporary servers on 3101 and 3201 were stopped by PID; no listener on 3100, 3101, 3200, 3201.
+- **Needs you:** the header decision and the other points in section 8.
 
 ---
 
@@ -34,7 +33,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.2 committed a
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
 | 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
-| 2 Landing & value proposition | ◐ | 3/7 | P2.1 and P2.2 committed; P2.3 awaiting review/commit |
+| 2 Landing & value proposition | ◐ | 4/7 | P2.1-P2.3 committed; P2.4 awaiting review/commit |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
@@ -61,6 +60,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.2 committed a
 | 2026-11-05 | P1.8 | Layout shell (skip link, header, footer, theme switch, providers), corrected business identity | `6f03a86` |
 | 2026-11-05 | P2.1 | Copy deck (IT/EN), content models and collections in `content/`, content test gate | `e70988c`, fix `823681e` |
 | 2026-11-06 | P2.2 | Home landing page: hero, proof, services, process, closing CTA; CSS-only `TextReveal when="load"`; `font-display: optional` | `cdc9e49` |
+| 2026-11-06 | P2.3 | Services index and detail pages, in-repo Markdown renderer (no MDX library), JSON-LD, no dead links, tracing warning fixed | `68b122d` |
 
 ---
 
@@ -98,6 +98,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D26 | 2026-11-05 | Content architecture (P2.1). Short page copy (hero, headings, CTAs, labels, process steps, contact) and ALL page titles/descriptions are in `messages/*.json`; services, work entries and About are MDX in `content/<collection>/<locale>/<slug>.mdx`. Frontmatter is **one JSON object between `---` lines** (valid YAML, so a later MDX/YAML pipeline reads it unchanged; no parser dependency now). Strict Zod schemas (`src/lib/content/schemas.ts`): an unknown key is an error; a client name or any result needs `clientConsent: true`; a demo has no client; a `planned` demo cannot be published; a project must be live and dated. File name = slug = stable id, the same in both languages and the same path in both languages (localized slugs left open). Message lists are keyed objects with the order in code (`site-map.ts`). The Work collection holds the **four planned demos as drafts** and no client projects. About has no biography. Titles are the page part only (12-52 characters), descriptions 80-160. Copy is checked for unverifiable claims (years, numbers of clients, percentages, guarantees, compliance, hype). Voice: first person, informal "tu" in Italian | There are no clients, results or biography to publish and none may be invented (CLAUDE.md §12); JSON frontmatter avoids a dependency before P2.3 decides the MDX stack; typed messages give parity for UI-sized copy; the schema makes "advertise a demo that does not exist yet" impossible | — |
 | D27 | 2026-11-06 | Home (P2.2). Sections are server components in `src/components/home/` composed by an async page; the hero headline is `TextReveal when="load"`, **CSS only** (the `view` mode skips a heading already on screen and loads GSAP after idle, which would flash a hero); services are spotlight cards from the collection; the process timeline is `ScrollPinnedSection` over `process.steps`; the closing CTA sits on `GradientMesh`. **Honest content:** the proof strip shows the four commitments and **no metrics** (none supplied, none invented); the **demos section renders nothing until a demo is published**; **no link to a page that does not exist** (`isPageAvailable`), so today the CTAs are the in-page anchors `#services` and `#contact`. **Fonts: `font-display: optional`** instead of `swap`: headings use a condensed width the fallback cannot match, so a late font re-flowed the hero (3 lines to 2) and measured CLS 0.26 on a slow first visit under reduced motion; `optional` never swaps (the font is preloaded and self-hosted; if it is not ready at once that page view keeps the fallback). Content is read from disk at request time, so `outputFileTracingIncludes` ships `content/` with the functions | CLAUDE.md §8 (readable without JS, no hidden-until-hydrated), docs/CONTENT.md (no unbuilt demos, no invented facts), CLS < 0.05 as a hard requirement | — |
 | D28 | 2026-11-06 | Services pages (P2.3). **No MDX library (resolves B10):** the content gate already bans everything MDX adds to Markdown (`{ }`, `<Tags />`, `import`/`export`), so the bodies are plain Markdown; `src/lib/content/markdown.ts` parses exactly `##` headings, paragraphs, `- ` lists, `**strong**`, `*emphasis*` and links into data, and `components/content/markdown.tsx` renders it as React elements (text escaped by React, no HTML path). `bodyProblems` now fails on any Markdown the renderer does not implement (numbered lists, quotes, tables, code, images, rules), so nothing renders as something else silently. A link target other than an internal path or https becomes plain text. Files stay valid MDX: moving to `@next/mdx` or `next-mdx-remote` later replaces two files. **Links to pages that do not exist are never emitted** (`resolveInternalPath`): `/contact` becomes `#contact`, `/work`, `/process` and `/about` show as text until each ships. **Structured data:** one `@graph` per service page: `ProfessionalService` (subtype of `LocalBusiness` and so of `Organization`; name, founder, the footer's address, area served, `knowsAbout` = the service's stack), `Service` (from the frontmatter, `provider` by `@id`) and `BreadcrumbList`; no price, contact detail, logo, rating or profile because none exists; `<` is escaped in the JSON so no string can close the script. **Build warning removed:** Turbopack warned that the dynamic `content/` reads would trace the whole project (including `public/` and all sources) into the server bundle; `turbopackIgnore` comments on those four calls fix it and `outputFileTracingIncludes` still ships `content/` (verified in the page's trace manifest: 18 content files, no `src/` or `public/`) | CLAUDE.md §5 (no dependency without need), docs/CONTENT.md (nothing invented, no dead links) | — |
+| D29 | 2026-11-06 | Work pages (P2.4). **Honesty by construction:** both pages read `getWork()` (published only), so a draft or planned entry is absent from the index and a real 404 at its URL, with no title, summary or slug anywhere in the HTML (tested against the real files, which are all drafts today). **Client consent has two locks:** the schema (P2.1) and `clientDisclosure()`, the only reader of `client` and `outcomes` in the work components, which returns nothing without `clientConsent: true` or for a demo; `work-structure.test.ts` fails on any other read, on an image, a logo or `includeDrafts`. There is no logo field in the schema and none is rendered. **Filters:** type, sector and technology as plain links to `/work?kind=&sector=&stack=` (not an ARIA tab widget: choosing one loads a different list, it does not switch panels), parsed with Zod against the options the published entries offer, unknown or oversized values ignored; a group with fewer than two options is hidden; the canonical URL ignores the query; works without JavaScript. **Empty state:** with nothing published `/work` shows `work.empty`, not filters. **Dev fixtures:** the non-empty UI is exercised in a browser through a dev-only route (`/_dev/work`, 404 in production) with synthetic entries, the same pattern as the UI gallery and FX showcase. **Consequences of `work` being available:** the header, the Home demos section (now featuring `demo` entries only, a case study is not an interactive demo), the services pages' demo link (`demoFor`) and Markdown links to `/work` all switch on by themselves once an entry is published; today none appears. **Header:** with a third link the navigation no longer leaves room for the theme switch on its row at 360 px, so the header went from three rows (about 160 px) to four (207 px); the shell test's budget went from 170 to 215 px (see section 8). The closing call to action is shared (`components/content/contact-cta.tsx`) with the services pages | CLAUDE.md §12 (client names, logos and metrics only with consent), docs/CONTENT.md (no entry advertised before it exists) | — |
 
 ---
 
@@ -115,6 +116,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B6 | Production domain name (needed for `NEXT_PUBLIC_SITE_URL` in Production). **Now also drives canonical and hreflang URLs** (P1.4); until it is set they use Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`) | you | P1.7 / P2.6 / before indexing |
 | B9 | ~~Approve the copy deck~~ approved 2026-11-06 (tone: first-person "tu" in Italian; copy deck and content models in `docs/CONTENT.md`). **Still open from `docs/CONTENT.md` §7:** the biography for About, and the technologies listed per service | you | P2.x (About page) |
 | B10 | ~~MDX stack for P2.3~~ resolved by D28: no dependency was added. If you would rather have a real MDX pipeline, say which and I replace `markdown.ts` + `markdown.tsx` (facts in section 8) | you | — |
+| B11 | **Header at 360 px with more links.** Four rows today (207 px of an 800 px screen); Process and About would make it five. Proposal: below `md` the navigation moves into a menu (Sheet, already in the UI kit); not built because it changes the shell and was not asked for | you | before Process / About ship |
 
 ---
 
@@ -149,6 +151,11 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P2.4 / decisions for you.** (1) **The header (B11).** Flipping `work` to available made the 360 px header four rows tall (207 px, a quarter of a small phone's height; it was three rows, about 160 px). The shell test said "at most three rows, under 170 px": I raised it to "at most four rows, under 215 px" instead of leaving it red, with a comment, and changed the header comment and docs/DESIGN.md §9 to say so. CLAUDE.md says not to weaken a test to make it pass: this is a changed budget, not a hidden one, and it is yours to reject. If you do, the answer is a menu below `md`; either way a fifth link needs one. (2) **`/work` is empty in production and will stay so until a demo is published.** All four entries are `draft: true, status: planned`. The filters, cards, consenting-client rule and detail template are real and tested, but on synthetic entries through the dev-only route, not on anything a visitor can see. To publish a demo: build it (Phase 3), set `status: live` and `draft: false` in both languages; the index, the Home demos section and the service pages' demo link then appear by themselves (and the e2e expectations follow the files). (3) **"Tabs" are link filters.** You asked for category/filter tabs; ARIA tabs switch panels in place, these load a filtered URL, so they are navigation links with `aria-current`. Say if you wanted the tab widget. (4) **Logos.** There is no logo field and nothing renders an image on the work pages. If client logos are wanted later they need a schema field tied to `clientConsent`, an asset rule and a place in `clientDisclosure`; the structure test will fail on an image until then, on purpose. (5) **Sector names are free text per language** ("Marketing e vendite" / "Marketing and sales"), so a filtered URL is language-specific; fine for now, a fixed list of sector keys would be needed if the filters should be shared across languages. (6) **No structured data on work pages.** Not requested; `CreativeWork` for case studies and a `SoftwareApplication`-style node for demos are candidates for P2.6.
+- **P2.4 / measured, and not measured.** Production build, enforced CSP, Chromium: the real `/work` in both languages, axe zero violations in both themes, at 360 px and under reduced motion; CLS under 0.05 on load and a full scroll; zero CSP violations and no console error; complete with JavaScript off; no horizontal scroll at 360, 768, 1280 and 1920 px; hostile query strings (script tags, an image with `onerror`, 2000-character values) return 200 and reflect nothing; path-like slugs (`..%2F`, `%00`) return 404. Dev fixtures (synthetic entries): axe zero violations on the index, a filtered index, the no-results state and both detail kinds in both themes, plus English at 360 px; the filters narrow, combine, clear and work without JavaScript; filter options are at least 44 px tall and show a focus ring. Visual check of the empty state, the filtered index, a 360 px page and a case-study detail in both themes. **Not measured:** LCP/INP on a phone (P4.6), Firefox/WebKit, a screen reader, the filters against real content, search-engine behaviour of the `?` URLs.
+- **P2.4 / things I changed outside the new pages:** `src/lib/navigation.ts` (`work` available), `src/components/home/home-demos.tsx` (features `demo` entries only), `src/components/services/services-cta.tsx` (now a thin wrapper over the shared `ContactCta`), `messages/*.json` (`work.filters.*`, `work.labels.service`, `work.labels.breadcrumb`), `src/components/shell/site-header.tsx` (comment) and `e2e/shell.spec.ts` (nav count, header budget), `e2e/support/{content,servers}.ts` (reads work entries; warms the new dev route), docs/CONTENT.md and docs/DESIGN.md. Tests that described the world before `/work` existed were updated, none weakened apart from the header budget above: the nav lists three links, the Home demo section links by default, `/work` is a page for the Markdown resolver (`/process` and `/about` still show as plain text).
+- **P2.4 / defects found on the way (all fixed).** (a) My first result-count message used an ICU plural, which ends in `}}` and tripped the placeholder rule of the claims lint (`unfilled template marker`); I changed the message to "Risultati: {count}" rather than loosen the lint. (b) The structure test first matched the message key "labels.client" as a property read; it now ignores string literals. (c) `filterKeys` was exported for nothing (knip). (d) Two of my edits to `shell.test.tsx` hit the wrong assertion (the `MainNav` fixture) and were corrected; the diff shows only the header assertion changed. (e) A latent bug: the Home demos section would have shown a published case study under "interactive demos" with the simulation notice; it now features demos only.
+- **P2.4 / limits.** The detail page has no "related entries" and no previous/next; a published project needs `publishedAt` but the index does not sort by it (files are listed in file-name order). Filtered pages carry no `noindex`; their canonical is `/work`. Drafts cannot be previewed in production by design; use the dev fixtures or the unit tests.
 - **P2.3 / decisions for you.** (1) **No MDX library (D28).** Confirm, or pick one. Facts, from the npm registry and the GitHub advisory database on 2026-11-06 (install size and bundle impact were NOT measured: nothing was installed). `next-mdx-remote` 6.0.0: MPL-2.0, about 1.76 M downloads/week, 107 KB unpacked, last published 2026-02-12, pulls in `@mdx-js/mdx` (about 25 unified/remark/rehype packages) and `@mdx-js/react`; its RSC mode compiles on the server at request time (CPU per request unless cached) and ships no client JS; **versions 4.3.0 to 5.x have a high-severity advisory (GHSA-g4xw-jxrg-5f6m, CVE-2026-0969: arbitrary code execution when rendering untrusted MDX), fixed in 6.0.0**; our content is trusted, so it would not apply, but it shows the surface an expression-capable renderer adds. `@next/mdx` 16.4.5: MIT, about 2.18 M/week, 15 KB unpacked, needs `@mdx-js/loader` (2.67 M/week) and `@mdx-js/react` (30 M/week) plus `@types/mdx`; it compiles at build time and is meant for `.mdx` files imported as modules, which does not fit our request-time reads and JSON frontmatter (it would need a frontmatter plugin, and Turbopack accepts plugins only as strings). Neither is needed while a body is headings, paragraphs, lists and links; one of them becomes worth it the day a page needs a component inside the text. (2) **The roadmap criterion "each page links to a relevant demo" is unmet by design.** All four demos are drafts and you approved hiding them, so `demoFor` returns null today; the code, the section and its tests exist (with a fixture and with the real content). It switches on when a demo is published and `/work` exists (flip `available` for `work` in `src/lib/navigation.ts`). (3) **"Rich results test passes" could not be run here** (it is Google's online tool and needs a public URL). What I checked instead: the JSON parses, every node has the required shape, `@id` references resolve, URLs are absolute and equal the canonical, nothing is invented. To my knowledge Google documents rich results for breadcrumbs and for local business, but none for `Service` or `ProfessionalService`, so for those the tool can only confirm that the markup is valid: please run it on a deployed `/it/services/ai-agents` and tell me what it reports. (4) **The structured data publishes the owner's name (`founder`) and the street address** that the footer already shows (both come from `src/lib/business.ts`), and `knowsAbout` repeats the technology list that docs/CONTENT.md §7 item 10 asks you to correct. Say if either should not be machine-readable. (5) Until `/contact` exists, the inline "parliamone" in each body and the closing button both go to the contact block (`#contact`).
 - **P2.3 / measured, and not measured.** Production build with the CSP enforced, Chromium: axe zero violations on the index and the four detail pages in both languages and both themes, plus 360 px in both themes, plus reduced motion; CLS under 0.05 on load and a full scroll in full and reduced motion; no CSP violation and no console error; every link on every service page resolves (200 or an existing anchor); prose lines at most 75ch at 1920 px; nothing overflows at 360, 768, 1280 and 1920 px; the page is complete with JavaScript off. **Not measured:** LCP/INP on a mid-range phone (P4.6), Firefox/WebKit, a screen reader, the live Rich Results Test, and Vercel itself (the trace manifest shows the content files are included, but a real deployment has not been seen).
 - **P2.3 / things I changed outside the new pages:** `src/lib/navigation.ts` (`services` available; `resolveInternalPath`), `src/lib/content/lint.ts` (the renderer's unsupported constructs now fail the gate), `src/lib/content/read.ts` (`turbopackIgnore`, comment), `messages/*.json` (one key, `services.labels.breadcrumb`), docs/CONTENT.md. Tests that described the state before the pages existed were updated to the new state, none weakened: the Home services cards now link (`home.test.tsx`), the header lists two links (`shell.test.tsx`, `shell.spec.ts`), and the theme-switch focus test starts from the last nav link instead of Home so it still tests Tab into the switch.
@@ -262,79 +269,75 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ```
 pnpm install --frozen-lockfile → pass (no dependency added or changed)
-pnpm verify       → pass, exit 0 with NO env file (typecheck → lint --max-warnings=0 → test → build, and the build
-                    prints no warning any more); test step: 48 files, 737 tests (660 before P2.3)
-pnpm test:e2e     → pass, 330 tests (Chromium), twice in a row (247 before: +83 in e2e/services.spec.ts). The first
-                    full run had 6 failures, all described in section 8 (two wrong tests of mine, three old
-                    assumptions about a one-link nav); the next runs were clean
+pnpm verify       → pass, exit 0 with NO env file (typecheck → lint --max-warnings=0 → test → build, no warning);
+                    test step: 52 files, 816 tests (737 before P2.4)
+pnpm test:e2e     → pass, 393 tests (Chromium; the dev-only gallery specs run on `next dev`), twice in a row
+                    (330 before: +63 in e2e/work.spec.ts and e2e/work-gallery.spec.ts). The first full run had 3
+                    failures, all caused by the third nav link (section 8): two header count assertions and the
+                    360 px header budget
 pnpm knip         → pass (one unused export found and un-exported on the way)
 pnpm format:check → pass (does not cover *.md, nor content/)
 
-P2.3 checks:
-  content           → /it and /en, index and four detail pages: one h1, h2 per service in order, the body headings,
-                      the three lists and the technologies from the frontmatter; unknown slug = HTTP 404 with the
-                      localized not-found page and no JSON-LD
-  metadata          → title = seoTitle + brand, description, canonical and hreflang (it, en, x-default) per page
-  structured data   → one ld+json script per detail page; ProfessionalService, Service, BreadcrumbList; Service url
-                      = canonical; provider resolves by @id; breadcrumb positions 1-3; no price, telephone, email,
-                      rating, review, sameAs or offers anywhere
-  links             → every link on every service page resolves; the in-text link and the button both reach
-                      #contact; the Home cards, the header and the breadcrumb navigate (Home → card → page → back)
-  parser (negative) → javascript:, data:, vbscript:, mailto:, http:, //host and relative targets never become a
-                      link; hostile text (<script>, <img onerror>) stays text; a target with parentheses cannot
-                      smuggle a link; a link to /process or /work shows as text
-  lint (negative)   → numbered list, '*' bullet, quote, table, code, image and rule each fail the gate
-  a11y              → axe zero violations: 10 pages x 2 themes, 360 px in both themes (index + detail), reduced
-                      motion; keyboard reaches the breadcrumb and the button in reading order
-  layout            → no horizontal scroll at 360 / 768 / 1280 / 1920; prose paragraphs at most 75ch at 1920
-  CLS / CSP         → CLS under 0.05 on load and a full scroll (full motion, reduced motion); zero CSP violations
-                      under the enforced policy and no console error
-  no JS             → the whole service (h1, body, lists) and the JSON-LD are in the HTML
-  mutation          → /contact treated as an existing page, demo shown without /work, and the JSON-LD escape
-                      removed: each made tests fail (5, 1 and 2 tests); all restored
-  build             → no Turbopack warning; page trace manifest lists the content files and no src/ or public/
-  NOT done          → Google Rich Results Test (needs a public URL); Lighthouse and mid-range-phone LCP/INP (P4.6);
-                      Firefox/WebKit; screen reader; Vercel deployment of this change; native-speaker review
+P2.4 checks:
+  honesty           → real files: every entry is a draft, so /it/work and /en/work show the empty state, no draft
+                      title, summary or slug appears in the HTML, every draft URL is HTTP 404 with the localized
+                      not-found page and no draft title, unknown and path-like slugs are 404; expectations are
+                      derived from the files, so publishing a demo changes them instead of passing silently
+  consent (negative)→ an object that holds a client name and results WITHOUT consent (the schema would refuse it)
+                      renders neither in the card nor in the detail; a demo never shows a client even with the flag;
+                      a consenting case study shows the client and its results; no image anywhere
+  structure         → no work file reads client / outcomes / clientConsent except through clientDisclosure, none
+                      renders an image or a logo, none asks for drafts
+  filters           → options come from published entries only; invalid, empty, oversized, markup and unknown values
+                      are ignored; AND across groups; stable, linkable URLs that parse back; groups with one option
+                      are hidden; no-results state with a way out; work without JavaScript
+  a11y              → axe zero violations: real /work x 2 locales x 2 themes, 360 px, reduced motion; fixtures:
+                      index, filtered, no results, two detail kinds x 2 themes, English at 360 px; options at least
+                      44 px with a visible focus ring
+  layout / CLS / CSP→ no horizontal scroll at 360 / 768 / 1280 / 1920; CLS under 0.05 on load and a full scroll;
+                      zero CSP violations, no console error; metadata, canonical (query ignored) and hreflang right
+  mutation          → drafts served by both pages + client read directly in both components + OR instead of AND
+                      across filter groups: 11 unit tests and the draft e2e tests failed; all restored
+  visual            → screenshots of the empty state (1280 dark), a filtered index (1280 dark), the index at 360
+                      light and a case-study detail (1280 light); nothing looked broken
+  NOT done          → Lighthouse and mid-range-phone LCP/INP (P4.6); Firefox/WebKit; screen reader; the filters on
+                      real published content (none exists); native-speaker review of the new filter labels
 ```
 
 ---
 
 ## 10. Proposed commit(s) for the work above
 
-One logical change (the tracing fix in `read.ts` is two comments and touches the same file; it travels with the pages that made it visible).
+One logical change.
 
 ```
-feat(services): add services pages with structured data
+feat(work): add work index with filters and detail pages
 
-Add /services and /services/<slug> for both languages, rendered from
-content/services/<locale>/<slug>.mdx: the h1 and summary, the body, the
-three lists from the frontmatter, the technologies and a closing call
-to action. An unknown slug is a real 404. Titles, descriptions,
-canonical and hreflang come from the frontmatter.
+Add /work and /work/<slug> for both languages, rendered from
+content/work/<locale>/<slug>.mdx through the Markdown renderer. The
+index filters by type, sector and technology through the query string:
+plain links, parsed with Zod against the options the published entries
+offer, so unknown values are ignored and the filters work without
+JavaScript. With nothing published the page shows its empty state.
 
-Each detail page carries JSON-LD: a ProfessionalService (name, owner,
-the address the footer already shows, area served), the Service itself
-and a BreadcrumbList. It states nothing the site does not show: no
-price, contact detail, logo or rating. The JSON is escaped so no value
-can close the script element.
+Keep the honesty rules by construction. Both pages read published
+entries only, so a draft is absent from the index and a 404 at its URL.
+A client name and results are read through one function that returns
+nothing without clientConsent: true (and nothing for a demo); a
+structure test fails if a work component reads them any other way or
+renders an image. There is no logo field and none is shown.
 
-Render the bodies without an MDX dependency. The content gate already
-forbids everything MDX adds to Markdown, so a small parser and a server
-component cover headings, paragraphs, lists, emphasis and links; the
-gate now also rejects Markdown the renderer does not implement. A link
-target that is not an internal path or https is shown as text. Files
-remain valid MDX, so a library can replace the two files later.
+Make work available in the navigation. The Home demos section now
+features demos only, so a published case study is not presented as an
+interactive demo. The non-empty UI is tested in a browser through a
+dev-only route with synthetic entries, since every real entry is still
+a draft.
 
-Never link to a page that does not exist: /contact goes to the contact
-block until the page ships, links to /work, /process and /about show as
-text, and the demo link needs a published demo and a work page (neither
-exists yet). Services is now in the header navigation.
+The third link makes the 360 px header four rows tall (207 px); the
+shell test budget goes from 170 to 215 px, and a menu is needed before
+a fifth link. Share the closing call to action with the services pages.
 
-Tell Turbopack not to trace the whole project for the dynamic content
-reads (it warned that public/ and all sources would be deployed); the
-content folder is still included explicitly.
-
-Task: P2.3
+Task: P2.4
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

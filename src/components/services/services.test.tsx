@@ -91,7 +91,7 @@ describe("Markdown", () => {
   it("shows a link to a page that does not exist yet as plain text, not a dead link", () => {
     render(
       <Markdown
-        body={"## A\n\nSee [the method](/process) and [a demo](/work/x)."}
+        body={"## A\n\nSee [the method](/process) and [the team](/about)."}
       />,
     );
 

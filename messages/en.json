@@ -155,7 +155,19 @@
       "stack": "Technologies",
       "client": "Client",
       "outcomes": "Results",
-      "simulation": "Simulation with synthetic data: no real account connected and no personal data processed."
+      "simulation": "Simulation with synthetic data: no real account connected and no personal data processed.",
+      "service": "Service",
+      "breadcrumb": "Breadcrumb"
+    },
+    "filters": {
+      "label": "Filter projects",
+      "type": "Type",
+      "sector": "Sector",
+      "stack": "Technologies",
+      "all": "All",
+      "count": "Results: {count}",
+      "noResults": "No project matches the selected filters.",
+      "clear": "Clear filters"
     },
     "cta": {
       "title": "Have a similar case?",

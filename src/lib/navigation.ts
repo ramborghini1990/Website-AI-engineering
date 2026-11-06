@@ -10,7 +10,7 @@
 export const navItems = [
   { key: "home", href: "/", available: true },
   { key: "services", href: "/services", available: true },
-  { key: "work", href: "/work", available: false },
+  { key: "work", href: "/work", available: true },
   { key: "process", href: "/process", available: false },
   { key: "about", href: "/about", available: false },
 ] as const;

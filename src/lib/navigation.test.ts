@@ -82,7 +82,18 @@ describe("resolveInternalPath: content never links to a page that does not exist
     });
   });
 
-  it.each(["/work", "/work/some-demo", "/process", "/about"])(
+  it("links to the work pages now that they exist (P2.4)", () => {
+    expect(resolveInternalPath("/work")).toEqual({
+      kind: "page",
+      href: "/work",
+    });
+    expect(resolveInternalPath("/work/some-demo")).toEqual({
+      kind: "page",
+      href: "/work/some-demo",
+    });
+  });
+
+  it.each(["/process", "/about"])(
     "shows %s as plain text while that page does not exist (negative)",
     (path) => {
       expect(resolveInternalPath(path)).toEqual({ kind: "none" });

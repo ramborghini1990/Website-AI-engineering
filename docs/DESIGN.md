@@ -282,7 +282,7 @@ When `prefers-reduced-motion: reduce`:
 Every page is rendered inside one shell, owned by `src/app/[locale]/layout.tsx`:
 
 1. **Skip link** (first tab stop, hidden until focused, 44 px, targets `#main-content`; works without JavaScript).
-2. **Header** (`src/components/shell/site-header.tsx`): wordmark, main navigation, theme switch, language switcher, primary call to action, in that order in the document and on screen. One wrapping row: three rows at 360 px, one row from `lg`. Not sticky (a sticky bar would cover focused elements, WCAG 2.2 2.4.11, and the FX pinned scenes).
+2. **Header** (`src/components/shell/site-header.tsx`): wordmark, main navigation, theme switch, language switcher, primary call to action, in that order in the document and on screen. One wrapping row: four rows at 360 px (207 px tall, since the third link, Work, joined the navigation in P2.4; it was three rows with two links), one row from `lg`. **Decision pending:** a fifth row is not acceptable, so when Process or About ship the navigation moves into a menu (Sheet) below `md`. Not sticky (a sticky bar would cover focused elements, WCAG 2.2 2.4.11, and the FX pinned scenes).
 3. **`<main id="main-content" tabindex="-1">`**: the only `main` landmark. Pages render a `div`, never a `main`.
 4. **Footer** (`site-footer.tsx`): contact block (the call to action's anchor, `#contact`), then the owner and the statutory details from `src/lib/business.ts`; a muted "not yet available" for anything not registered yet (docs/IDENTITY.md).
 5. **Providers:** `TooltipProvider`, `LenisProvider`, and one `Toaster` with translated labels.

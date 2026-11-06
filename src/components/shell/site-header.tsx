@@ -14,8 +14,9 @@ import { availableNavItems, contactHref, type NavItem } from "@/lib/navigation";
  * follows the visual order, WCAG 2.4.3).
  *
  * It is one wrapping row, not separate mobile and desktop layouts: at 360 px it
- * falls into three rows (wordmark / navigation and theme / language and call to
- * action), from `lg` it is a single row. Not sticky on purpose: a sticky bar
+ * falls into four rows (wordmark / navigation / theme and language / call to
+ * action; three rows while there were two links), from `lg` it is a single row.
+ * Past five links it needs a menu (docs/DESIGN.md §9). Not sticky on purpose: a sticky bar
  * would cover the focused element while tabbing (WCAG 2.2 2.4.11) and the
  * pinned scenes of the FX library; if it becomes sticky, add
  * `scroll-padding-top` and a pin offset.

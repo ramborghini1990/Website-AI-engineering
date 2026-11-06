@@ -8,14 +8,15 @@ import { isPageAvailable } from "@/lib/navigation";
 
 /**
  * Featured interactive demos. It renders NOTHING until at least one demo is
- * published (`getWork()` returns published entries only): the four planned
+ * published (`getWork()` returns published entries only, and only the ones
+ * of kind `demo` are featured here): the four planned
  * demos are drafts, and docs/CONTENT.md forbids advertising a demo that does
  * not exist. Publishing one (`draft: false`, `status: "live"`) makes this
  * section appear. Links to the demo pages and to `/work` appear once those
  * pages exist.
  */
 export function HomeDemos({
-  demos,
+  demos: published,
   linked = isPageAvailable("work"),
 }: {
   demos: ReadonlyArray<{ slug: string; data: Work }>;
@@ -24,6 +25,8 @@ export function HomeDemos({
   const t = useTranslations("home.demos");
   const labels = useTranslations("work.labels");
 
+  // Case studies are not "interactive demos": they have their own place in /work.
+  const demos = published.filter(({ data }) => data.kind === "demo");
   if (demos.length === 0) return null;
 
   return (

@@ -211,8 +211,8 @@ test.describe("header", () => {
         header.getByRole("link", { name: business.brand.name }),
       ).toHaveAttribute("href", `/${locale}`);
       const nav = header.getByRole("navigation", { name: COPY[locale].nav });
-      // Home and, since P2.3, Services: only pages that exist are listed.
-      await expect(nav.getByRole("link")).toHaveCount(2);
+      // Home, Services (P2.3) and Work (P2.4): only pages that exist are listed.
+      await expect(nav.getByRole("link")).toHaveCount(3);
       await expect(nav.getByRole("link", { name: "Home" })).toHaveAttribute(
         "aria-current",
         "page",
@@ -597,14 +597,19 @@ test.describe("responsive", () => {
     });
   }
 
-  test("360 px: the header is at most three rows tall, and the footer stays readable", async ({
+  test("360 px: the header is at most four rows tall, and the footer stays readable", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await open(page, "/it");
 
     const header = await page.getByRole("banner").boundingBox();
-    expect(header?.height).toBeLessThan(170);
+    // Four 44 px rows with their gaps. With three links the navigation (234 px) no
+    // longer leaves room for the theme switch (134 px) on its row at 360 px, so the
+    // header grew from three rows (about 160 px) to four (207 px). A fifth page
+    // (Process, About) must come with a menu instead of a fifth row: this bound
+    // is what makes that decision unavoidable (docs/DESIGN.md §9).
+    expect(header?.height).toBeLessThan(215);
     for (const term of await page
       .getByRole("contentinfo")
       .locator("dd")
