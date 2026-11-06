@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.4 committed as `4f78467`)_
+_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.5 committed as `dc601df`)_
 
 ---
 
@@ -11,21 +11,20 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.4 committed a
 | Field | Value |
 |---|---|
 | Phase | 2 — Landing page & agency value proposition |
-| Active task | `P2.5` — Contact & inquiry funnel v1: `/contact` four-step form (need, budget band, timeline, your details), Server Action with Zod, honeypot + Turnstile, rate limit, Postgres via Drizzle, email notification, `/contact/thanks`; every call to action now points at `/contact` |
-| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (69 files, 1049 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 441/441 twice in a row; the live services (Postgres, Upstash, Resend, Turnstile) were not exercised, only their adapters against fakes. Decisions for you in section 8, "P2.5 / decisions for you" |
-| Next task | `P2.6` — SEO & sharing (`sitemap.ts`, `robots.ts`, OG images, canonicals); do not start unprompted |
+| Active task | `P2.6` — SEO & sharing: `sitemap.xml` (both languages, hreflang alternates), `robots.txt`, a generated Open Graph / Twitter image per page and language (`next/og`), canonical and alternates on every public page through one helper |
+| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (75 files, 1119 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 464/464 twice in a row; the images were looked at. Not verified: Google/Bing, the social-card debuggers, a deployed preview (section 8) |
+| Next task | `P2.7` — Booking: Cal.com (EU) behind a click-to-load consent gate (needs the consent manager, P4.1, or a click-to-load design: decide before starting); do not start unprompted |
 
 **Plan for the active task**
-1. Ports and adapters (`src/lib/inquiry/`): the flow `processInquiry` takes its services as arguments (limiter, bot check, store, mailer, logger), so it is tested with fakes; `deps.ts` picks the real service or an in-process stand-in from plain config, `runtime.ts` reads the environment (D30).
-2. Real adapters: Upstash sliding window, Turnstile siteverify by `fetch`, Resend REST by `fetch`, Drizzle over postgres.js. Stand-ins for local, tests and CI: memory limiter, memory store, memory mailbox, a bot check that passes. On Vercel nothing is mocked: a missing service means the form says it is unavailable.
-3. UI: one `<form>` with four steps in a client component (native radios, real checkbox, error summary with focus, focus to each step heading, hidden inputs carry earlier steps), a Turnstile widget that loads only on the last step, honeypot, privacy sentence, noscript notice; the Server Action redirects to `/contact/thanks`.
-4. Privacy: `src/lib/logger.ts` (it was missing: the allow-list logger the rules require), no IP/user agent/token column, a salted hash as limiter key, separate unticked marketing consent stored with a consent-wording version.
-5. Flip `/contact` to available: header, hero, closing sections and the services/work pages now link to `/contact`; the footer keeps its identity block.
+1. One helper, `pageMetadata` (`src/lib/seo.ts`): title, description, canonical, hreflang (+ `x-default`), Open Graph (type, site name, locale and alternate, url, image with size and alt) and Twitter (large image card). Every public page uses it; `src/app/seo-coverage.test.ts` fails for a page that does not.
+2. `src/app/sitemap.ts` and `src/app/robots.ts` over pure builders (`src/lib/sitemap.ts`, `sitemap-pages.ts`, `robots.ts`): only pages that exist and are public, both languages, every entry listing all language versions; production crawlable except the dev tools, any other deployment disallowed.
+3. Share images: one route, `/[locale]/og/<key>` (`ImageResponse`), text only from our own content for real public pages (404 for anything else, drafts included), colours from a drift-tested copy of the dark tokens.
+4. Tests: unit for each builder, the key resolver, the palette, the route (it renders real PNGs under vitest) and the coverage gate; `e2e/seo.spec.ts` crawls every URL of the sitemap on the production build; three mutations.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. No mutation sweep was run for this task (you asked not to). No server of mine is running (checked after the last e2e run).
-- `pnpm add` changed `package.json` and `pnpm-lock.yaml` (four dependencies, section 8); `pnpm install --frozen-lockfile` is the first thing to run on another machine.
-- **Needs you:** the decisions in section 8, and the services in section 5 (B12, B13) before the form can go live.
+- Nothing half-done. No server of mine is running (checked: no node process, no listener on 3100, 3101, 3200, 3201).
+- Process note: two `next start --port 3101` servers from earlier tasks were still alive (an earlier cleanup stopped only their wrappers) and answered my first image check with an old build; I stopped them by PID and now start temporary servers with `Start-Process -PassThru` and stop them by that PID.
+- **Needs you:** the decisions in section 8, and, after the first production deploy, submitting the sitemap and checking a share card (they need your accounts).
 
 ---
 
@@ -35,7 +34,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.4 committed a
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
 | 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
-| 2 Landing & value proposition | ◐ | 5/7 | P2.1-P2.4 committed; P2.5 verified, awaiting review/commit |
+| 2 Landing & value proposition | ◐ | 6/7 | P2.1-P2.5 committed; P2.6 verified, awaiting review/commit |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
@@ -64,6 +63,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.4 committed a
 | 2026-11-06 | P2.2 | Home landing page: hero, proof, services, process, closing CTA; CSS-only `TextReveal when="load"`; `font-display: optional` | `cdc9e49` |
 | 2026-11-06 | P2.3 | Services index and detail pages, in-repo Markdown renderer (no MDX library), JSON-LD, no dead links, tracing warning fixed | `68b122d` |
 | 2026-11-06 | P2.4 | Work index with filters and detail pages, draft and client-consent guards, `work` in the navigation | `4f78467` |
+| 2026-11-06 | P2.5 | Inquiry funnel: four-step form, Server Action, honeypot + Turnstile, rate limit, Postgres via Drizzle, email notification, `/contact/thanks`, allow-list logger | `dc601df` |
 
 ---
 
@@ -103,6 +103,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D28 | 2026-11-06 | Services pages (P2.3). **No MDX library (resolves B10):** the content gate already bans everything MDX adds to Markdown (`{ }`, `<Tags />`, `import`/`export`), so the bodies are plain Markdown; `src/lib/content/markdown.ts` parses exactly `##` headings, paragraphs, `- ` lists, `**strong**`, `*emphasis*` and links into data, and `components/content/markdown.tsx` renders it as React elements (text escaped by React, no HTML path). `bodyProblems` now fails on any Markdown the renderer does not implement (numbered lists, quotes, tables, code, images, rules), so nothing renders as something else silently. A link target other than an internal path or https becomes plain text. Files stay valid MDX: moving to `@next/mdx` or `next-mdx-remote` later replaces two files. **Links to pages that do not exist are never emitted** (`resolveInternalPath`): `/contact` becomes `#contact`, `/work`, `/process` and `/about` show as text until each ships. **Structured data:** one `@graph` per service page: `ProfessionalService` (subtype of `LocalBusiness` and so of `Organization`; name, founder, the footer's address, area served, `knowsAbout` = the service's stack), `Service` (from the frontmatter, `provider` by `@id`) and `BreadcrumbList`; no price, contact detail, logo, rating or profile because none exists; `<` is escaped in the JSON so no string can close the script. **Build warning removed:** Turbopack warned that the dynamic `content/` reads would trace the whole project (including `public/` and all sources) into the server bundle; `turbopackIgnore` comments on those four calls fix it and `outputFileTracingIncludes` still ships `content/` (verified in the page's trace manifest: 18 content files, no `src/` or `public/`) | CLAUDE.md §5 (no dependency without need), docs/CONTENT.md (nothing invented, no dead links) | — |
 | D29 | 2026-11-06 | Work pages (P2.4). **Honesty by construction:** both pages read `getWork()` (published only), so a draft or planned entry is absent from the index and a real 404 at its URL, with no title, summary or slug anywhere in the HTML (tested against the real files, which are all drafts today). **Client consent has two locks:** the schema (P2.1) and `clientDisclosure()`, the only reader of `client` and `outcomes` in the work components, which returns nothing without `clientConsent: true` or for a demo; `work-structure.test.ts` fails on any other read, on an image, a logo or `includeDrafts`. There is no logo field in the schema and none is rendered. **Filters:** type, sector and technology as plain links to `/work?kind=&sector=&stack=` (not an ARIA tab widget: choosing one loads a different list, it does not switch panels), parsed with Zod against the options the published entries offer, unknown or oversized values ignored; a group with fewer than two options is hidden; the canonical URL ignores the query; works without JavaScript. **Empty state:** with nothing published `/work` shows `work.empty`, not filters. **Dev fixtures:** the non-empty UI is exercised in a browser through a dev-only route (`/_dev/work`, 404 in production) with synthetic entries, the same pattern as the UI gallery and FX showcase. **Consequences of `work` being available:** the header, the Home demos section (now featuring `demo` entries only, a case study is not an interactive demo), the services pages' demo link (`demoFor`) and Markdown links to `/work` all switch on by themselves once an entry is published; today none appears. **Header:** with a third link the navigation no longer leaves room for the theme switch on its row at 360 px, so the header went from three rows (about 160 px) to four (207 px); the shell test's budget went from 170 to 215 px (see section 8). The closing call to action is shared (`components/content/contact-cta.tsx`) with the services pages | CLAUDE.md §12 (client names, logos and metrics only with consent), docs/CONTENT.md (no entry advertised before it exists) | — |
 | D30 | 2026-11-06 | Inquiry funnel (P2.5). **Shape:** `processInquiry` (`src/lib/inquiry/process.ts`) is one function with its services injected: honeypot → Zod validation → rate limit → bot check → store → email → typed result (`success` / `validation` / `rate_limited` / `bot_check_failed` / `unavailable`); errors reach the visitor as a code, details go to the logger as an event name and an error class. **Real vs stand-in:** `deps.ts` chooses per service from plain config; when `VERCEL_ENV` is set (a deployment) every service is required and a missing one makes the page and the action say "unavailable" (a lead is never accepted and dropped); when it is unset (laptop, tests, CI, `next start` here) a missing service is replaced by an in-process one so the form works with no network and no secrets. `REQUIRED_IN_PRODUCTION` stays empty (it would fail the build before the services exist). **Dependencies (asked-for stack, facts in section 8):** `drizzle-orm`, `postgres`, `@upstash/ratelimit`, `@upstash/redis`; **no** drizzle-kit (its esbuild dependency has an install script) and no email or Turnstile SDK: both are `fetch`. The SQL migration is hand-written (`src/lib/db/migrations/0001_create_inquiries.sql`) and a test fails if it drifts from the Drizzle schema. **Privacy by construction:** the stored record is built field by field, no IP, user agent, referrer or token column; the limiter key is an HMAC of the address with a secret salt; `src/lib/logger.ts` (missing until now, although the rules require it) writes only allow-listed fields and redacts emails, phones, IPs, IBANs, fiscal codes and tokens; a structure test forbids `console.` in the funnel. **Marketing consent:** its own unticked, optional checkbox, stored with `CONSENT_VERSION` and the time. **Turnstile:** the script loads only when the visitor reaches the last step; fail-closed verification. **Honeypot:** a filled one gets a normal-looking success and nothing is stored or counted. **Confirmation:** the action redirects to `/contact/thanks` (noindex, nothing personal in the URL). **Guard change:** `env.guard.test.ts` now treats a `"use server"` module as a boundary (Next compiles a client import of it to a reference), and says so with two tests; the guard had correctly caught my first draft importing a type from a server module, so that type moved to a pure `result.ts`. **Links:** the contact flag is true, the privacy notice is plain text until `/privacy` exists (P4.2) | docs/BLUEPRINT.md D5 and §security, CLAUDE.md §6 and §10, docs/GDPR_CHECKLIST.md §5 and §6 | — |
+| D31 | 2026-11-06 | SEO and sharing (P2.6). **One source of truth:** `pageMetadata` builds canonical, hreflang (with `x-default`), Open Graph and Twitter for every public page, and a gate test fails for a page under `src/app/[locale]` that does not use it (the confirmation page, the dev tools and the 404 are the listed exceptions; the first two are `noindex`). **Sitemap:** `src/app/sitemap.ts`, built at build time, lists only pages that EXIST and are PUBLIC (an unbuilt page, a draft work entry, the confirmation page and the dev tools are not listed), once per language, each entry carrying all language versions and `x-default`; `changefreq` and `priority` are included as asked (Google ignores them), `lastmod` only when a real date exists (none today: a file's mtime is the deploy time on CI). **Robots:** production allows everything except `/*/_dev/` and `/*/dev-tools/` and names the sitemap; any other deployment (a Vercel preview) disallows everything; the confirmation page is deliberately not disallowed so its `noindex` can be read. **Share images:** one route, `/[locale]/og/<key>`, drawing the page's own h1 on the instrument-panel card; the PATH alone decides the content, a query string is ignored, and only real public pages render (a service or published work entry by slug validated with `slugSchema`; unknown, draft and path-trick keys are 404), so our domain cannot be used to print arbitrary text; the cache is one day at the CDN with stale-while-revalidate, not the year-long default. **Colours:** satori cannot read CSS variables and the raw-colour guard forbids hex in `.ts`/`.tsx`, so the dark tokens live in `src/lib/og/palette.json` and `og.test.ts` fails if any differs from `globals.css`. **Font:** the one weight bundled with `ImageResponse` (decision pending, section 8). **Locales:** `og:locale` is `it_IT` and `en_GB` with the other as alternate | docs/BLUEPRINT.md (SEO), CLAUDE.md §7 (tokens), docs/CONTENT.md (nothing indexed that does not exist) | — |
 
 ---
 
@@ -157,6 +158,10 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P2.6 / decisions for you.** (1) **The card's typeface.** `ImageResponse` bundles one font at one weight, so the headline is regular, not the heavy Instrument Sans of the site. The site's font cannot be reused as is (next/font keeps WOFF2 in `.next`; satori needs TTF/OTF/WOFF) and a font CDN is forbidden. To match the identity exactly I would add a TTF of Instrument Sans (SIL OFL, record it in `docs/THIRD_PARTY.md`) to the repository and load it in the route: say if you want that. (2) **Sitemap and robots are built at build time**, so the site URL must be known then (`NEXT_PUBLIC_SITE_URL` or Vercel's production URL, docs/DEPLOYMENT.md): a wrong origin means a wrong sitemap. On a Vercel preview `robots.txt` disallows everything; production is crawlable. (3) **`lastmod` is absent on purpose** (no real modification dates exist yet; a published project's date is used when one appears); `changefreq` and `priority` are there because you asked, and Google ignores them. (4) **Search Console and Bing Webmaster Tools** need your accounts: submit `/sitemap.xml` after the first production deploy. (5) **Not verified outside this repository:** how Google, Bing, Facebook, LinkedIn and X read the markup and the images (use the Rich Results/URL Inspection tool, the Facebook Sharing Debugger, the LinkedIn Post Inspector and a card preview on a deployed URL); locally I checked the tags, the sitemap and 16 images against the specification and looked at three of them. (6) **`og:locale` is `en_GB`** for English (the practice serves the EU); change it in `src/lib/seo.ts` if you prefer `en_US`. (7) A page that is built later (About, Process) must add its key to `src/lib/og/content.ts` and `src/lib/sitemap-pages.ts` (the sitemap already includes it automatically once its navigation flag is true, but its card key must exist or the gate test names the file). (8) The card shows the site's address in its footer line (the build's origin): on the production build it will read the real domain.
+- **P2.6 / measured, and not measured.** Production build, enforced CSP, Chromium: `/robots.txt` and `/sitemap.xml` are served without a locale redirect; the sitemap has the 16 expected URLs (4 pages + 4 services, in 2 languages), no draft, no thanks page, no dev route, every URL on the site's origin without trailing slash or query, each with `it`, `en` and `x-default`; every listed page was crawled (HTTP 200, canonical equal to its URL, hreflang equal to the sitemap's alternates and each alternate itself listed, `html lang`, `og:type/url/site_name/title/description/locale/locale:alternate/image(+width, height, alt)`, `twitter:card/title/image`); every image is a 1200x630 PNG with the refreshable cache, Italian and English images differ, and 8 kinds of invalid request are 404 (unknown language or page, unknown service, a draft work entry, a path trick, the confirmation page, too many segments), a forged `?title=` changes nothing. **Not measured:** the external validators above; a deployed preview; Firefox/WebKit; image rendering on the platforms' crawlers.
+- **P2.6 / things I changed outside the new files:** the `generateMetadata` of Home, services (index and detail), work (index and detail) and contact now call `pageMetadata` (same titles, descriptions and canonicals as before, plus Open Graph and Twitter), `src/lib/seo.ts` (new helpers, `localeAlternates` unchanged), docs/CONTENT.md §8, docs/DEPLOYMENT.md. No existing test was changed.
+- **P2.6 / limits.** The card has no per-page illustration or metrics (nothing verifiable to show); the 404 and the thanks page have no card; `/it/og/...` URLs are public and cheap to render but not rate-limited (the CDN cache absorbs repeats, and the key space is the handful of real pages).
 - **P2.5 / decisions for you.** (1) **Dependencies.** I added the four you named or that they require, as the core stack allows, with these facts (npm registry, 2026-11-06; bundle impact not measured; all are server-side only): `drizzle-orm` 0.45.4, Apache-2.0, about 47 M downloads/week, no install script, the ORM D5 chose; `postgres` (postgres.js) 4.0.0, Unlicense, about 38 M/week, no install script, the driver (the newest 4.1.0 was too recent for the repository's release-age rule, so pnpm picked 4.0.0), chosen because it works with any Postgres including Neon's pooler; `@upstash/ratelimit` 2.2.0, MIT, about 3.2 M/week, one small dependency; `@upstash/redis` 1.41.0, MIT, about 7.5 M/week, its required peer. Alternatives I did not take: drizzle-kit (esbuild install script, not on the allow-list; hand-written SQL instead), `@neondatabase/serverless` or `pg` (a vendor driver or a heavier one), the Resend and Turnstile SDKs (a `fetch` is enough). Say if you want any of them removed or swapped. (2) **Email provider: Resend, by REST.** D5 left it open (Resend EU or Brevo). Resend needs a verified sender domain and its DPA and data region checked; the notification code is one small file, so Brevo is a one-file change. (3) **The notification email carries the whole inquiry** (name, email, company, description, budget, timeline, consent) in plain text to your inbox: that is what makes the funnel usable without an admin view, and it puts the visitor's data in your mail provider and your mailbox. docs/GDPR_CHECKLIST.md §5 prefers "minimal content or a link"; the alternative needs an admin view that does not exist. Your call. (4) **Wording and options I wrote for you to approve:** the five needs (agent, process, web app, documents, not sure), the **budget bands** (up to 5,000 / 5,000-15,000 / 15,000-50,000 / over 50,000 euro / not decided: these are my invention, not your price list), the four timelines, every label, hint and error, the privacy sentence, the marketing-consent wording, the Turnstile disclosure, the confirmation text. The privacy sentence and the consent wording are legal text and need a qualified professional (CLAUDE.md §14). (5) **Budget and timeline are required** (each has a "not decided" way out); docs/GDPR_CHECKLIST.md §5 listed them as optional. Say if you want them optional. (6) **Retention** is not implemented (P4.3): rows stay until deleted; `created_at` is there for the purge. (7) **Without JavaScript the form cannot move between steps**: the page, the first step and a notice say so (the notice uses `contact.form.noscript`), but there is no fallback channel because no email address is published (B2). Publishing one in the noscript notice is the fix. (8) **Rate limit: five accepted requests per ten minutes per client**; if Upstash does not answer within 3 seconds the request is allowed (fail-open, logged), a conscious choice for a contact form. (9) **`next start` on a laptop is not "production"** for the funnel (it has no `VERCEL_ENV`): it uses the stand-ins, including a bot check that passes and a limiter that lives in the process. That is what the e2e server does. (10) The marketing consent only records the choice; there is no newsletter and no sending (a double opt-in flow would be a separate task).
 - **P2.5 / what I verified and what I did not.** Verified (section 9): typecheck, lint, 69 test files / 1049 tests, knip, format, `next build`, and the whole e2e suite twice (441 passed both times, including `e2e/contact.spec.ts`: happy path in both languages, validation, error summary, rate limit, honeypot, no request leaving the site, CSP, axe in both themes, 360 px, no JavaScript). **Could not run (no credentials, and tests must not use the network):** the Drizzle insert against a real Postgres, Upstash, Resend and the Turnstile widget and siteverify; each adapter is tested against a fake of its API, so a mistake in my reading of an API (a response shape, a header) would show only on the first live run: use Cloudflare's test keys, a Neon branch and Resend's sandbox first (section 9). **Not run:** a mutation sweep for this task.
 - **P2.5 / what the first e2e runs found (all fixed).** Your first run had 15 failures and then 2; the causes: (a) next-intl's `getLocale()` uses `next/root-params`, which Next.js refuses inside a Server Action, so the form now sends its language in a hidden field and the action accepts only a locale of ours (a forged one falls back to Italian); (b) a Home test counted in-page anchors that became `/contact` links; (c) React renders no children inside `<noscript>`, so the no-JavaScript notice is now a paragraph shown only under `@media (scripting: none)` (confirmed in Chromium by the passing e2e); (d) **a CSP violation, `script-src <- eval`**: Zod 4 probes `new Function("")` the first time it builds an object schema, and the enforced CSP reports even a caught probe; the inquiry schema is the first Zod code that runs in the browser, so `src/lib/inquiry/schema.ts` now calls `z.config({ jitless: true })` before building any schema (the form's four fields do not need the JIT), and `schema.csp.test.ts` fails if a `Function` is ever constructed while validating (with a control case that proves the check can fail). Any future Zod schema that runs in the browser must load after that setting.
@@ -280,77 +285,62 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm add drizzle-orm postgres @upstash/ratelimit @upstash/redis → +6 packages, no install script
-pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 69 files,
-                    1049 tests (816 before P2.5); build without warning; /[locale]/contact and
-                    /[locale]/contact/thanks in the route list
-pnpm test:e2e     → pass, 441 tests (Chromium), twice in a row (393 before: +48 in e2e/contact.spec.ts). The
-                    first full run, by you, had 15 failures and then 2 after the first fixes; all four causes are
-                    in section 8
-pnpm knip         → pass
-pnpm format:check → pass (does not cover *.md, nor content/)
-no listener on 3100, 3101, 3200, 3201 afterwards
+pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 75 files,
+                    1119 tests (1049 before P2.6); build without warning; /robots.txt and /sitemap.xml are static
+                    routes, /[locale]/og/[...key] dynamic
+pnpm test:e2e     → pass, 464 tests (Chromium), twice in a row (441 before: +23 in e2e/seo.spec.ts). The second
+                    run printed "[WebServer] ELIFECYCLE exit code 1" once, AFTER the last test: Playwright
+                    stopping the pnpm-wrapped server; the run exited 0
+pnpm knip / pnpm format:check → pass
+no node process and no listener on 3100, 3101, 3200, 3201 afterwards
 
-P2.5 checks:
-  flow (unit)       → honeypot, validation, rate limit, bot check, store, email in that order; every failure typed;
-                      a failed email does not fail a stored inquiry; nothing submitted reaches a log line; the
-                      client key is a hash and the sixth request is refused (process, actions, schema tests)
-  adapters (unit)   → memory and Upstash limiter, Turnstile (fail-closed), Resend, Drizzle store against fakes;
-                      the SQL migration has exactly the Drizzle columns; the table has no ip/agent/token column
-  deployed vs local → a deployed site missing any service is not ready (the form is unavailable), locally every
-                      service has a stand-in (deps.test.ts)
-  guards            → client code never reaches server code and a "use server" module is a boundary; no console,
-                      no browser storage, no <noscript>, the Cloudflare origin only in the widget
-  CSP               → zero violations through the whole flow under the enforced policy, no console error, no
-                      request to another origin (e2e); no eval from the validation library (unit + e2e)
-  a11y / layout     → axe zero violations on every step, the error state, the confirmation page, in both themes,
-                      at 360 px and under reduced motion; no horizontal scroll at 360 / 768 / 1280 / 1920; CLS
-                      under 0.05; the page, the first step and the notice are in the HTML without JavaScript
-  NOT done          → live Postgres / Upstash / Resend / Turnstile; Lighthouse and phone LCP/INP (P4.6);
-                      Firefox/WebKit; screen reader; a mutation sweep
-
-Before the form goes live (B12, B13): create the services, run the psql migration, set the variables of
-docs/DEPLOYMENT.md §3, then repeat the manual smoke test with Cloudflare's test keys: no request to
-challenges.cloudflare.com on steps 1-3, the widget on step 4, a row with only the schema columns, an email with a
-working Reply-To, log lines with no personal data.
+P2.6 checks:
+  metadata helper   → pageMetadata: title (template or absolute), description, canonical and alternates equal to
+                      localeAlternates, Open Graph with url, locale and alternate, image size and alt, Twitter large
+                      card; gate: every public page uses it, the exceptions are listed and noindex
+  sitemap / robots  → pure builders (both languages, alternates agree, no invented date, trailing slash tolerated,
+                      preview disallowed); real pages: only existing public pages, no draft, no unbuilt page
+  share images      → the route renders real 1200x630 PNGs under vitest; keys resolve to the page's h1; 10 invalid
+                      keys, every draft, a path trick and a forged query are refused or ignored; the palette equals
+                      the design tokens (drift test); the card holds no colour of its own
+  crawl (e2e)       → see section 8: every sitemap URL, canonical, hreflang reciprocity, Open Graph, Twitter,
+                      images, 404s, robots and sitemap without a locale redirect
+  mutation          → palette off by one digit, a page without pageMetadata, drafts allowed into the sitemap: each
+                      failed a test (3); all restored
+  visual            → three share images (Italian home, English service, Italian service) looked at: dark panel,
+                      grid, amber accent, eyebrow, language tag, address, scale ticks; nothing clipped
+  NOT done          → external validators, a deployed preview, Firefox/WebKit, platform crawlers
 ```
 
 ---
 
 ## 10. Proposed commit(s) for the work above
 
-One logical change: the funnel and what it needs. If you prefer two commits: (1) `feat(security): add logger, rate limit, bot check, email and inquiry storage` for `src/lib/{logger,db,email,security,inquiry}`, `package.json`, `pnpm-lock.yaml`, `.env.example` and their tests; (2) `feat(contact): add the inquiry form and confirmation page` for the rest. Both unit and e2e suites are green.
+One logical change.
 
 ```
-feat(contact): add the inquiry funnel with bot protection and storage
+feat(seo): add sitemap, robots and generated share images
 
-Add /contact with a four-step form (need, budget band, timeline, your
-details) and /contact/thanks. A Server Action runs the flow: honeypot,
-Zod validation, rate limit, Cloudflare Turnstile check, insert into
-Postgres with Drizzle, then a plain-text notification email, and
-redirects to the confirmation page. Every call to action on the site
-now points at /contact.
+Add /sitemap.xml and /robots.txt, and a share image per page and
+language at /<locale>/og/<page>, drawn with next/og in the dark
+instrument-panel look. The sitemap lists only pages that exist and are
+public, once per language, each entry carrying every language version
+and x-default; it states no date it does not know. robots.txt allows
+the site, blocks the dev tools and names the sitemap; any deployment
+other than production disallows everything.
 
-Privacy by construction: the stored row has no address, user agent or
-token column; the rate-limit key is a salted HMAC of the address; logs
-go through a new allow-list logger that redacts emails, phones, IPs and
-tokens; the marketing consent is its own unticked, optional checkbox
-stored with the version of its wording; the Turnstile script loads only
-on the last step. The privacy notice is plain text until its page exists.
+Give every public page its metadata through one helper: title,
+description, canonical, hreflang with x-default, Open Graph and Twitter
+cards with the page's own image. A test fails for a page that does not
+use it, so a new page cannot ship without them.
 
-Each service has a real adapter (Upstash, Turnstile and Resend by fetch,
-Drizzle over postgres.js) and an in-process stand-in. On a deployment
-every service is required and a missing one makes the form say it is
-unavailable, so a lead is never accepted and dropped; locally and in CI
-the stand-ins let the form work with no network and no secrets.
+The image route draws only the page's own title, chosen by its path and
+only for real public pages: an unknown page, a draft work entry or the
+confirmation page is a 404, and a query string changes nothing, so the
+domain cannot be used to print arbitrary text. The card colours are a
+copy of the dark design tokens that a test keeps in step with the CSS.
 
-The client/server import guard now treats a "use server" module as a
-boundary. Zod's JIT is turned off for the inquiry schema, because its
-eval probe is a CSP violation in the browser. Add drizzle-orm, postgres,
-@upstash/ratelimit and @upstash/redis; the SQL migration is hand-written
-and a test fails if it drifts from the schema.
-
-Task: P2.5
+Task: P2.6
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

@@ -1,0 +1,11 @@
+{
+  "_note": "Dark-theme tokens of src/app/globals.css, copied because satori (next/og) cannot read CSS variables. palette.test.ts fails if any value differs from globals.css. Kept as JSON so the raw-colour guard (src/no-raw-colors.test.ts) still covers every .ts and .tsx file.",
+  "bg": "#0b0d10",
+  "surface2": "#171b22",
+  "borderSubtle": "#262c36",
+  "borderStrong": "#6b7482",
+  "text": "#f2efe8",
+  "textSecondary": "#b7bcc6",
+  "textMuted": "#8f96a3",
+  "accent": "#ffb347"
+}

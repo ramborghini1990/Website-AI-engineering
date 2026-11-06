@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/env";
 import { demoFor } from "@/lib/content/demo-link";
 import { getServices, getWork } from "@/lib/content/read";
 import { isPageAvailable } from "@/lib/navigation";
-import { localeAlternates } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 import { serviceJsonLd } from "@/lib/structured-data";
 
 /** The service for this URL, or null (an unknown slug is a 404, never an error page). */
@@ -27,12 +27,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const { locale, entry } = await findService(slug);
   if (entry === null) return {};
-  return {
-    // Child segment: the layout's `title.template` appends the brand.
+  return pageMetadata({
+    locale,
+    path: `/services/${entry.slug}`,
+    ogKey: `services/${entry.slug}`,
     title: entry.data.seoTitle,
     description: entry.data.description,
-    alternates: localeAlternates(locale, `/services/${entry.slug}`),
-  };
+  });
 }
 
 /**

@@ -99,6 +99,10 @@ psql "$DATABASE_URL" -f src/lib/db/migrations/0001_create_inquiries.sql
 
 Email goes through Resend's REST API (`EMAIL_API_KEY`); `EMAIL_FROM` must be on a domain verified with the provider (SPF/DKIM, P4.7). Use the Cloudflare **test** keys in Development and Preview (they are in `.env.example`); only Production gets real ones.
 
+### Sitemap, robots and share images (P2.6)
+
+`/sitemap.xml` and `/robots.txt` are generated at **build time**, so the site URL must be known during the build: set `NEXT_PUBLIC_SITE_URL`, or rely on Vercel's `VERCEL_PROJECT_PRODUCTION_URL` (production) and `VERCEL_URL` (previews), as `resolveSiteUrl` does. A wrong origin there is a wrong sitemap. Only a **production** deployment is indexable: on a preview (`VERCEL_ENV=preview`) `robots.txt` disallows everything and lists no sitemap. After the first production deploy, submit `/sitemap.xml` in Google Search Console and Bing Webmaster Tools (that needs your account), and check a page in the Facebook Sharing Debugger, the LinkedIn Post Inspector and a Twitter/X card preview.
+
 ## 4. Readiness checklist
 
 Done in the repo:

@@ -9,19 +9,22 @@ import { HomeProof } from "@/components/home/home-proof";
 import { HomeServices } from "@/components/home/home-services";
 import { business } from "@/lib/business";
 import { getServices, getWork } from "@/lib/content/read";
-import { localeAlternates } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata");
   const locale = await getLocale();
   const brand = business.brand.name;
-  return {
-    // The layout's `title.template` only applies to child segments, not to
-    // the page in the same segment, so the brand suffix is added here.
-    title: { absolute: `${t("home.title")} | ${brand}` },
+  // The layout's `title.template` only applies to child segments, not to the
+  // page in the same segment, so Home sets its title as absolute.
+  return pageMetadata({
+    locale,
+    path: "/",
+    ogKey: "home",
+    title: t("home.title"),
     description: t("home.description", { brand }),
-    alternates: localeAlternates(locale, "/"),
-  };
+    absolute: true,
+  });
 }
 
 /**

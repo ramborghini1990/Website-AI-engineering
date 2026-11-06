@@ -5,17 +5,18 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { ContactView } from "@/components/contact/contact-view";
 import { InquiryForm } from "@/components/contact/inquiry-form";
 import { getInquiryRuntime, turnstileSiteKey } from "@/lib/inquiry/runtime";
-import { localeAlternates } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.contact");
   const locale = await getLocale();
-  return {
-    // Child segment: the layout's `title.template` appends the brand.
+  return pageMetadata({
+    locale,
+    path: "/contact",
+    ogKey: "contact",
     title: t("title"),
     description: t("description"),
-    alternates: localeAlternates(locale, "/contact"),
-  };
+  });
 }
 
 /**

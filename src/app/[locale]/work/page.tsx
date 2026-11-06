@@ -4,18 +4,19 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { WorkIndex } from "@/components/work/work-index";
 import { getWork } from "@/lib/content/read";
 import { filterOptions, parseWorkFilters } from "@/lib/content/work-filter";
-import { localeAlternates } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.work");
   const locale = await getLocale();
-  return {
-    // Child segment: the layout's `title.template` appends the brand.
+  // A filtered view (`?kind=demo`) has the same canonical URL as the index.
+  return pageMetadata({
+    locale,
+    path: "/work",
+    ogKey: "work",
     title: t("title"),
     description: t("description"),
-    // A filtered view (`?kind=demo`) has the same canonical URL as the index.
-    alternates: localeAlternates(locale, "/work"),
-  };
+  });
 }
 
 /**

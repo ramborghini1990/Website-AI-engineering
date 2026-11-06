@@ -4,7 +4,7 @@ import { getLocale } from "next-intl/server";
 
 import { WorkDetail } from "@/components/work/work-detail";
 import { getServices, getWork } from "@/lib/content/read";
-import { localeAlternates } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 
 /**
  * The PUBLISHED entry for this URL, or null. `getWork()` leaves drafts out, so
@@ -23,12 +23,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const { locale, entry } = await findWork(slug);
   if (entry === null) return {};
-  return {
-    // Child segment: the layout's `title.template` appends the brand.
+  return pageMetadata({
+    locale,
+    path: `/work/${entry.slug}`,
+    ogKey: `work/${entry.slug}`,
     title: entry.data.seoTitle,
     description: entry.data.description,
-    alternates: localeAlternates(locale, `/work/${entry.slug}`),
-  };
+  });
 }
 
 /** /work/<slug> (P2.4): one published demo or case study, from `content/work/<locale>/<slug>.mdx`. */
