@@ -9,7 +9,7 @@
  */
 export const navItems = [
   { key: "home", href: "/", available: true },
-  { key: "services", href: "/services", available: false },
+  { key: "services", href: "/services", available: true },
   { key: "work", href: "/work", available: false },
   { key: "process", href: "/process", available: false },
   { key: "about", href: "/about", available: false },
@@ -28,6 +28,34 @@ export const availableNavItems: readonly NavItem[] = navItems.filter(
  */
 export function isPageAvailable(key: NavItem["key"]): boolean {
   return navItems.some((item) => item.key === key && item.available);
+}
+
+/** Whether the inquiry page (P2.5) exists. Flip it when `/contact` ships. */
+const pageExists: Record<"contact", boolean> = { contact: false };
+
+/**
+ * Where an internal link written in content (`/contact`, `/services/ai-agents`)
+ * can point today, so Markdown bodies never produce a link to a 404:
+ * - `page`: the page exists, link to it (the i18n `Link` adds the locale);
+ * - `anchor`: the page does not exist yet but the action has an in-page
+ *   equivalent (contact → the contact block in the footer);
+ * - `none`: no page and no substitute, so the text is shown without a link.
+ */
+export type InternalTarget =
+  | { kind: "page"; href: string }
+  | { kind: "anchor"; href: string }
+  | { kind: "none" };
+
+export function resolveInternalPath(path: string): InternalTarget {
+  const first = path.split("/")[1] ?? "";
+  if (first === "contact") {
+    return pageExists.contact
+      ? { kind: "page", href: path }
+      : { kind: "anchor", href: contactHref };
+  }
+  const item = navItems.find((candidate) => candidate.key === first);
+  if (item !== undefined && !item.available) return { kind: "none" };
+  return { kind: "page", href: path };
 }
 
 /**

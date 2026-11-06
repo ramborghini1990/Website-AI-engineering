@@ -132,7 +132,8 @@
       "deliverables": "Cosa consegno",
       "stack": "Tecnologie",
       "demo": "Provalo in una demo",
-      "learnMore": "Scopri il servizio"
+      "learnMore": "Scopri il servizio",
+      "breadcrumb": "Percorso di navigazione"
     },
     "cta": {
       "title": "Non sai da dove cominciare?",

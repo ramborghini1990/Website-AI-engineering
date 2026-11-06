@@ -10,6 +10,7 @@ import {
   contactHref,
   CONTACT_ANCHOR,
   navItems,
+  resolveInternalPath,
 } from "@/lib/navigation";
 
 const APP = fileURLToPath(new URL("../app/[locale]", import.meta.url));
@@ -55,4 +56,36 @@ describe("navigation", () => {
   it("the call to action points at the footer contact block", () => {
     expect(contactHref).toBe(`#${CONTACT_ANCHOR}`);
   });
+
+  it("services is available now that /services and /services/<slug> exist", () => {
+    expect(availableNavItems.map((item) => item.key)).toContain("services");
+  });
+});
+
+describe("resolveInternalPath: content never links to a page that does not exist", () => {
+  it("links to pages that exist", () => {
+    expect(resolveInternalPath("/")).toEqual({ kind: "page", href: "/" });
+    expect(resolveInternalPath("/services")).toEqual({
+      kind: "page",
+      href: "/services",
+    });
+    expect(resolveInternalPath("/services/ai-agents")).toEqual({
+      kind: "page",
+      href: "/services/ai-agents",
+    });
+  });
+
+  it("sends /contact to the in-page contact block until the contact page exists", () => {
+    expect(resolveInternalPath("/contact")).toEqual({
+      kind: "anchor",
+      href: contactHref,
+    });
+  });
+
+  it.each(["/work", "/work/some-demo", "/process", "/about"])(
+    "shows %s as plain text while that page does not exist (negative)",
+    (path) => {
+      expect(resolveInternalPath(path)).toEqual({ kind: "none" });
+    },
+  );
 });

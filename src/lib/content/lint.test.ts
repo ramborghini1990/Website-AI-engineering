@@ -92,8 +92,21 @@ describe("bodyProblems", () => {
     ["a link with no text", "## A\n\nsee [](/contact) words words words words", /no text/],
     ["too few words", "## A\n\nshort", /too short/],
     ["a guarantee", "## A\n\nGarantiamo il risultato in ogni caso words words", /guarantee/],
+    ["a numbered list", "## A\n\n1. first\n2. second\n\nwords words words", /numbered list/],
+    ["a '*' bullet", "## A\n\n* first\n* second\n\nwords words words", /bullet other than/],
+    ["a quote", "## A\n\n> quoted\n\nwords words words words", /quote or table/],
+    ["a table", "## A\n\n| a | b |\n\nwords words words words", /quote or table/],
+    ["a code span", "## A\n\nuse `code` here words words words", /code span/],
+    ["an image", "## A\n\n![alt](/x.png) words words words words", /image/],
+    ["a horizontal rule", "## A\n\n---\n\nwords words words words", /horizontal rule/],
   ])("rejects %s (negative)", (_name, body, expected) => {
     expect(bodyProblems(body, rules).join(" | ")).toMatch(expected);
+  });
+
+  it("accepts the constructs the renderer supports: '- ' lists, strong and emphasis", () => {
+    const body = `${good}\n- one item\n- another item\n\nSome **strong** and *emphasised* words.\n`;
+
+    expect(bodyProblems(body, rules)).toEqual([]);
   });
 
   it("rejects too many words", () => {

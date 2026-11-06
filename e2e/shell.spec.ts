@@ -27,6 +27,7 @@ const COPY = {
   it: {
     skip: "Vai al contenuto principale",
     nav: "Principale",
+    services: "Servizi",
     cta: "Parliamone",
     theme: "Tema",
     language: "Lingua",
@@ -39,6 +40,7 @@ const COPY = {
   en: {
     skip: "Skip to main content",
     nav: "Main",
+    services: "Services",
     cta: "Get in touch",
     theme: "Theme",
     language: "Language",
@@ -209,11 +211,15 @@ test.describe("header", () => {
         header.getByRole("link", { name: business.brand.name }),
       ).toHaveAttribute("href", `/${locale}`);
       const nav = header.getByRole("navigation", { name: COPY[locale].nav });
-      await expect(nav.getByRole("link")).toHaveCount(1);
+      // Home and, since P2.3, Services: only pages that exist are listed.
+      await expect(nav.getByRole("link")).toHaveCount(2);
       await expect(nav.getByRole("link", { name: "Home" })).toHaveAttribute(
         "aria-current",
         "page",
       );
+      await expect(
+        nav.getByRole("link", { name: COPY[locale].services }),
+      ).not.toHaveAttribute("aria-current", "page");
       await expect(
         header.getByRole("link", { name: COPY[locale].cta }),
       ).toHaveAttribute("href", "#contact");
@@ -495,7 +501,12 @@ test.describe("theme switch", () => {
     page,
   }) => {
     await open(page, "/en");
-    await page.getByRole("link", { name: "Home" }).focus();
+    // The last link of the main navigation is followed by the theme switch.
+    await page
+      .getByRole("navigation", { name: "Main" })
+      .getByRole("link")
+      .last()
+      .focus();
 
     await page.keyboard.press("Tab");
 

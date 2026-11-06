@@ -23,10 +23,15 @@ import type { Collection } from "@/lib/content/site-map";
  * a `ContentError` naming the file and the field, which fails the build of any
  * page that reads it (and `pnpm test`, see `collections.test.ts`).
  *
- * It returns the Markdown body as TEXT. Rendering it (MDX) arrives with the
- * pages in P2.3. When pages read this at runtime on Vercel, add
+ * It returns the Markdown body as TEXT; `markdown.ts` parses the subset the
+ * bodies may use and `components/content/markdown.tsx` renders it. When pages read this at runtime on Vercel, add
  * `outputFileTracingIncludes: { "/**": ["./content/**"] }` to next.config.ts so
  * the files are shipped with the function.
+ *
+ * The `turbopackIgnore` comments tell the bundler not to trace the whole
+ * project for these dynamic paths (it warned that everything, `public/` and
+ * all sources, would be deployed with the server code). The content folder is
+ * added explicitly in next.config.ts instead.
  */
 
 export type Entry<T> = { slug: string; data: T; body: string; file: string };
@@ -42,17 +47,17 @@ function readCollection<S extends z.ZodType>(
   schema: S,
   root: string = defaultContentRoot(),
 ): Array<Entry<z.output<S>>> {
-  const dir = path.join(root, collection, locale);
+  const dir = path.join(/*turbopackIgnore: true*/ root, collection, locale);
   let names: string[];
   try {
-    names = readdirSync(dir).filter((name) => name.endsWith(".mdx"));
+    names = readdirSync(/*turbopackIgnore: true*/ dir).filter((name) => name.endsWith(".mdx"));
   } catch {
     return [];
   }
   return names.sort().map((name) => {
-    const file = path.join(dir, name);
+    const file = path.join(/*turbopackIgnore: true*/ dir, name);
     const { data, body } = parseContent(
-      readFileSync(file, "utf8"),
+      readFileSync(/*turbopackIgnore: true*/ file, "utf8"),
       schema,
       file,
     );

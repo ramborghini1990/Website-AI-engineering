@@ -132,7 +132,8 @@
       "deliverables": "What I deliver",
       "stack": "Technologies",
       "demo": "Try it in a demo",
-      "learnMore": "Read about the service"
+      "learnMore": "Read about the service",
+      "breadcrumb": "Breadcrumb"
     },
     "cta": {
       "title": "Not sure where to start?",

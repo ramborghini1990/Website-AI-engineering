@@ -86,6 +86,21 @@ export function bodyProblems(body: string, rules: BodyRules): string[] {
   if (/^\s*(?:import|export)\s/m.test(body))
     problems.push("contains an import or export");
 
+  // Markdown that the renderer (markdown.ts) does not implement: better a
+  // failing check than text that silently renders as something else.
+  const unsupported: ReadonlyArray<[string, RegExp]> = [
+    ["a numbered list", /^\s*\d+[.)]\s/m],
+    ["a bullet other than '- '", /^\s*[*+]\s/m],
+    ["a quote or table", /^\s*[>|]/m],
+    ["a code span or fence", /`/],
+    ["an image", /!\[/],
+    ["a horizontal rule", /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/m],
+  ];
+  for (const [label, pattern] of unsupported) {
+    if (pattern.test(body))
+      problems.push(`uses ${label}, which the renderer does not support`);
+  }
+
   for (const match of body.matchAll(/\[([^\]]*)\]\(([^)]*)\)/g)) {
     const target = match[2];
     const internal = target.startsWith("/");

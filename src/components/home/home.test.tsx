@@ -200,10 +200,21 @@ describe.each(["it", "en"] as const)("Services grid (%s)", (locale) => {
     );
   });
 
-  it("has NO links while the services pages do not exist (a link to a 404 is worse than none)", () => {
-    renderIn(locale, <HomeServices services={services()} />);
+  it("has NO links when the services pages are not available (a link to a 404 is worse than none)", () => {
+    renderIn(locale, <HomeServices services={services()} linked={false} />);
 
     expect(screen.queryAllByRole("link")).toEqual([]);
+  });
+
+  it("links to the services pages by default now that they exist (P2.3)", () => {
+    renderIn(locale, <HomeServices services={services()} />);
+
+    expect(
+      screen.getAllByRole("link").map((link) => link.getAttribute("href")),
+    ).toEqual([
+      ...services().map((service) => `/it/services/${service.slug}`),
+      "/it/services",
+    ]);
   });
 
   it("links each card, and the whole section to /services, once the pages exist", () => {
@@ -374,14 +385,20 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
     expect(screen.queryByRole("main")).not.toBeInTheDocument();
   });
 
-  it("every link on the page is an in-page anchor that exists: no dead link before P2.3-P2.5", async () => {
+  it("every link goes to a page that exists (the services pages) or to an in-page anchor: no dead link before P2.4-P2.5", async () => {
     await renderPage();
 
     const hrefs = screen
       .getAllByRole("link")
       .map((link) => link.getAttribute("href") ?? "");
     expect(hrefs.length).toBeGreaterThan(2);
-    for (const href of hrefs) expect(href.startsWith("#"), href).toBe(true);
+    const services = new Set([
+      "/it/services",
+      ...getServices(locale).map((service) => `/it/services/${service.slug}`),
+    ]);
+    for (const href of hrefs) {
+      expect(href.startsWith("#") || services.has(href), href).toBe(true);
+    }
     // #contact lives in the footer (the layout), #services on this page.
     expect(document.querySelector("#services")).not.toBeNull();
   });

@@ -290,7 +290,7 @@ describe("SiteHeader", () => {
       within(nav)
         .getAllByRole("link")
         .map((l) => l.textContent),
-    ).toEqual(["Home"]);
+    ).toEqual(["Home", "Services"]);
   });
 });
 
