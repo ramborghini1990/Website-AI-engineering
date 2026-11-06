@@ -48,6 +48,8 @@ Architecture: custom, first-party consent manager (no third-party CMP script nee
 
 ## 5. Contact / inquiry / demo forms
 
+> **P2.5 status (built, not reviewed by a professional; the boxes below are left unticked on purpose).** Built: fields name, email, company (optional), need, description, budget band and timeline (the last two have "not decided yet" options); a separate, unticked marketing checkbox, never required, stored with the consent wording version and the time; honeypot + Turnstile (script loaded only on the last step); Zod validation; rate limit by salted hash; EU Postgres via Drizzle with no IP, user agent or token column; plain-text email to the owner; redacting logger; the privacy sentence under the submit button with its Art. 6(1)(b) basis. **Open before launch:** the privacy notice page and its link (P4.2; until then the sentence has no link), naming Cloudflare, the email provider, Upstash and the database host as processors and checking their DPAs and regions, the retention purge (P4.3), and whether the notification email should carry the full inquiry (it does today) or only a pointer, per the "minimal content" line below.
+
 - ☐ **Data minimisation**: required fields = name, business email, message/need. Optional: company, budget band, timeline. No phone unless the visitor wants a call; no date of birth, no free "notes about you". **[P2.5]**
 - ☐ **Purpose limitation**: notice under the submit button: "We use these data to answer your request (Art. 6(1)(b) pre-contractual measures). [Informativa privacy]". No consent checkbox needed for answering the inquiry itself.
 - ☐ **Marketing/newsletter consent** separate, **unticked**, optional, and not a condition for submitting (Art. 7(4)). Newsletter uses **double opt-in**. **[P2.5]**

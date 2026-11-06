@@ -30,8 +30,15 @@ export function isPageAvailable(key: NavItem["key"]): boolean {
   return navItems.some((item) => item.key === key && item.available);
 }
 
-/** Whether the inquiry page (P2.5) exists. Flip it when `/contact` ships. */
-const pageExists: Record<"contact", boolean> = { contact: false };
+/**
+ * Whether pages outside the main navigation exist. `contact` shipped in P2.5.
+ * `privacy` (the privacy notice) arrives in P4.2: until then a link to it is
+ * shown as plain text, never as a dead link. Flip it when the page ships.
+ */
+const pageExists: Record<"contact" | "privacy", boolean> = {
+  contact: true,
+  privacy: false,
+};
 
 /**
  * Where an internal link written in content (`/contact`, `/services/ai-agents`)
@@ -48,10 +55,12 @@ export type InternalTarget =
 
 export function resolveInternalPath(path: string): InternalTarget {
   const first = path.split("/")[1] ?? "";
-  if (first === "contact") {
-    return pageExists.contact
-      ? { kind: "page", href: path }
-      : { kind: "anchor", href: contactHref };
+  if (first === "contact" || first === "privacy") {
+    if (pageExists[first]) return { kind: "page", href: path };
+    // Without the contact page the action has an in-page equivalent (the contact block).
+    return first === "contact"
+      ? { kind: "anchor", href: contactHref }
+      : { kind: "none" };
   }
   const item = navItems.find((candidate) => candidate.key === first);
   if (item !== undefined && !item.available) return { kind: "none" };
@@ -59,9 +68,9 @@ export function resolveInternalPath(path: string): InternalTarget {
 }
 
 /**
- * The header's primary call to action. It points at the contact block in the
- * footer (present on every page) until the inquiry page exists (P2.5); then
- * change `href` to "/contact" and render it with the i18n `Link`.
+ * The contact block in the footer (identity and address, on every page) carries
+ * this id. Since P2.5 the calls to action go to `/contact`; the anchor remains
+ * the fallback `resolveInternalPath` uses if that page is ever switched off.
  */
 export const CONTACT_ANCHOR = "contact";
-export const contactHref = `#${CONTACT_ANCHOR}`;
+const contactHref = `#${CONTACT_ANCHOR}`;

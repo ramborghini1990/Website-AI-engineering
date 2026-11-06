@@ -106,3 +106,31 @@ Scope: the proxy matcher is unchanged, so static files (`/_next/static`, `/favic
 | Real browser, enforced: headers, nonce on every script, fresh per request, zero violations, blocks injection, 404 stays 404 | `e2e/security.spec.ts` |
 
 Not covered: a `securityheaders.com` / Mozilla Observatory grade (needs a deployed preview: the ROADMAP's "grade A" criterion is still to check by you); CSP behaviour in Firefox and Safari; the Plausible and Turnstile origins in a real page (nothing loads them yet).
+
+## 7. The inquiry funnel (P2.5)
+
+The contact form (`/[locale]/contact`) is the one place the site accepts visitor input. Controls, in the order they run (`src/lib/inquiry/process.ts`):
+
+1. **Honeypot** (`website`, hidden from people and assistive technology): a filled one gets a normal-looking success and nothing is stored, sent or counted.
+2. **Validation** with Zod (`src/lib/inquiry/schema.ts`): enums for need, budget and timeline; length limits; control characters and line breaks refused in names; unknown fields ignored.
+3. **Rate limit**: five accepted requests per ten minutes per client. The client is a salted HMAC of the address (`RATE_LIMIT_IP_SALT`), never the address; Upstash Redis (sliding window) when configured, an in-process limiter otherwise.
+4. **Bot check**: Cloudflare Turnstile token verified server-side (`src/lib/security/turnstile.ts`), fail-closed; the widget script is loaded only when the visitor reaches the last step.
+5. **Storage** (`inquiries` table, Drizzle over postgres.js) with exactly the schema's columns, then a **plain-text email** to the owner (Resend REST). A failed email is logged and does not fail the inquiry (it is already stored); a failed insert is reported as unavailable.
+6. **Logging**: only through `src/lib/logger.ts`, an allow-list of fields plus redaction. No submitted value, address or token can be logged.
+
+Server Actions are origin-checked by Next.js; the CSP already allows the Turnstile origin only when both keys are set.
+
+**Local, CI and `next start` on a laptop** (`VERCEL_ENV` unset): whatever is not configured is replaced by an in-process stand-in (memory limiter, store and mailbox, a bot check that passes), so the form works with no network and no secrets. **On Vercel** (`VERCEL_ENV` set): every service is required; if one is missing the page says the form is unavailable and the action refuses. A lead is never accepted and dropped.
+
+| Claim | Evidence |
+|---|---|
+| Validation, negative cases, one error per field | `src/lib/inquiry/schema.test.ts` |
+| Order of checks, honeypot, rate limit, bot check, failures typed, nothing personal logged | `src/lib/inquiry/process.test.ts` |
+| Client key is a hash, per client, the sixth request is refused; fields the schema does not know never reach the record | `src/app/[locale]/contact/actions.test.ts` |
+| Rate limiter (memory and Upstash), Turnstile (fail-closed), email, IP parsing | `src/lib/security/*.test.ts`, `src/lib/email/resend.test.ts`, `src/lib/inquiry/client-ip.test.ts` |
+| Stored row has only schema columns; SQL migration equals the Drizzle schema | `src/lib/inquiry/store.test.ts` |
+| Logger redaction and allow-list | `src/lib/logger.test.ts` |
+| Deployed site without a service is unavailable, not mocked | `src/lib/inquiry/deps.test.ts` |
+| Client code never reaches server code; `"use server"` modules are a boundary | `src/lib/env.guard.test.ts` |
+| No `console`, no browser storage, Cloudflare origin only in the widget | `src/components/contact/contact-structure.test.ts` |
+| Browser flow, error summary, redirect, rate-limit message, no third-party request, CSP, axe | `e2e/contact.spec.ts` |

@@ -70,12 +70,12 @@ describe("Markdown", () => {
     expect(screen.queryAllByRole("heading", { level: 1 })).toEqual([]);
   });
 
-  it("sends /contact to the contact block while the page does not exist", () => {
+  it("links /contact to the contact page", () => {
     render(<Markdown body={"## A\n\nPlease [talk to me](/contact) soon."} />);
 
     expect(screen.getByRole("link", { name: "talk to me" })).toHaveAttribute(
       "href",
-      "#contact",
+      "/it/contact",
     );
   });
 
@@ -212,17 +212,16 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
     );
   });
 
-  it("ends with the call to action to the contact block, and the link in the text agrees", () => {
+  it("ends with the call to action to the contact page, and the link in the text agrees", () => {
     const { data, body } = entry();
     renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
 
     const cta = screen.getByRole("link", {
       name: messages[locale].services.cta.cta,
     });
-    expect(cta).toHaveAttribute("href", "#contact");
+    expect(cta).toHaveAttribute("href", "/it/contact");
     for (const link of screen.getAllByRole("link")) {
-      const href = link.getAttribute("href") ?? "";
-      expect(href.startsWith("#") || href.startsWith("/it/"), href).toBe(true);
+      expect(link.getAttribute("href") ?? "").toMatch(/^\/it\//);
     }
   });
 

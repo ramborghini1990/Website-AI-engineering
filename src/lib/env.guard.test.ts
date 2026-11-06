@@ -103,6 +103,11 @@ function serverLeaks(graph: Graph): string[] {
         const target = resolve(current, specifier, graph);
         if (target === undefined || seen.has(target)) continue;
         seen.add(target);
+        // A "use server" module is a boundary: Next.js compiles an import of it
+        // from a client component into a reference to the action, and the module
+        // itself never ships to the browser.
+        if (startsWithDirective(graph.get(target) ?? "", "use server"))
+          continue;
         if (isServerOnly(graph.get(target) ?? "")) {
           leaks.push(
             [...trail, target].map((p) => path.relative(SRC, p)).join(" -> "),
@@ -174,6 +179,38 @@ describe("client code never reaches server-only code", () => {
     graph.set(bare, '"use client";\nimport "server-only";');
 
     expect(serverLeaks(graph)).toHaveLength(2);
+  });
+
+  it("a client importing a Server Action module is fine: it is a boundary, never bundled", () => {
+    const action = path.join(SRC, "app", "action.ts");
+    const form = path.join(SRC, "components", "form.tsx");
+    const graph: Graph = new Map(files);
+    graph.set(
+      action,
+      '"use server";\nimport { env } from "@/lib/env";\nexport async function go() { return env.CSP_MODE; }',
+    );
+    graph.set(
+      form,
+      '"use client";\nimport { go } from "@/app/action";\nexport const F = () => go;',
+    );
+
+    expect(serverLeaks(graph)).toEqual([]);
+  });
+
+  it("the boundary is the directive, not the file name: the same module without it leaks (negative)", () => {
+    const action = path.join(SRC, "app", "action.ts");
+    const form = path.join(SRC, "components", "form.tsx");
+    const graph: Graph = new Map(files);
+    graph.set(
+      action,
+      'import { env } from "@/lib/env";\nexport async function go() { return env.CSP_MODE; }',
+    );
+    graph.set(
+      form,
+      '"use client";\nimport { go } from "@/app/action";\nexport const F = () => go;',
+    );
+
+    expect(serverLeaks(graph)).toHaveLength(1);
   });
 
   it("server components importing the env are fine (not flagged)", () => {

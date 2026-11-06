@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 
 import {
   availableNavItems,
-  contactHref,
   CONTACT_ANCHOR,
   navItems,
   resolveInternalPath,
@@ -53,8 +52,8 @@ describe("navigation", () => {
     expect(availableNavItems.map((item) => item.key)).toContain("home");
   });
 
-  it("the call to action points at the footer contact block", () => {
-    expect(contactHref).toBe(`#${CONTACT_ANCHOR}`);
+  it("the footer contact block keeps its anchor id", () => {
+    expect(CONTACT_ANCHOR).toBe("contact");
   });
 
   it("services is available now that /services and /services/<slug> exist", () => {
@@ -75,11 +74,15 @@ describe("resolveInternalPath: content never links to a page that does not exist
     });
   });
 
-  it("sends /contact to the in-page contact block until the contact page exists", () => {
+  it("links to the contact page now that it exists (P2.5)", () => {
     expect(resolveInternalPath("/contact")).toEqual({
-      kind: "anchor",
-      href: contactHref,
+      kind: "page",
+      href: "/contact",
     });
+  });
+
+  it("shows the privacy notice as plain text until its page exists (P4.2): no dead link", () => {
+    expect(resolveInternalPath("/privacy")).toEqual({ kind: "none" });
   });
 
   it("links to the work pages now that they exist (P2.4)", () => {

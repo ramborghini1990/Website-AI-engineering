@@ -290,7 +290,103 @@
         }
       }
     },
-    "detailsTitle": "Dove trovarmi"
+    "detailsTitle": "Dove trovarmi",
+    "form": {
+      "title": "Raccontami il tuo progetto",
+      "progress": "Passo {current} di {total}",
+      "progressLabel": "Avanzamento del modulo",
+      "steps": {
+        "need": "Di che cosa hai bisogno",
+        "budget": "Budget",
+        "timeline": "Tempi",
+        "contact": "I tuoi dati"
+      },
+      "need": {
+        "legend": "Di che cosa hai bisogno?",
+        "options": {
+          "ai-agents": "Un agente AI",
+          "workflow-automation": "Automatizzare un processo",
+          "web-application": "Un'applicazione web",
+          "document-intelligence": "Lavorare con i documenti",
+          "not-sure": "Non lo so ancora"
+        },
+        "descriptionLabel": "Racconta il progetto in poche righe",
+        "descriptionHint": "Chi sei, che cosa vuoi ottenere, quali strumenti usi già. Non servono dettagli tecnici."
+      },
+      "budget": {
+        "legend": "Che budget hai in mente?",
+        "hint": "Un ordine di grandezza basta: serve a proporti la strada giusta, non è un impegno.",
+        "options": {
+          "under-5k": "Fino a 5.000 €",
+          "5k-15k": "Da 5.000 a 15.000 €",
+          "15k-50k": "Da 15.000 a 50.000 €",
+          "over-50k": "Oltre 50.000 €",
+          "undecided": "Non l'ho ancora definito"
+        }
+      },
+      "timeline": {
+        "legend": "Entro quando ti servirebbe?",
+        "hint": "Anche una stima approssimativa va bene.",
+        "options": {
+          "asap": "Il prima possibile",
+          "one-to-three-months": "Entro 1-3 mesi",
+          "three-to-six-months": "Entro 3-6 mesi",
+          "exploring": "Sto solo valutando"
+        }
+      },
+      "contact": {
+        "intro": "Come ti rispondo?",
+        "nameLabel": "Nome e cognome",
+        "emailLabel": "Email",
+        "emailHint": "Ti scrivo solo a questo indirizzo.",
+        "companyLabel": "Azienda (facoltativo)"
+      },
+      "consent": {
+        "marketing": "Voglio ricevere ogni tanto novità e approfondimenti (facoltativo)",
+        "marketingHint": "Puoi lasciarlo vuoto: ti rispondo comunque. Puoi cambiare idea in qualsiasi momento."
+      },
+      "privacy": "Uso questi dati solo per rispondere alla tua richiesta (art. 6, par. 1, lett. b, GDPR). Leggi l'<link>informativa privacy</link>.",
+      "turnstile": "Il modulo è protetto contro lo spam da Cloudflare Turnstile: il tuo browser contatta Cloudflare solo quando arrivi a questo passo.",
+      "buttons": {
+        "next": "Avanti",
+        "back": "Indietro",
+        "submit": "Invia la richiesta",
+        "sending": "Invio in corso"
+      },
+      "errors": {
+        "summaryTitle": "Controlla questi campi",
+        "choose": "Scegli un'opzione.",
+        "required": "Compila questo campo.",
+        "tooShort": "Il testo è troppo corto: aggiungi qualche dettaglio.",
+        "tooLong": "Il testo è troppo lungo: accorcialo.",
+        "invalid": "Controlla il valore inserito.",
+        "emailInvalid": "Inserisci un indirizzo email valido."
+      },
+      "fields": {
+        "need": "Di che cosa hai bisogno",
+        "description": "Descrizione del progetto",
+        "budget": "Budget",
+        "timeline": "Tempi",
+        "name": "Nome e cognome",
+        "email": "Email",
+        "company": "Azienda"
+      },
+      "failure": {
+        "rate_limited": "Hai inviato troppe richieste in poco tempo. Riprova tra {minutes} minuti.",
+        "bot_check_failed": "Non sono riuscito a verificare che tu sia una persona. Riprova.",
+        "unavailable": "Non riesco a inviare la richiesta in questo momento. Riprova più tardi."
+      },
+      "unavailable": {
+        "title": "Il modulo non è disponibile al momento",
+        "body": "Non posso ricevere richieste da qui in questo momento. Riprova più tardi."
+      },
+      "noscript": "Il modulo richiede JavaScript: abilitalo oppure prova da un altro browser."
+    },
+    "thanks": {
+      "title": "Grazie, ho ricevuto la tua richiesta",
+      "body": "La leggo con attenzione e ti rispondo di persona all'indirizzo che hai indicato.",
+      "home": "Torna alla home"
+    }
   },
   "notFound": {
     "title": "Pagina non trovata",

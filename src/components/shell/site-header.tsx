@@ -6,7 +6,7 @@ import { ThemeSwitch } from "@/components/shell/theme-switch";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { business } from "@/lib/business";
-import { availableNavItems, contactHref, type NavItem } from "@/lib/navigation";
+import { availableNavItems, type NavItem } from "@/lib/navigation";
 
 /**
  * The site header: wordmark, main navigation, theme, language and the primary
@@ -43,7 +43,7 @@ export function SiteHeader({
         <ThemeSwitch />
         <LanguageSwitcher className="-ml-3 md:ml-0" />
         <Button asChild className="ml-auto md:ml-0">
-          <a href={contactHref}>{t("label")}</a>
+          <Link href="/contact">{t("label")}</Link>
         </Button>
       </div>
     </header>

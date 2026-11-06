@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.3 committed as `68b122d`)_
+_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.4 committed as `4f78467`)_
 
 ---
 
@@ -11,19 +11,21 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.3 committed a
 | Field | Value |
 |---|---|
 | Phase | 2 — Landing page & agency value proposition |
-| Active task | `P2.4` — Work: `/work` index with type, sector and technology filters, and `/work/<slug>` detail pages from `content/work/<locale>/<slug>.mdx`, with the draft and client-consent guards; `work` is now available in the navigation |
-| Status | **built and verified, awaiting review (not committed)**; one design decision needs you (the header, section 8, "P2.4 / decisions for you") |
-| Next task | `P2.5` — Contact & inquiry funnel (new dependencies likely: Turnstile, rate limiting, DB; ask first); do not start unprompted |
+| Active task | `P2.5` — Contact & inquiry funnel v1: `/contact` four-step form (need, budget band, timeline, your details), Server Action with Zod, honeypot + Turnstile, rate limit, Postgres via Drizzle, email notification, `/contact/thanks`; every call to action now points at `/contact` |
+| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (69 files, 1049 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 441/441 twice in a row; the live services (Postgres, Upstash, Resend, Turnstile) were not exercised, only their adapters against fakes. Decisions for you in section 8, "P2.5 / decisions for you" |
+| Next task | `P2.6` — SEO & sharing (`sitemap.ts`, `robots.ts`, OG images, canonicals); do not start unprompted |
 
 **Plan for the active task**
-1. Published entries only: `getWork()` already leaves drafts out, and both pages use it and nothing else, so a draft is invisible (index) and a 404 (detail), however real its file. A structure test fails if a work file asks for drafts.
-2. Client consent has two locks: the schema refuses a client without `clientConsent: true` (P2.1) and `clientDisclosure()` (`src/lib/content/work-view.ts`) returns nothing without it; a structure test fails if a work component reads `client`, `outcomes` or `clientConsent` any other way, or renders an image or a logo.
-3. Filters (type, sector, technology) live in the query string, parsed with Zod against the options the published entries actually offer (unknown values are dropped), rendered on the server as links: they work without JavaScript. With nothing published the page shows its approved empty state instead of filters for nothing.
-4. Tests: unit for the filters, the consent guard and the components (both languages); `e2e/work.spec.ts` (production, enforced CSP: the real state, which is an empty index and a 404 per draft) and `e2e/work-gallery.spec.ts` (dev only, SYNTHETIC published entries on `/_dev/work`: filters, cards, consenting client, detail template, axe in both themes); three mutations.
+1. Ports and adapters (`src/lib/inquiry/`): the flow `processInquiry` takes its services as arguments (limiter, bot check, store, mailer, logger), so it is tested with fakes; `deps.ts` picks the real service or an in-process stand-in from plain config, `runtime.ts` reads the environment (D30).
+2. Real adapters: Upstash sliding window, Turnstile siteverify by `fetch`, Resend REST by `fetch`, Drizzle over postgres.js. Stand-ins for local, tests and CI: memory limiter, memory store, memory mailbox, a bot check that passes. On Vercel nothing is mocked: a missing service means the form says it is unavailable.
+3. UI: one `<form>` with four steps in a client component (native radios, real checkbox, error summary with focus, focus to each step heading, hidden inputs carry earlier steps), a Turnstile widget that loads only on the last step, honeypot, privacy sentence, noscript notice; the Server Action redirects to `/contact/thanks`.
+4. Privacy: `src/lib/logger.ts` (it was missing: the allow-list logger the rules require), no IP/user agent/token column, a salted hash as limiter key, separate unticked marketing consent stored with a consent-wording version.
+5. Flip `/contact` to available: header, hero, closing sections and the services/work pages now link to `/contact`; the footer keeps its identity block.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Mutated files were restored (checked: no mutation text left, full suite green afterwards); the temporary servers on 3101 and 3201 were stopped by PID; no listener on 3100, 3101, 3200, 3201.
-- **Needs you:** the header decision and the other points in section 8.
+- Nothing half-done. No mutation sweep was run for this task (you asked not to). No server of mine is running (checked after the last e2e run).
+- `pnpm add` changed `package.json` and `pnpm-lock.yaml` (four dependencies, section 8); `pnpm install --frozen-lockfile` is the first thing to run on another machine.
+- **Needs you:** the decisions in section 8, and the services in section 5 (B12, B13) before the form can go live.
 
 ---
 
@@ -33,7 +35,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.3 committed a
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
 | 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
-| 2 Landing & value proposition | ◐ | 4/7 | P2.1-P2.3 committed; P2.4 awaiting review/commit |
+| 2 Landing & value proposition | ◐ | 5/7 | P2.1-P2.4 committed; P2.5 verified, awaiting review/commit |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
@@ -61,6 +63,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.3 committed a
 | 2026-11-05 | P2.1 | Copy deck (IT/EN), content models and collections in `content/`, content test gate | `e70988c`, fix `823681e` |
 | 2026-11-06 | P2.2 | Home landing page: hero, proof, services, process, closing CTA; CSS-only `TextReveal when="load"`; `font-display: optional` | `cdc9e49` |
 | 2026-11-06 | P2.3 | Services index and detail pages, in-repo Markdown renderer (no MDX library), JSON-LD, no dead links, tracing warning fixed | `68b122d` |
+| 2026-11-06 | P2.4 | Work index with filters and detail pages, draft and client-consent guards, `work` in the navigation | `4f78467` |
 
 ---
 
@@ -99,6 +102,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D27 | 2026-11-06 | Home (P2.2). Sections are server components in `src/components/home/` composed by an async page; the hero headline is `TextReveal when="load"`, **CSS only** (the `view` mode skips a heading already on screen and loads GSAP after idle, which would flash a hero); services are spotlight cards from the collection; the process timeline is `ScrollPinnedSection` over `process.steps`; the closing CTA sits on `GradientMesh`. **Honest content:** the proof strip shows the four commitments and **no metrics** (none supplied, none invented); the **demos section renders nothing until a demo is published**; **no link to a page that does not exist** (`isPageAvailable`), so today the CTAs are the in-page anchors `#services` and `#contact`. **Fonts: `font-display: optional`** instead of `swap`: headings use a condensed width the fallback cannot match, so a late font re-flowed the hero (3 lines to 2) and measured CLS 0.26 on a slow first visit under reduced motion; `optional` never swaps (the font is preloaded and self-hosted; if it is not ready at once that page view keeps the fallback). Content is read from disk at request time, so `outputFileTracingIncludes` ships `content/` with the functions | CLAUDE.md §8 (readable without JS, no hidden-until-hydrated), docs/CONTENT.md (no unbuilt demos, no invented facts), CLS < 0.05 as a hard requirement | — |
 | D28 | 2026-11-06 | Services pages (P2.3). **No MDX library (resolves B10):** the content gate already bans everything MDX adds to Markdown (`{ }`, `<Tags />`, `import`/`export`), so the bodies are plain Markdown; `src/lib/content/markdown.ts` parses exactly `##` headings, paragraphs, `- ` lists, `**strong**`, `*emphasis*` and links into data, and `components/content/markdown.tsx` renders it as React elements (text escaped by React, no HTML path). `bodyProblems` now fails on any Markdown the renderer does not implement (numbered lists, quotes, tables, code, images, rules), so nothing renders as something else silently. A link target other than an internal path or https becomes plain text. Files stay valid MDX: moving to `@next/mdx` or `next-mdx-remote` later replaces two files. **Links to pages that do not exist are never emitted** (`resolveInternalPath`): `/contact` becomes `#contact`, `/work`, `/process` and `/about` show as text until each ships. **Structured data:** one `@graph` per service page: `ProfessionalService` (subtype of `LocalBusiness` and so of `Organization`; name, founder, the footer's address, area served, `knowsAbout` = the service's stack), `Service` (from the frontmatter, `provider` by `@id`) and `BreadcrumbList`; no price, contact detail, logo, rating or profile because none exists; `<` is escaped in the JSON so no string can close the script. **Build warning removed:** Turbopack warned that the dynamic `content/` reads would trace the whole project (including `public/` and all sources) into the server bundle; `turbopackIgnore` comments on those four calls fix it and `outputFileTracingIncludes` still ships `content/` (verified in the page's trace manifest: 18 content files, no `src/` or `public/`) | CLAUDE.md §5 (no dependency without need), docs/CONTENT.md (nothing invented, no dead links) | — |
 | D29 | 2026-11-06 | Work pages (P2.4). **Honesty by construction:** both pages read `getWork()` (published only), so a draft or planned entry is absent from the index and a real 404 at its URL, with no title, summary or slug anywhere in the HTML (tested against the real files, which are all drafts today). **Client consent has two locks:** the schema (P2.1) and `clientDisclosure()`, the only reader of `client` and `outcomes` in the work components, which returns nothing without `clientConsent: true` or for a demo; `work-structure.test.ts` fails on any other read, on an image, a logo or `includeDrafts`. There is no logo field in the schema and none is rendered. **Filters:** type, sector and technology as plain links to `/work?kind=&sector=&stack=` (not an ARIA tab widget: choosing one loads a different list, it does not switch panels), parsed with Zod against the options the published entries offer, unknown or oversized values ignored; a group with fewer than two options is hidden; the canonical URL ignores the query; works without JavaScript. **Empty state:** with nothing published `/work` shows `work.empty`, not filters. **Dev fixtures:** the non-empty UI is exercised in a browser through a dev-only route (`/_dev/work`, 404 in production) with synthetic entries, the same pattern as the UI gallery and FX showcase. **Consequences of `work` being available:** the header, the Home demos section (now featuring `demo` entries only, a case study is not an interactive demo), the services pages' demo link (`demoFor`) and Markdown links to `/work` all switch on by themselves once an entry is published; today none appears. **Header:** with a third link the navigation no longer leaves room for the theme switch on its row at 360 px, so the header went from three rows (about 160 px) to four (207 px); the shell test's budget went from 170 to 215 px (see section 8). The closing call to action is shared (`components/content/contact-cta.tsx`) with the services pages | CLAUDE.md §12 (client names, logos and metrics only with consent), docs/CONTENT.md (no entry advertised before it exists) | — |
+| D30 | 2026-11-06 | Inquiry funnel (P2.5). **Shape:** `processInquiry` (`src/lib/inquiry/process.ts`) is one function with its services injected: honeypot → Zod validation → rate limit → bot check → store → email → typed result (`success` / `validation` / `rate_limited` / `bot_check_failed` / `unavailable`); errors reach the visitor as a code, details go to the logger as an event name and an error class. **Real vs stand-in:** `deps.ts` chooses per service from plain config; when `VERCEL_ENV` is set (a deployment) every service is required and a missing one makes the page and the action say "unavailable" (a lead is never accepted and dropped); when it is unset (laptop, tests, CI, `next start` here) a missing service is replaced by an in-process one so the form works with no network and no secrets. `REQUIRED_IN_PRODUCTION` stays empty (it would fail the build before the services exist). **Dependencies (asked-for stack, facts in section 8):** `drizzle-orm`, `postgres`, `@upstash/ratelimit`, `@upstash/redis`; **no** drizzle-kit (its esbuild dependency has an install script) and no email or Turnstile SDK: both are `fetch`. The SQL migration is hand-written (`src/lib/db/migrations/0001_create_inquiries.sql`) and a test fails if it drifts from the Drizzle schema. **Privacy by construction:** the stored record is built field by field, no IP, user agent, referrer or token column; the limiter key is an HMAC of the address with a secret salt; `src/lib/logger.ts` (missing until now, although the rules require it) writes only allow-listed fields and redacts emails, phones, IPs, IBANs, fiscal codes and tokens; a structure test forbids `console.` in the funnel. **Marketing consent:** its own unticked, optional checkbox, stored with `CONSENT_VERSION` and the time. **Turnstile:** the script loads only when the visitor reaches the last step; fail-closed verification. **Honeypot:** a filled one gets a normal-looking success and nothing is stored or counted. **Confirmation:** the action redirects to `/contact/thanks` (noindex, nothing personal in the URL). **Guard change:** `env.guard.test.ts` now treats a `"use server"` module as a boundary (Next compiles a client import of it to a reference), and says so with two tests; the guard had correctly caught my first draft importing a type from a server module, so that type moved to a pure `result.ts`. **Links:** the contact flag is true, the privacy notice is plain text until `/privacy` exists (P4.2) | docs/BLUEPRINT.md D5 and §security, CLAUDE.md §6 and §10, docs/GDPR_CHECKLIST.md §5 and §6 | — |
 
 ---
 
@@ -117,6 +121,8 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B9 | ~~Approve the copy deck~~ approved 2026-11-06 (tone: first-person "tu" in Italian; copy deck and content models in `docs/CONTENT.md`). **Still open from `docs/CONTENT.md` §7:** the biography for About, and the technologies listed per service | you | P2.x (About page) |
 | B10 | ~~MDX stack for P2.3~~ resolved by D28: no dependency was added. If you would rather have a real MDX pipeline, say which and I replace `markdown.ts` + `markdown.tsx` (facts in section 8) | you | — |
 | B11 | **Header at 360 px with more links.** Four rows today (207 px of an 800 px screen); Process and About would make it five. Proposal: below `md` the navigation moves into a menu (Sheet, already in the UI kit); not built because it changes the shell and was not asked for | you | before Process / About ship |
+| B12 | **Privacy notice page.** The form's privacy sentence (Art. 13 summary, legal basis Art. 6(1)(b)) has no link until `/privacy` exists (P4.2). GDPR requires the information at the point of collection: do not point real visitors at the form before the notice exists, or accept that it is a known gap | you | before the form goes live |
+| B13 | **Services to create for a deployment.** EU Postgres (Neon or Supabase) + the migration; Upstash Redis (EU); Cloudflare Turnstile (a real site key per environment); an email provider account with a verified sender domain (Resend was chosen; Brevo is the EU alternative in D5); then set the variables of docs/DEPLOYMENT.md §3. Until then a deployed `/contact` shows "not available" | you | before the form goes live |
 
 ---
 
@@ -125,10 +131,10 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | Service | Dev | Preview | Prod | Notes |
 |---|---|---|---|---|
 | Vercel project | n/a | unverified (PR preview not evidenced) | Ready: https://website-ai-engineering.vercel.app/ (from `282dcbb`) | region fra1 set in `vercel.json`; runbook `docs/DEPLOYMENT.md`; no env vars set yet (app reads none) |
-| Postgres (EU) | | | | separate branch per env |
-| Upstash Redis (EU) | | | | |
-| Email provider (EU) | | | | SPF/DKIM/DMARC |
-| Turnstile | test key | test key | prod key | |
+| Postgres (EU) | none needed (in-process stand-in) | not created | not created | code ready (P2.5): `inquiries` table via `src/lib/db/migrations/0001_create_inquiries.sql`; separate branch per env (B13) |
+| Upstash Redis (EU) | none needed (in-process limiter) | not created | not created | code ready (P2.5): sliding window, 5 per 10 min per hashed client |
+| Email provider (EU) | none needed (in-process mailbox) | not created | not created | Resend REST chosen in P2.5 (D30); verified sender domain, SPF/DKIM/DMARC (P4.7) |
+| Turnstile | test key (optional; without it the stand-in passes) | test key | prod key | code ready (P2.5): widget on the last step, server-side verify |
 | Claude API | | | | budget alert set? |
 | 21st MCP | `.mcp.json` committed; `API_KEY_21ST` user env var, **not confirmed set**; project-server approval pending | n/a | n/a | key never in repo; see `docs/TOOLING_SETUP.md` |
 
@@ -151,6 +157,12 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P2.5 / decisions for you.** (1) **Dependencies.** I added the four you named or that they require, as the core stack allows, with these facts (npm registry, 2026-11-06; bundle impact not measured; all are server-side only): `drizzle-orm` 0.45.4, Apache-2.0, about 47 M downloads/week, no install script, the ORM D5 chose; `postgres` (postgres.js) 4.0.0, Unlicense, about 38 M/week, no install script, the driver (the newest 4.1.0 was too recent for the repository's release-age rule, so pnpm picked 4.0.0), chosen because it works with any Postgres including Neon's pooler; `@upstash/ratelimit` 2.2.0, MIT, about 3.2 M/week, one small dependency; `@upstash/redis` 1.41.0, MIT, about 7.5 M/week, its required peer. Alternatives I did not take: drizzle-kit (esbuild install script, not on the allow-list; hand-written SQL instead), `@neondatabase/serverless` or `pg` (a vendor driver or a heavier one), the Resend and Turnstile SDKs (a `fetch` is enough). Say if you want any of them removed or swapped. (2) **Email provider: Resend, by REST.** D5 left it open (Resend EU or Brevo). Resend needs a verified sender domain and its DPA and data region checked; the notification code is one small file, so Brevo is a one-file change. (3) **The notification email carries the whole inquiry** (name, email, company, description, budget, timeline, consent) in plain text to your inbox: that is what makes the funnel usable without an admin view, and it puts the visitor's data in your mail provider and your mailbox. docs/GDPR_CHECKLIST.md §5 prefers "minimal content or a link"; the alternative needs an admin view that does not exist. Your call. (4) **Wording and options I wrote for you to approve:** the five needs (agent, process, web app, documents, not sure), the **budget bands** (up to 5,000 / 5,000-15,000 / 15,000-50,000 / over 50,000 euro / not decided: these are my invention, not your price list), the four timelines, every label, hint and error, the privacy sentence, the marketing-consent wording, the Turnstile disclosure, the confirmation text. The privacy sentence and the consent wording are legal text and need a qualified professional (CLAUDE.md §14). (5) **Budget and timeline are required** (each has a "not decided" way out); docs/GDPR_CHECKLIST.md §5 listed them as optional. Say if you want them optional. (6) **Retention** is not implemented (P4.3): rows stay until deleted; `created_at` is there for the purge. (7) **Without JavaScript the form cannot move between steps**: the page, the first step and a notice say so (the notice uses `contact.form.noscript`), but there is no fallback channel because no email address is published (B2). Publishing one in the noscript notice is the fix. (8) **Rate limit: five accepted requests per ten minutes per client**; if Upstash does not answer within 3 seconds the request is allowed (fail-open, logged), a conscious choice for a contact form. (9) **`next start` on a laptop is not "production"** for the funnel (it has no `VERCEL_ENV`): it uses the stand-ins, including a bot check that passes and a limiter that lives in the process. That is what the e2e server does. (10) The marketing consent only records the choice; there is no newsletter and no sending (a double opt-in flow would be a separate task).
+- **P2.5 / what I verified and what I did not.** Verified (section 9): typecheck, lint, 69 test files / 1049 tests, knip, format, `next build`, and the whole e2e suite twice (441 passed both times, including `e2e/contact.spec.ts`: happy path in both languages, validation, error summary, rate limit, honeypot, no request leaving the site, CSP, axe in both themes, 360 px, no JavaScript). **Could not run (no credentials, and tests must not use the network):** the Drizzle insert against a real Postgres, Upstash, Resend and the Turnstile widget and siteverify; each adapter is tested against a fake of its API, so a mistake in my reading of an API (a response shape, a header) would show only on the first live run: use Cloudflare's test keys, a Neon branch and Resend's sandbox first (section 9). **Not run:** a mutation sweep for this task.
+- **P2.5 / what the first e2e runs found (all fixed).** Your first run had 15 failures and then 2; the causes: (a) next-intl's `getLocale()` uses `next/root-params`, which Next.js refuses inside a Server Action, so the form now sends its language in a hidden field and the action accepts only a locale of ours (a forged one falls back to Italian); (b) a Home test counted in-page anchors that became `/contact` links; (c) React renders no children inside `<noscript>`, so the no-JavaScript notice is now a paragraph shown only under `@media (scripting: none)` (confirmed in Chromium by the passing e2e); (d) **a CSP violation, `script-src <- eval`**: Zod 4 probes `new Function("")` the first time it builds an object schema, and the enforced CSP reports even a caught probe; the inquiry schema is the first Zod code that runs in the browser, so `src/lib/inquiry/schema.ts` now calls `z.config({ jitless: true })` before building any schema (the form's four fields do not need the JIT), and `schema.csp.test.ts` fails if a `Function` is ever constructed while validating (with a control case that proves the check can fail). Any future Zod schema that runs in the browser must load after that setting.
+- **P2.5 / things I changed outside the funnel:** `src/lib/navigation.ts` (contact available, `privacy` known), `site-header.tsx`, `home-hero.tsx`, `home-final-cta.tsx`, `contact-cta.tsx` (links to `/contact`), `src/i18n/navigation.ts` (exports `redirect`), `src/lib/env.guard.test.ts` (Server Action boundary, two new tests), tests for all of the above (the premise "the CTA goes to #contact" changed; none weakened), `e2e/{home,services,shell,work}.spec.ts` (same), `messages/*.json` (`contact.form`, `contact.thanks`), `.env.example` (comments), docs/SECURITY.md §7, docs/DEPLOYMENT.md, docs/CONTENT.md, docs/GDPR_CHECKLIST.md, `package.json` and `pnpm-lock.yaml`.
+- **P2.5 / defects found while writing it (all fixed).** (a) The env/client guard failed on my first draft: the browser form imported a type from `process.ts`, which imports the email module (server-only); fixed with a pure `result.ts`, and the guard learned that a `"use server"` module is a boundary. (b) In the form tests a never-settling action promise stalled every later test (React keeps pending actions in a global queue): the test now releases it. (c) Several first-draft exports were unused (knip). (d) A column-name check matched "descrIPtion" for "ip"; now anchored.
+- **P2.5 / limits.** One inquiry per submit, no attachments, no draft saving, no confirmation email to the visitor, no admin view or status workflow (the `status` column exists for it), no CAPTCHA fallback if Turnstile is blocked by the visitor's browser (the form then says to retry). The confirmation page is reachable by direct URL.
 - **P2.4 / decisions for you.** (1) **The header (B11).** Flipping `work` to available made the 360 px header four rows tall (207 px, a quarter of a small phone's height; it was three rows, about 160 px). The shell test said "at most three rows, under 170 px": I raised it to "at most four rows, under 215 px" instead of leaving it red, with a comment, and changed the header comment and docs/DESIGN.md §9 to say so. CLAUDE.md says not to weaken a test to make it pass: this is a changed budget, not a hidden one, and it is yours to reject. If you do, the answer is a menu below `md`; either way a fifth link needs one. (2) **`/work` is empty in production and will stay so until a demo is published.** All four entries are `draft: true, status: planned`. The filters, cards, consenting-client rule and detail template are real and tested, but on synthetic entries through the dev-only route, not on anything a visitor can see. To publish a demo: build it (Phase 3), set `status: live` and `draft: false` in both languages; the index, the Home demos section and the service pages' demo link then appear by themselves (and the e2e expectations follow the files). (3) **"Tabs" are link filters.** You asked for category/filter tabs; ARIA tabs switch panels in place, these load a filtered URL, so they are navigation links with `aria-current`. Say if you wanted the tab widget. (4) **Logos.** There is no logo field and nothing renders an image on the work pages. If client logos are wanted later they need a schema field tied to `clientConsent`, an asset rule and a place in `clientDisclosure`; the structure test will fail on an image until then, on purpose. (5) **Sector names are free text per language** ("Marketing e vendite" / "Marketing and sales"), so a filtered URL is language-specific; fine for now, a fixed list of sector keys would be needed if the filters should be shared across languages. (6) **No structured data on work pages.** Not requested; `CreativeWork` for case studies and a `SoftwareApplication`-style node for demos are candidates for P2.6.
 - **P2.4 / measured, and not measured.** Production build, enforced CSP, Chromium: the real `/work` in both languages, axe zero violations in both themes, at 360 px and under reduced motion; CLS under 0.05 on load and a full scroll; zero CSP violations and no console error; complete with JavaScript off; no horizontal scroll at 360, 768, 1280 and 1920 px; hostile query strings (script tags, an image with `onerror`, 2000-character values) return 200 and reflect nothing; path-like slugs (`..%2F`, `%00`) return 404. Dev fixtures (synthetic entries): axe zero violations on the index, a filtered index, the no-results state and both detail kinds in both themes, plus English at 360 px; the filters narrow, combine, clear and work without JavaScript; filter options are at least 44 px tall and show a focus ring. Visual check of the empty state, the filtered index, a 360 px page and a case-study detail in both themes. **Not measured:** LCP/INP on a phone (P4.6), Firefox/WebKit, a screen reader, the filters against real content, search-engine behaviour of the `?` URLs.
 - **P2.4 / things I changed outside the new pages:** `src/lib/navigation.ts` (`work` available), `src/components/home/home-demos.tsx` (features `demo` entries only), `src/components/services/services-cta.tsx` (now a thin wrapper over the shared `ContactCta`), `messages/*.json` (`work.filters.*`, `work.labels.service`, `work.labels.breadcrumb`), `src/components/shell/site-header.tsx` (comment) and `e2e/shell.spec.ts` (nav count, header budget), `e2e/support/{content,servers}.ts` (reads work entries; warms the new dev route), docs/CONTENT.md and docs/DESIGN.md. Tests that described the world before `/work` existed were updated, none weakened apart from the header budget above: the nav lists three links, the Home demo section links by default, `/work` is a page for the Markdown resolver (`/process` and `/about` still show as plain text).
@@ -268,76 +280,77 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm install --frozen-lockfile → pass (no dependency added or changed)
-pnpm verify       → pass, exit 0 with NO env file (typecheck → lint --max-warnings=0 → test → build, no warning);
-                    test step: 52 files, 816 tests (737 before P2.4)
-pnpm test:e2e     → pass, 393 tests (Chromium; the dev-only gallery specs run on `next dev`), twice in a row
-                    (330 before: +63 in e2e/work.spec.ts and e2e/work-gallery.spec.ts). The first full run had 3
-                    failures, all caused by the third nav link (section 8): two header count assertions and the
-                    360 px header budget
-pnpm knip         → pass (one unused export found and un-exported on the way)
+pnpm add drizzle-orm postgres @upstash/ratelimit @upstash/redis → +6 packages, no install script
+pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 69 files,
+                    1049 tests (816 before P2.5); build without warning; /[locale]/contact and
+                    /[locale]/contact/thanks in the route list
+pnpm test:e2e     → pass, 441 tests (Chromium), twice in a row (393 before: +48 in e2e/contact.spec.ts). The
+                    first full run, by you, had 15 failures and then 2 after the first fixes; all four causes are
+                    in section 8
+pnpm knip         → pass
 pnpm format:check → pass (does not cover *.md, nor content/)
+no listener on 3100, 3101, 3200, 3201 afterwards
 
-P2.4 checks:
-  honesty           → real files: every entry is a draft, so /it/work and /en/work show the empty state, no draft
-                      title, summary or slug appears in the HTML, every draft URL is HTTP 404 with the localized
-                      not-found page and no draft title, unknown and path-like slugs are 404; expectations are
-                      derived from the files, so publishing a demo changes them instead of passing silently
-  consent (negative)→ an object that holds a client name and results WITHOUT consent (the schema would refuse it)
-                      renders neither in the card nor in the detail; a demo never shows a client even with the flag;
-                      a consenting case study shows the client and its results; no image anywhere
-  structure         → no work file reads client / outcomes / clientConsent except through clientDisclosure, none
-                      renders an image or a logo, none asks for drafts
-  filters           → options come from published entries only; invalid, empty, oversized, markup and unknown values
-                      are ignored; AND across groups; stable, linkable URLs that parse back; groups with one option
-                      are hidden; no-results state with a way out; work without JavaScript
-  a11y              → axe zero violations: real /work x 2 locales x 2 themes, 360 px, reduced motion; fixtures:
-                      index, filtered, no results, two detail kinds x 2 themes, English at 360 px; options at least
-                      44 px with a visible focus ring
-  layout / CLS / CSP→ no horizontal scroll at 360 / 768 / 1280 / 1920; CLS under 0.05 on load and a full scroll;
-                      zero CSP violations, no console error; metadata, canonical (query ignored) and hreflang right
-  mutation          → drafts served by both pages + client read directly in both components + OR instead of AND
-                      across filter groups: 11 unit tests and the draft e2e tests failed; all restored
-  visual            → screenshots of the empty state (1280 dark), a filtered index (1280 dark), the index at 360
-                      light and a case-study detail (1280 light); nothing looked broken
-  NOT done          → Lighthouse and mid-range-phone LCP/INP (P4.6); Firefox/WebKit; screen reader; the filters on
-                      real published content (none exists); native-speaker review of the new filter labels
+P2.5 checks:
+  flow (unit)       → honeypot, validation, rate limit, bot check, store, email in that order; every failure typed;
+                      a failed email does not fail a stored inquiry; nothing submitted reaches a log line; the
+                      client key is a hash and the sixth request is refused (process, actions, schema tests)
+  adapters (unit)   → memory and Upstash limiter, Turnstile (fail-closed), Resend, Drizzle store against fakes;
+                      the SQL migration has exactly the Drizzle columns; the table has no ip/agent/token column
+  deployed vs local → a deployed site missing any service is not ready (the form is unavailable), locally every
+                      service has a stand-in (deps.test.ts)
+  guards            → client code never reaches server code and a "use server" module is a boundary; no console,
+                      no browser storage, no <noscript>, the Cloudflare origin only in the widget
+  CSP               → zero violations through the whole flow under the enforced policy, no console error, no
+                      request to another origin (e2e); no eval from the validation library (unit + e2e)
+  a11y / layout     → axe zero violations on every step, the error state, the confirmation page, in both themes,
+                      at 360 px and under reduced motion; no horizontal scroll at 360 / 768 / 1280 / 1920; CLS
+                      under 0.05; the page, the first step and the notice are in the HTML without JavaScript
+  NOT done          → live Postgres / Upstash / Resend / Turnstile; Lighthouse and phone LCP/INP (P4.6);
+                      Firefox/WebKit; screen reader; a mutation sweep
+
+Before the form goes live (B12, B13): create the services, run the psql migration, set the variables of
+docs/DEPLOYMENT.md §3, then repeat the manual smoke test with Cloudflare's test keys: no request to
+challenges.cloudflare.com on steps 1-3, the widget on step 4, a row with only the schema columns, an email with a
+working Reply-To, log lines with no personal data.
 ```
 
 ---
 
 ## 10. Proposed commit(s) for the work above
 
-One logical change.
+One logical change: the funnel and what it needs. If you prefer two commits: (1) `feat(security): add logger, rate limit, bot check, email and inquiry storage` for `src/lib/{logger,db,email,security,inquiry}`, `package.json`, `pnpm-lock.yaml`, `.env.example` and their tests; (2) `feat(contact): add the inquiry form and confirmation page` for the rest. Both unit and e2e suites are green.
 
 ```
-feat(work): add work index with filters and detail pages
+feat(contact): add the inquiry funnel with bot protection and storage
 
-Add /work and /work/<slug> for both languages, rendered from
-content/work/<locale>/<slug>.mdx through the Markdown renderer. The
-index filters by type, sector and technology through the query string:
-plain links, parsed with Zod against the options the published entries
-offer, so unknown values are ignored and the filters work without
-JavaScript. With nothing published the page shows its empty state.
+Add /contact with a four-step form (need, budget band, timeline, your
+details) and /contact/thanks. A Server Action runs the flow: honeypot,
+Zod validation, rate limit, Cloudflare Turnstile check, insert into
+Postgres with Drizzle, then a plain-text notification email, and
+redirects to the confirmation page. Every call to action on the site
+now points at /contact.
 
-Keep the honesty rules by construction. Both pages read published
-entries only, so a draft is absent from the index and a 404 at its URL.
-A client name and results are read through one function that returns
-nothing without clientConsent: true (and nothing for a demo); a
-structure test fails if a work component reads them any other way or
-renders an image. There is no logo field and none is shown.
+Privacy by construction: the stored row has no address, user agent or
+token column; the rate-limit key is a salted HMAC of the address; logs
+go through a new allow-list logger that redacts emails, phones, IPs and
+tokens; the marketing consent is its own unticked, optional checkbox
+stored with the version of its wording; the Turnstile script loads only
+on the last step. The privacy notice is plain text until its page exists.
 
-Make work available in the navigation. The Home demos section now
-features demos only, so a published case study is not presented as an
-interactive demo. The non-empty UI is tested in a browser through a
-dev-only route with synthetic entries, since every real entry is still
-a draft.
+Each service has a real adapter (Upstash, Turnstile and Resend by fetch,
+Drizzle over postgres.js) and an in-process stand-in. On a deployment
+every service is required and a missing one makes the form say it is
+unavailable, so a lead is never accepted and dropped; locally and in CI
+the stand-ins let the form work with no network and no secrets.
 
-The third link makes the 360 px header four rows tall (207 px); the
-shell test budget goes from 170 to 215 px, and a menu is needed before
-a fifth link. Share the closing call to action with the services pages.
+The client/server import guard now treats a "use server" module as a
+boundary. Zod's JIT is turned off for the inquiry schema, because its
+eval probe is a CSP violation in the browser. Add drizzle-orm, postgres,
+@upstash/ratelimit and @upstash/redis; the SQL migration is hand-written
+and a test fails if it drifts from the schema.
 
-Task: P2.4
+Task: P2.5
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

@@ -290,7 +290,103 @@
         }
       }
     },
-    "detailsTitle": "Where to find me"
+    "detailsTitle": "Where to find me",
+    "form": {
+      "title": "Tell me about your project",
+      "progress": "Step {current} of {total}",
+      "progressLabel": "Form progress",
+      "steps": {
+        "need": "What you need",
+        "budget": "Budget",
+        "timeline": "Timeline",
+        "contact": "Your details"
+      },
+      "need": {
+        "legend": "What do you need?",
+        "options": {
+          "ai-agents": "An AI agent",
+          "workflow-automation": "To automate a process",
+          "web-application": "A web application",
+          "document-intelligence": "To work with documents",
+          "not-sure": "I'm not sure yet"
+        },
+        "descriptionLabel": "Describe the project in a few lines",
+        "descriptionHint": "Who you are, what you want to achieve, which tools you already use. No technical detail needed."
+      },
+      "budget": {
+        "legend": "What budget do you have in mind?",
+        "hint": "A rough order of magnitude is enough: it helps me suggest the right route, it is not a commitment.",
+        "options": {
+          "under-5k": "Up to €5,000",
+          "5k-15k": "€5,000 to €15,000",
+          "15k-50k": "€15,000 to €50,000",
+          "over-50k": "Over €50,000",
+          "undecided": "I haven't decided yet"
+        }
+      },
+      "timeline": {
+        "legend": "When would you need it?",
+        "hint": "A rough estimate is fine.",
+        "options": {
+          "asap": "As soon as possible",
+          "one-to-three-months": "Within 1-3 months",
+          "three-to-six-months": "Within 3-6 months",
+          "exploring": "I'm just exploring"
+        }
+      },
+      "contact": {
+        "intro": "How do I reply?",
+        "nameLabel": "Full name",
+        "emailLabel": "Email",
+        "emailHint": "I will only write to this address.",
+        "companyLabel": "Company (optional)"
+      },
+      "consent": {
+        "marketing": "I would like to receive occasional news and articles (optional)",
+        "marketingHint": "You can leave it empty: I will reply anyway. You can change your mind at any time."
+      },
+      "privacy": "I use this data only to answer your request (art. 6(1)(b) GDPR). Read the <link>privacy notice</link>.",
+      "turnstile": "The form is protected against spam by Cloudflare Turnstile: your browser contacts Cloudflare only when you reach this step.",
+      "buttons": {
+        "next": "Next",
+        "back": "Back",
+        "submit": "Send the request",
+        "sending": "Sending"
+      },
+      "errors": {
+        "summaryTitle": "Please check these fields",
+        "choose": "Choose an option.",
+        "required": "Please fill in this field.",
+        "tooShort": "The text is too short: add a few details.",
+        "tooLong": "The text is too long: please shorten it.",
+        "invalid": "Please check the value you entered.",
+        "emailInvalid": "Enter a valid email address."
+      },
+      "fields": {
+        "need": "What you need",
+        "description": "Project description",
+        "budget": "Budget",
+        "timeline": "Timeline",
+        "name": "Full name",
+        "email": "Email",
+        "company": "Company"
+      },
+      "failure": {
+        "rate_limited": "You have sent too many requests in a short time. Please try again in {minutes} minutes.",
+        "bot_check_failed": "I could not verify that you are a person. Please try again.",
+        "unavailable": "I cannot send the request right now. Please try again later."
+      },
+      "unavailable": {
+        "title": "The form is not available at the moment",
+        "body": "I cannot receive requests from here right now. Please try again later."
+      },
+      "noscript": "The form needs JavaScript: please enable it or try another browser."
+    },
+    "thanks": {
+      "title": "Thank you, I have received your request",
+      "body": "I will read it carefully and reply to you personally at the address you gave.",
+      "home": "Back to home"
+    }
   },
   "notFound": {
     "title": "Page not found",

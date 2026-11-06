@@ -265,12 +265,12 @@ describe("SiteHeader", () => {
     ).toBeInTheDocument();
   });
 
-  it("the primary call to action goes to the contact block in the footer", () => {
+  it("the primary call to action goes to the contact page", () => {
     renderIn("it", <SiteHeader items={home} />);
 
     expect(screen.getByRole("link", { name: "Parliamone" })).toHaveAttribute(
       "href",
-      "#contact",
+      "/it/contact",
     );
   });
 
@@ -379,7 +379,7 @@ describe("SiteFooter", () => {
     expect(screen.getByText("VAT number (Partita IVA)")).toBeInTheDocument();
   });
 
-  it("has the contact block the header's call to action points at", () => {
+  it("keeps the contact block with the identity and address (the anchor the content falls back to)", () => {
     renderIn("en", <SiteFooter />);
 
     const contact = screen.getByRole("contentinfo").querySelector("#contact");

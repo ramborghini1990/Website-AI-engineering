@@ -179,7 +179,7 @@ for (const locale of LOCALES) {
       await expect(section.getByText(copy.finalCta.body)).toBeVisible();
       await expect(
         section.getByRole("link", { name: copy.finalCta.cta }),
-      ).toHaveAttribute("href", "#contact");
+      ).toHaveAttribute("href", `/${locale}/contact`);
       await expect(page.locator("[data-fx='gradient-mesh']")).toHaveCount(1);
     });
 
@@ -203,9 +203,14 @@ for (const locale of LOCALES) {
           expect((await request.get(href)).status(), href).toBe(200);
         }
       }
+      // The in-page anchors left are the skip link and the hero's "services" action;
+      // the contact actions are links to the contact page now.
+      const anchors = hrefs.filter((h) => h.startsWith("#"));
+      expect(anchors).toContain("#services");
+      expect(anchors.length).toBeGreaterThanOrEqual(2);
       expect(
-        hrefs.filter((h) => h.startsWith("#")).length,
-      ).toBeGreaterThanOrEqual(4);
+        hrefs.filter((h) => h === `/${locale}/contact`).length,
+      ).toBeGreaterThanOrEqual(3);
     });
 
     test("the hero actions lead to the services on the page and to the contact block", async ({
@@ -221,8 +226,8 @@ for (const locale of LOCALES) {
         .getByRole("region", { name: copy.finalCta.title })
         .getByRole("link", { name: copy.finalCta.cta })
         .click();
-      await expect(page).toHaveURL(/#contact$/);
-      await expect(page.locator("#contact")).toBeInViewport();
+      await expect(page).toHaveURL(new RegExp(`/${locale}/contact$`));
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
   });
 }

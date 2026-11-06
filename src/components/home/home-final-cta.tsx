@@ -4,12 +4,12 @@ import { GradientMesh } from "@/components/fx/gradient-mesh";
 import { MagneticButton } from "@/components/fx/magnetic-button";
 import { SectionHeader } from "@/components/home/section-header";
 import { Button } from "@/components/ui/button";
-import { contactHref } from "@/lib/navigation";
+import { Link } from "@/i18n/navigation";
 
 /**
  * The closing call to action over the ambient mesh (CSS only, very faint:
  * `fx-contrast.test.ts` proves the text keeps AA contrast over it). The action
- * goes to the contact block until `/contact` exists.
+ * goes to the contact page.
  */
 export function HomeFinalCta() {
   const t = useTranslations("home.finalCta");
@@ -26,7 +26,7 @@ export function HomeFinalCta() {
           <div>
             <MagneticButton>
               <Button asChild size="lg">
-                <a href={contactHref}>{t("cta")}</a>
+                <Link href="/contact">{t("cta")}</Link>
               </Button>
             </MagneticButton>
           </div>

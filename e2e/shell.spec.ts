@@ -222,7 +222,7 @@ test.describe("header", () => {
       ).not.toHaveAttribute("aria-current", "page");
       await expect(
         header.getByRole("link", { name: COPY[locale].cta }),
-      ).toHaveAttribute("href", "#contact");
+      ).toHaveAttribute("href", `/${locale}/contact`);
     });
   }
 
@@ -243,9 +243,7 @@ test.describe("header", () => {
     }
   });
 
-  test("the call to action leads to the contact block in the footer", async ({
-    page,
-  }) => {
+  test("the call to action leads to the contact page", async ({ page }) => {
     await open(page, "/it");
 
     await page
@@ -253,9 +251,18 @@ test.describe("header", () => {
       .getByRole("link", { name: COPY.it.cta })
       .click();
 
-    await expect(page).toHaveURL(/#contact$/);
-    await expect(page.locator("#contact")).toBeInViewport();
-    await expect(page.locator("#contact")).toContainText("Contatti");
+    await expect(page).toHaveURL(/\/it\/contact$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Parliamone",
+    );
+  });
+
+  test("the footer keeps the contact block with the identity details", async ({
+    page,
+  }) => {
+    await open(page, "/it");
+
+    await expect(page.locator("footer #contact")).toContainText("Contatti");
   });
 
   test("it is not sticky: it scrolls away, so it can never cover a focused element", async ({

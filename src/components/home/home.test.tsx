@@ -111,12 +111,12 @@ describe.each(["it", "en"] as const)("Hero (%s)", (locale) => {
       expect(word.className).toContain("animate-word-rise");
   });
 
-  it("the primary action goes to the contact block and the secondary one to the services on the page (no dead link)", () => {
+  it("the primary action goes to the contact page and the secondary one to the services on the page (no dead link)", () => {
     renderIn(locale, <HomeHero />);
 
     expect(screen.getByRole("link", { name: copy.primaryCta })).toHaveAttribute(
       "href",
-      "#contact",
+      "/it/contact",
     );
     expect(
       screen.getByRole("link", { name: copy.secondaryCta }),
@@ -342,7 +342,7 @@ describe.each(["it", "en"] as const)("Process timeline (%s)", (locale) => {
 });
 
 describe.each(["it", "en"] as const)("Final call to action (%s)", (locale) => {
-  it("sits on the ambient mesh, with an h2 and an action to the contact block", () => {
+  it("sits on the ambient mesh, with an h2 and an action to the contact page", () => {
     renderIn(locale, <HomeFinalCta />);
 
     const copy = messages[locale].home.finalCta;
@@ -353,7 +353,7 @@ describe.each(["it", "en"] as const)("Final call to action (%s)", (locale) => {
     expect(screen.getByText(copy.body)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.cta })).toHaveAttribute(
       "href",
-      "#contact",
+      "/it/contact",
     );
   });
 
@@ -411,7 +411,7 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
     expect(screen.queryByRole("main")).not.toBeInTheDocument();
   });
 
-  it("every link goes to a page that exists (the services pages) or to an in-page anchor: no dead link before P2.4-P2.5", async () => {
+  it("every link goes to a page that exists (services, contact) or to an in-page anchor: no dead link", async () => {
     await renderPage();
 
     const hrefs = screen
@@ -419,6 +419,7 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
       .map((link) => link.getAttribute("href") ?? "");
     expect(hrefs.length).toBeGreaterThan(2);
     const services = new Set([
+      "/it/contact",
       "/it/services",
       ...getServices(locale).map((service) => `/it/services/${service.slug}`),
     ]);

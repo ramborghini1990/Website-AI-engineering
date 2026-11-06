@@ -3,14 +3,14 @@ import { useTranslations } from "next-intl";
 import { MagneticButton } from "@/components/fx/magnetic-button";
 import { TextReveal } from "@/components/fx/text-reveal";
 import { Button } from "@/components/ui/button";
-import { contactHref } from "@/lib/navigation";
+import { Link } from "@/i18n/navigation";
 
 /**
  * Hero: eyebrow, the one-line offer as the page's h1, the lead and two calls to
  * action. The headline animates on load with CSS only (`TextReveal
  * when="load"`), so the text is in the server HTML and nothing waits for
- * JavaScript. The primary action goes to the contact block until `/contact`
- * exists; the secondary one scrolls to the services on this page.
+ * JavaScript. The primary action goes to the contact page; the secondary one
+ * scrolls to the services on this page.
  */
 export function HomeHero() {
   const t = useTranslations("home.hero");
@@ -33,7 +33,7 @@ export function HomeHero() {
       <div className="mt-10 flex flex-wrap items-center gap-4">
         <MagneticButton>
           <Button asChild size="lg">
-            <a href={contactHref}>{t("primaryCta")}</a>
+            <Link href="/contact">{t("primaryCta")}</Link>
           </Button>
         </MagneticButton>
         <Button asChild size="lg" variant="secondary">

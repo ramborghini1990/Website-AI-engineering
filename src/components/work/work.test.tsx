@@ -223,12 +223,12 @@ describe.each(["it", "en"] as const)("WorkIndex (%s)", (locale) => {
     expect(screen.getAllByText(copy.labels.simulation)).toHaveLength(1);
   });
 
-  it("ends with the contact call to action, to the contact block", () => {
+  it("ends with the contact call to action, to the contact page", () => {
     renderIn(locale, <WorkIndex entries={all} filters={{}} />);
 
     expect(screen.getByRole("link", { name: copy.cta.cta })).toHaveAttribute(
       "href",
-      "#contact",
+      "/it/contact",
     );
   });
 

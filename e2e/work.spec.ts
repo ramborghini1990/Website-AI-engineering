@@ -135,7 +135,7 @@ for (const locale of LOCALES) {
       ).toHaveAttribute("aria-current", "page");
     });
 
-    test("the closing call to action reaches the contact block", async ({
+    test("the closing call to action leads to the contact page", async ({
       page,
     }) => {
       await open(page, `/${locale}/work`);
@@ -143,9 +143,9 @@ for (const locale of LOCALES) {
       const cta = page
         .getByRole("main")
         .getByRole("link", { name: copy.cta.cta });
-      await expect(cta).toHaveAttribute("href", "#contact");
+      await expect(cta).toHaveAttribute("href", `/${locale}/contact`);
       await cta.click();
-      await expect(page.locator("#contact")).toBeInViewport();
+      await expect(page).toHaveURL(new RegExp(`/${locale}/contact$`));
     });
   });
 

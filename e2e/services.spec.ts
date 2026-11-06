@@ -290,7 +290,7 @@ for (const locale of LOCALES) {
         }
       });
 
-      test("the call to action and the link inside the text both reach the contact block", async ({
+      test("the call to action and the link inside the text both lead to the contact page", async ({
         page,
       }) => {
         await open(page, `/${locale}/services/${slug}`);
@@ -301,20 +301,15 @@ for (const locale of LOCALES) {
           name: copy.cta.cta,
           exact: true,
         });
-        const inText = main.locator("p a[href='#contact']");
-        await expect(button).toHaveAttribute("href", "#contact");
+        const inText = main.locator(`p a[href='/${locale}/contact']`);
+        await expect(button).toHaveAttribute("href", `/${locale}/contact`);
         await expect(inText).toHaveCount(1);
 
         for (const link of [inText, button]) {
-          await page.evaluate(() => {
-            window.scrollTo(0, 0);
-          });
-          await page.evaluate(() => {
-            history.replaceState(null, "", location.pathname);
-          });
+          await open(page, `/${locale}/services/${slug}`);
           await link.click();
-          await expect(page).toHaveURL(/#contact$/);
-          await expect(page.locator("#contact")).toBeInViewport();
+          await expect(page).toHaveURL(new RegExp(`/${locale}/contact$`));
+          await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         }
       });
     });
@@ -436,9 +431,9 @@ test.describe("accessibility (axe, WCAG 2.0-2.2 A/AA)", () => {
     }
     expect(reached).toContain("/it");
     expect(reached).toContain("/it/services");
-    expect(reached).toContain("#contact");
+    expect(reached).toContain("/it/contact");
     expect(reached.indexOf("/it/services")).toBeLessThan(
-      reached.indexOf("#contact"),
+      reached.lastIndexOf("/it/contact"),
     );
   });
 });

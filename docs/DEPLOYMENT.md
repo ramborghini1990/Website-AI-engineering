@@ -87,6 +87,18 @@ pnpm dlx vercel@65.11.0 env pull .env.local        # pulls the Development scope
 
 `.env.local` is gitignored and is deliberately unreadable to Claude Code (`.claude/settings.json`).
 
+### The inquiry funnel in a deployment (P2.5)
+
+On Vercel (`VERCEL_ENV` is set) the contact form needs **all** of: `DATABASE_URL`, `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`, `RATE_LIMIT_IP_SALT`, `EMAIL_API_KEY` + `EMAIL_FROM` + `INQUIRY_NOTIFY_TO`. If one is missing the page shows "the form is not available" and the action refuses; nothing is silently mocked. (`REQUIRED_IN_PRODUCTION` in `env-schema.ts` stays empty on purpose: requiring them would fail the build before the services exist.)
+
+Create the table once per database, before the first inquiry (no migration tool is installed; the file is plain SQL and idempotent):
+
+```bash
+psql "$DATABASE_URL" -f src/lib/db/migrations/0001_create_inquiries.sql
+```
+
+Email goes through Resend's REST API (`EMAIL_API_KEY`); `EMAIL_FROM` must be on a domain verified with the provider (SPF/DKIM, P4.7). Use the Cloudflare **test** keys in Development and Preview (they are in `.env.example`); only Production gets real ones.
+
 ## 4. Readiness checklist
 
 Done in the repo:
