@@ -6,6 +6,7 @@ import {
   layoutShift,
   trackLayoutShift,
   waitForHydration,
+  settleAnimations,
 } from "./support/motion";
 
 /**
@@ -55,6 +56,7 @@ async function open(page: Page, path: string) {
 }
 
 async function expectNoAxeViolations(page: Page) {
+  await settleAnimations(page);
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(results.violations).toEqual([]);
 }
@@ -240,7 +242,10 @@ test.describe("header", () => {
   }) => {
     await open(page, "/it");
 
-    await page.getByRole("link", { name: COPY.it.cta }).click();
+    await page
+      .getByRole("banner")
+      .getByRole("link", { name: COPY.it.cta })
+      .click();
 
     await expect(page).toHaveURL(/#contact$/);
     await expect(page.locator("#contact")).toBeInViewport();
@@ -324,7 +329,8 @@ test.describe("footer", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 1200 });
-    await open(page, "/it");
+    // A short page: the 404 (Home is long now).
+    await open(page, "/it/non-esiste");
 
     const bottom = await page
       .getByRole("contentinfo")

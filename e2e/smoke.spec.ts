@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { settleAnimations } from "./support/motion";
+
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 // Computed colours of the `bg` token (docs/DESIGN.md §2.1).
@@ -43,6 +45,7 @@ const setThemeClass = async (page: Page, theme: "light" | "dark") => {
 };
 
 async function expectNoAxeViolations(page: Page) {
+  await settleAnimations(page);
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(results.violations).toEqual([]);
 }

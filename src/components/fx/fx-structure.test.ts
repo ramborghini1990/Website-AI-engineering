@@ -96,7 +96,8 @@ describe("FX code splitting", () => {
       read(file).includes("Motion"),
     )) {
       if (name === "use-fx-ready.ts") continue;
-      expect(read(name), name).toMatch(/ready \? <\w+Motion/);
+      // `ready ? <XMotion` or, where a component can also run without JS, `ready && cond ? <XMotion`
+      expect(read(name), name).toMatch(/ready (?:&& [^?]+ )?\? <\w+Motion/);
     }
   });
 

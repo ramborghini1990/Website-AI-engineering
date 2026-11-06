@@ -57,3 +57,21 @@ export async function waitForHydration(page: Page): Promise<void> {
     );
   });
 }
+
+/**
+ * Wait until every finite animation and transition on the page has finished.
+ * Axe scans a half-faded word as low-contrast text, which is a transient state
+ * and not a design failure; the Home hero rises in on load (CSS), so any scan of
+ * a page that includes it must settle first. `allSettled` because a replaced
+ * transition is cancelled and its `finished` promise rejects (AbortError).
+ */
+export async function settleAnimations(page: Page): Promise<void> {
+  await page.evaluate(() =>
+    Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished),
+    ),
+  );
+}

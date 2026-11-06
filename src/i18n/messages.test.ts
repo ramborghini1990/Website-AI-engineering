@@ -67,7 +67,7 @@ describe("message files", () => {
   });
 
   test("the two languages really differ for translated copy", () => {
-    expect(en.home.status).not.toBe(it.home.status);
+    expect(en.home.hero.headline).not.toBe(it.home.hero.headline);
     expect(en.notFound.title).not.toBe(it.notFound.title);
   });
 });
@@ -76,7 +76,7 @@ describe("type-safe message keys", () => {
   const t = createTranslator({ locale: "it", messages: it });
 
   test("resolve existing keys", () => {
-    expect(t("home.title", { brand: "Brand Token" })).toBe("Brand Token");
+    expect(t("cta.label")).toBe("Parliamone");
     expect(t("notFound.backHome")).toBe("Torna alla home");
   });
 

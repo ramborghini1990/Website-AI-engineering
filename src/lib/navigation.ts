@@ -22,6 +22,15 @@ export const availableNavItems: readonly NavItem[] = navItems.filter(
 );
 
 /**
+ * Whether the page behind a navigation key exists yet. Pages use this to decide
+ * whether to render a link to it (no link to a 404): the services cards on Home
+ * link to `/services/<slug>` only once the services pages ship.
+ */
+export function isPageAvailable(key: NavItem["key"]): boolean {
+  return navItems.some((item) => item.key === key && item.available);
+}
+
+/**
  * The header's primary call to action. It points at the contact block in the
  * footer (present on every page) until the inquiry page exists (P2.5); then
  * change `href` to "/contact" and render it with the i18n `Link`.

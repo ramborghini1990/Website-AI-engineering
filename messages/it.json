@@ -74,8 +74,6 @@
     "close": "Chiudi notifica"
   },
   "home": {
-    "title": "{brand}",
-    "status": "Il nuovo sito è in costruzione.",
     "hero": {
       "eyebrow": "Ingegneria AI e full-stack · Torino",
       "headline": "Costruisco agenti AI e software che reggono in produzione.",

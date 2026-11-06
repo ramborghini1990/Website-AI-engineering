@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { HomeDemos } from "@/components/home/home-demos";
+import { HomeFinalCta } from "@/components/home/home-final-cta";
+import { HomeHero } from "@/components/home/home-hero";
+import { HomeProcess } from "@/components/home/home-process";
+import { HomeProof } from "@/components/home/home-proof";
+import { HomeServices } from "@/components/home/home-services";
 import { business } from "@/lib/business";
+import { getServices, getWork } from "@/lib/content/read";
 import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,18 +25,25 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Placeholder home: the real page is P2.2, the copy deck is P2.1. The <main>
- * landmark, header and footer come from the root layout.
+ * Home (P2.2). Static-first: every section is server-rendered with its text in
+ * place. The sections use the FX library (docs/MOTION.md): a hero headline that
+ * animates on load with CSS only, spotlight cards, a pinned process story and a
+ * mesh behind the closing call to action. Without JavaScript all of it reads
+ * normally; under reduced motion nothing moves. Copy: the approved deck
+ * (docs/CONTENT.md). The demos section renders only once a demo is published.
+ * The <main> landmark, header and footer come from the root layout.
  */
-export default function HomePage() {
-  const t = useTranslations("home");
+export default async function HomePage() {
+  const locale = await getLocale();
 
   return (
-    <div className="mx-auto flex w-full max-w-page flex-1 flex-col justify-center gap-6 px-gutter py-16">
-      <h1 className="text-5xl text-text">
-        {t("title", { brand: business.brand.name })}
-      </h1>
-      <p className="max-w-prose text-lg text-text-secondary">{t("status")}</p>
-    </div>
+    <>
+      <HomeHero />
+      <HomeProof />
+      <HomeServices services={getServices(locale)} />
+      <HomeDemos demos={getWork(locale)} />
+      <HomeProcess />
+      <HomeFinalCta />
+    </>
   );
 }

@@ -21,17 +21,26 @@ import "../globals.css";
 
 // next/font/google downloads the files at build time and serves them from our
 // own origin: no request to Google at runtime (GDPR, docs/DESIGN.md §3).
+//
+// `display: "optional"`, not "swap": a swap re-flows text when the web font
+// arrives after the first paint. Headings use the condensed width of the
+// variable font (`font-stretch`, globals.css), which the fallback cannot match,
+// so a late font moved the hero headline from three lines to two and shifted
+// the page by CLS 0.26 on the first visit (found in P2.2, docs/DESIGN.md §3).
+// With "optional" the font is used only if it is ready almost at once (it is
+// preloaded and self-hosted), otherwise this page view keeps the fallback and
+// the font is cached for the next one. Never a shift.
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
   subsets: ["latin", "latin-ext"],
   axes: ["wdth"],
-  display: "swap",
+  display: "optional",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin", "latin-ext"],
-  display: "swap",
+  display: "optional",
 });
 
 // The known locales (pages render per request, see LocaleLayout).

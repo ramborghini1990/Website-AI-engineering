@@ -128,7 +128,7 @@ Italian needs only Latin glyphs (à è é ì ò ù, €); `latin` covers them.
 - Headings use Instrument Sans at weight 600 and, for display sizes, a slightly condensed width (`wdth` ≈ 90) to get a tight, engineered look. `wdth` must be requested in the `next/font` axes or it is not loaded.
 - Mono is for **short** strings only (labels, numbers, code): uppercase eyebrows at the `xs` step with `letter-spacing: 0.06em`. Never body copy.
 - Numerals in tables and metrics: `font-variant-numeric: tabular-nums`.
-- Load only the weights and axes used; `display: swap`; keep fallback metrics adjusted by `next/font` so the swap does not shift layout (CLS).
+- Load only the weights and axes used; **`display: optional`** (changed in P2.2, was `swap`): headings use the condensed width of the variable font, which the fallback cannot match, so a font arriving after the first paint re-flowed the hero headline (three lines to two) and measured CLS 0.26 on a slow first visit. With `optional` the font is used only if it is ready almost at once (it is preloaded and self-hosted); otherwise that page view keeps the fallback and the font is cached for the next one. The trade-off: on a slow first visit the page is set in the fallback font. `e2e/home.spec.ts` ("a late web font") guards it.
 
 ### 3.1 Fluid scale
 

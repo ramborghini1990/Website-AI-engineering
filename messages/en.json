@@ -74,8 +74,6 @@
     "close": "Dismiss notification"
   },
   "home": {
-    "title": "{brand}",
-    "status": "The new website is under construction.",
     "hero": {
       "eyebrow": "AI and full-stack engineering · Turin",
       "headline": "I build AI agents and software that hold up in production.",

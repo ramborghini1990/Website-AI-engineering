@@ -24,6 +24,12 @@ const nextConfig: NextConfig = {
       },
     ]);
   },
+  // Pages read the MDX content (`content/`) from disk at request time through
+  // `src/lib/content/read.ts`; make sure those files ship with the server
+  // functions (docs/CONTENT.md §4).
+  outputFileTracingIncludes: {
+    "/*": ["./content/**/*"],
+  },
   turbopack: {
     rules: {
       "*.css": {

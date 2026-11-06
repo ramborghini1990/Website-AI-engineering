@@ -72,7 +72,7 @@ Six reusable effects, showcased at `/[locale]/_dev/fx` (dev only). Every one is 
 
 | Component | Needs JS | Under reduced motion | Without JS |
 |---|---|---|---|
-| `TextReveal` (headline) | yes, lazy | plain headline; chunk never loads | plain headline |
+| `TextReveal` (headline) | `when="view"`: yes, lazy. `when="load"`: **no** (CSS) | plain headline; chunk never loads. `load`: the animation token is `none` | plain headline. `load` still animates (CSS) |
 | `MagneticButton` | yes, lazy, mouse only | button stays put; chunk never loads | plain button |
 | `SpotlightCard` | yes, lazy, mouse only | plain card; chunk never loads | plain card |
 | `ScrollPinnedSection` | yes, lazy | stacked steps, nothing hidden or pinned | stacked steps |
@@ -87,7 +87,8 @@ Six reusable effects, showcased at `/[locale]/_dev/fx` (dev only). Every one is 
 
 Things worth knowing:
 
-- `TextReveal` only animates a headline that is still below the trigger line when its motion loads. One already on screen (or scrolled past, e.g. after Back) stays as rendered: hiding visible text to animate it in is a flash and would hurt LCP. A hero headline is `playIntro`'s job.
+- **Hero headline (P2.2): `TextReveal when="load"`.** `view` skips a heading that is already on screen, so it could never animate a hero. `load` is CSS only (`--animate-word-rise` keyframes, a per-word `animation-delay`, 40 ms per word and 600 ms at most): the words are in the server HTML, nothing waits for JavaScript, the first word shows at once, and the reduced-motion block switches the token off.
+- `TextReveal` (`when="view"`) only animates a headline that is still below the trigger line when its motion loads. One already on screen (or scrolled past, e.g. after Back) stays as rendered: hiding visible text to animate it in is a flash and would hurt LCP. A hero headline is `playIntro`'s job.
 - `ScrollPinnedSection` does not pin when its content is taller than the viewport (reflow, WCAG 1.4.10). It checks once when its motion loads; it does not re-check on resize. Steps are text: a step that is still transparent is focusable, so put no links or controls in them.
 - ScrollTrigger pins by moving the section into a spacer element. The wrapper keeps the section inside an unpinned `div` so React can remove it on its own (`fx-integration.test.tsx` covers the case that used to throw `NotFoundError`).
 - `GradientMesh` and the `SpotlightCard` glow are translucent accent over text. Their strengths live in `fx-tokens.ts` and `fx-contrast.test.ts` proves 4.5:1 for every text colour in both themes. The mesh is capped at about 5 % per blob for that reason, so on a dark background it is subtle to the point of being easy to miss. Raising it fails the test.

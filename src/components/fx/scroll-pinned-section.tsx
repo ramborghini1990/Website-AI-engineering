@@ -27,11 +27,14 @@ const PinnedMotion = dynamic(
 export function ScrollPinnedSection({
   children,
   steps,
+  "aria-labelledby": labelledBy,
   className,
 }: {
   /** The section heading and intro, always visible. */
   children: ReactNode;
   steps: readonly ReactNode[];
+  /** Id of the heading that names the section (it becomes a labelled region). */
+  "aria-labelledby"?: string;
   className?: string;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -48,6 +51,7 @@ export function ScrollPinnedSection({
       <div data-fx="pinned-section">
         <section
           ref={ref}
+          aria-labelledby={labelledBy}
           className={cn(
             "flex min-h-dvh flex-col justify-center gap-8",
             className,

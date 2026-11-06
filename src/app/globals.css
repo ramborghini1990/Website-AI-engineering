@@ -150,6 +150,9 @@
   --animate-mesh-a: mesh-a 28s var(--ease-in-out) infinite alternate;
   --animate-mesh-b: mesh-b 36s var(--ease-in-out) infinite alternate;
   --animate-mesh-c: mesh-c 44s var(--ease-in-out) infinite alternate;
+  /* Hero headline words (TextReveal when="load"): CSS only, plays from the server-rendered text. */
+  --animate-word-rise: word-rise var(--duration-reveal) var(--ease-out)
+    backwards;
 
   @keyframes overlay-in {
     from {
@@ -242,6 +245,12 @@
       transform: translateX(-50%);
     }
   }
+  @keyframes word-rise {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
   @keyframes mesh-a {
     to {
       transform: translate3d(12%, 8%, 0) scale(1.12);
@@ -294,6 +303,7 @@
     --animate-mesh-a: none;
     --animate-mesh-b: none;
     --animate-mesh-c: none;
+    --animate-word-rise: none;
   }
 }
 

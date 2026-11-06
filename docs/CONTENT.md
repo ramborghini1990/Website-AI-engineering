@@ -131,7 +131,7 @@ These are statements the site would make **as you**. I wrote them as proposals; 
 
 ## 8. Handing over to the next tasks
 
-- **P2.2 Home:** read `home.*` (iterate `homeProofKeys`, `processStepKeys`); services cards from `getServices(locale)` (`title`, `summary`); show the demos section **only when at least one demo is published**; no testimonials or logos (none exist).
+- **P2.2 Home (built):** `src/app/[locale]/page.tsx` composes `src/components/home/*` (hero, proof, services, demos, process, final call to action) from `home.*`, the services collection and `process.steps`. Decisions made there: the demos section renders nothing until a demo is published; links appear only for pages that exist (`isPageAvailable`), so today every Home link is an in-page anchor (`#services`, `#contact`); no metrics are shown. Original hand-over notes: read `home.*` (iterate `homeProofKeys`, `processStepKeys`); services cards from `getServices(locale)` (`title`, `summary`); show the demos section **only when at least one demo is published**; no testimonials or logos (none exist).
 - **P2.3 Services:** index from `getServices`; detail from the MDX body plus frontmatter lists, labels from `services.labels`; JSON-LD from `title`/`description`/`stack`; link the demo only if published; every page links to Contact.
 - **P2.4 Work:** the schema and rules already exist; the index must handle the **empty state** (`work.empty`); filters by `kind`/`service`.
 - **P2.5 Contact:** copy for the page is in `contact.*`; form fields, validation messages and the consent texts are not written yet.

@@ -1,11 +1,16 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { settleAnimations } from "./support/motion";
+
 import { business } from "../src/lib/business";
+import en from "../messages/en.json";
+import it from "../messages/it.json";
 
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 async function expectNoAxeViolations(page: Page) {
+  await settleAnimations(page);
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(results.violations).toEqual([]);
 }
@@ -105,16 +110,18 @@ test.describe("static assets are left alone", () => {
   });
 });
 
-for (const [locale, title, heading] of [
+for (const [locale, title, heading, lead] of [
   [
     "it",
     `Ingegneria AI e sviluppo full-stack | ${business.brand.name}`,
-    business.brand.name,
+    it.home.hero.headline,
+    it.home.hero.lead,
   ],
   [
     "en",
     `AI engineering and full-stack development | ${business.brand.name}`,
-    business.brand.name,
+    en.home.hero.headline,
+    en.home.hero.lead,
   ],
 ] as const) {
   test.describe(`/${locale}`, () => {
@@ -130,11 +137,7 @@ for (const [locale, title, heading] of [
       await expect(
         page.getByRole("heading", { level: 1, name: heading }),
       ).toBeVisible();
-      await expect(page.getByRole("main")).toContainText(
-        locale === "it"
-          ? "Il nuovo sito è in costruzione."
-          : "The new website is under construction.",
-      );
+      await expect(page.getByRole("main")).toContainText(lead);
 
       const origin = new URL(baseURL ?? "").origin;
       // canonical is this locale's URL; hreflang lists both locales and x-default
