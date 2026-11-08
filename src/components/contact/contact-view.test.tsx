@@ -91,6 +91,47 @@ describe.each(["it", "en"] as const)("ContactView (%s)", (locale) => {
     expect(notice).toHaveTextContent(copy.form.unavailable.body);
   });
 
+  it("shows the booking option after the form and the lists when one is given, and nothing when it is not", () => {
+    const { container } = renderIn(
+      locale,
+      <ContactView
+        available
+        form={<form aria-label="the form" />}
+        booking={<section aria-label="the booking" />}
+      />,
+    );
+
+    const form = screen.getByRole("form", { name: "the form" });
+    const booking = screen.getByRole("region", { name: "the booking" });
+    expect(
+      form.compareDocumentPosition(booking) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    cleanup();
+
+    const without = renderIn(
+      locale,
+      <ContactView available form={<form aria-label="the form" />} />,
+    );
+    expect(without.container.textContent).not.toContain(
+      container.querySelector("[aria-label='the booking']")?.textContent ??
+        "never",
+    );
+    expect(screen.queryByRole("region", { name: "the booking" })).toBeNull();
+  });
+
+  it("the form is unchanged by the booking option: same form, same place", () => {
+    renderIn(
+      locale,
+      <ContactView
+        available
+        form={<form aria-label="the form" />}
+        booking={<div>booking</div>}
+      />,
+    );
+
+    expect(screen.getByRole("form", { name: "the form" })).toBeInTheDocument();
+  });
+
   it("keeps heading levels in order: h1, then h2 sections, then h3 items", () => {
     renderIn(locale, <ContactView available form={null} />);
 

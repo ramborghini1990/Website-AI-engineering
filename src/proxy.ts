@@ -42,6 +42,10 @@ export default function proxy(request: NextRequest) {
         env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== undefined &&
         env.TURNSTILE_SECRET_KEY !== undefined,
       analyticsOrigin: env.NEXT_PUBLIC_PLAUSIBLE_ORIGIN,
+      bookingOrigin:
+        env.NEXT_PUBLIC_CAL_URL !== undefined
+          ? new URL(env.NEXT_PUBLIC_CAL_URL).origin
+          : undefined,
       reportUri: env.CSP_REPORT_URI,
       enforcing: mode === "enforce",
     });

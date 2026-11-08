@@ -63,6 +63,7 @@ frame-ancestors 'none'
 upgrade-insecure-requests          (enforce mode only)
 ```
 
+- **The booking page (P2.7):** when `NEXT_PUBLIC_CAL_URL` is set, its ORIGIN (`https://cal.eu`, never the path) is allowed in `frame-src` and nowhere else, so the page can be embedded, after a click (`<ConsentGate>`), and nothing else can. Without the variable `frame-src` stays `'none'`. The URL must be on `cal.eu` or `app.cal.eu` (EU instance) or the build fails. The origin is global (the policy is per request, not per page); allowing a frame is not loading it. The iframe itself is sandboxed (scripts, its own origin, forms and popups only: no top navigation, no modals), has no device permissions and sends only our origin as referrer.
 - **Origins we allow:** our own, plus **only when configured**: Cloudflare Turnstile (`https://challenges.cloudflare.com` in `script-src` and `frame-src`, when both Turnstile keys are set; per Cloudflare's CSP page the nonce on the `api.js` tag propagates and `strict-dynamic` works) and the analytics origin from `NEXT_PUBLIC_PLAUSIBLE_ORIGIN` (`script-src` and `connect-src`). **Unverified:** Plausible's docs say "add plausible.io to your CSP" without listing directives; scripts and the event POST are my assumption. Check it in a browser when P2.6 wires analytics. Nothing loads from either origin today: adding the origin to the CSP allows it, it does not load it. Third-party scripts still go through `<ConsentGate>` (CLAUDE.md §10) and the cookie policy (P4.2).
 - **`style-src-attr 'unsafe-inline'`** is the one deliberate looseness: React renders `style="…"` attributes (Radix, the FX layers) and a nonce cannot be put on an attribute. Attributes cannot run script. Style *elements* need the nonce.
 - **`strict-dynamic`** means scripts created at runtime by a trusted (nonced) script are allowed whatever their host. That is how Next's chunks and Turnstile load, and also why a hostile *parser-inserted* tag or inline handler is blocked while a script appended by already-running trusted code is not. The `script-src` host list is ignored by modern browsers and kept only for old ones.
@@ -134,3 +135,18 @@ Server Actions are origin-checked by Next.js; the CSP already allows the Turnsti
 | Client code never reaches server code; `"use server"` modules are a boundary | `src/lib/env.guard.test.ts` |
 | No `console`, no browser storage, Cloudflare origin only in the widget | `src/components/contact/contact-structure.test.ts` |
 | Browser flow, error summary, redirect, rate-limit message, no third-party request, CSP, axe | `e2e/contact.spec.ts` |
+
+## 8. Third-party embeds and the booking option (P2.7)
+
+Rule (CLAUDE.md §10): a third-party script or embed loads only through `<ConsentGate category="...">` (`src/components/consent/consent-gate.tsx`), after the visitor's own click. Until then its children are **not rendered**: no iframe, no script, no preconnect, so the browser makes no request. The gate does not remember the click (no cookie, no storage); each visit starts blocked. It always offers a plain link that needs no embed and no JavaScript (the button is hidden where scripting is off).
+
+Every third party is listed in `src/lib/consent/registry.ts` (provider, category, trigger, what it receives, the CSP rule): the source for the cookie and privacy notices (P4.2). Adding one means: a registry entry, the gate, its origin in `src/lib/security/csp.ts`, and the notices.
+
+| Claim | Evidence |
+|---|---|
+| Before the click nothing is rendered, fetched or stored; after it the embed renders and takes focus; the choice is not remembered | `src/components/consent/consent-gate.test.tsx` |
+| The booking frame is titled and sandboxed without top navigation or modals | `src/components/contact/booking-section.test.tsx` |
+| An `<iframe>` exists only in the booking embed, as a child of the gate; no `next/script`; no hard-coded provider URL; every category registered | `src/components/consent/consent-structure.test.ts` |
+| The booking URL must be on the EU instance, https, without credentials | `src/lib/env-schema.test.ts` |
+| `frame-src` gets the booking origin only when configured, and nothing else gets it | `src/lib/security/csp.test.ts`, `src/proxy.test.ts`, `e2e/booking.spec.ts` |
+| Real browser, enforced CSP: no request to the booking host before the click however the page is used, exactly the configured page after it, no violation, no hint in `<head>`, not remembered after a reload, link-only without JavaScript, the form still works, axe in both themes | `e2e/booking.spec.ts` |

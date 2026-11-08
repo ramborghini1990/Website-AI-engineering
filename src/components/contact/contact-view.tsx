@@ -13,9 +13,12 @@ import { contactNextKeys, contactPrepareKeys } from "@/lib/content/site-map";
 export function ContactView({
   available,
   form,
+  booking = null,
 }: {
   available: boolean;
   form: ReactNode;
+  /** The booking option (P2.7), under the form; absent when no booking page is configured. */
+  booking?: ReactNode;
 }) {
   const t = useTranslations("contact");
 
@@ -90,6 +93,8 @@ export function ContactView({
           </section>
         </aside>
       </div>
+
+      {booking}
     </section>
   );
 }

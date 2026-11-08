@@ -36,7 +36,7 @@ Architecture: custom, first-party consent manager (no third-party CMP script nee
 - ☐ **Don't re-show the banner** to someone who refused for at least **6 months**, unless the processing changes materially or you can't know their choice (e.g. storage cleared). **[P4.1]**
 - ☐ **Consent receipt** (proof, Art. 7(1)): store server-side `{ consentId (random UUID), choices, policyVersion, timestamp, userAgentFamily }`, **no IP, no account link**. Keep the `consentId` in a first-party necessary cookie. **[P4.1]**
 - ☐ **Withdrawal as easy as giving**: "Cookie preferences" link always available; withdrawing deletes the related cookies/storage keys where technically possible.
-- ☐ **Embeds click-to-load**: YouTube (use `youtube-nocookie.com` behind a gate anyway), Cal.com, Google Maps (prefer a static map image). **[P2.7]**
+- ☐ **Embeds click-to-load**: YouTube (use `youtube-nocookie.com` behind a gate anyway), Cal.com, Google Maps (prefer a static map image). **[P2.7]** *P2.7 built (not reviewed by a professional; left unticked): `<ConsentGate>` renders nothing and requests nothing before a click, keeps no cookie or storage, always offers a plain link; Cal.com is the first registered third party (`src/lib/consent/registry.ts`); its disclosure text is draft legal copy. The banner, "reject all" and the consent receipt are P4.1.*
 - ☐ Playwright test asserts: zero third-party requests and zero non-necessary cookies on first load; after "Rifiuta tutti" the same holds across navigation; after "Accetta" the gated embeds load. **[P4.1]**
 
 ## 4. Analytics privacy

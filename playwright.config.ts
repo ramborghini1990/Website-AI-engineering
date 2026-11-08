@@ -1,6 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { devPort, devURL, prodPort, prodURL } from "./e2e/support/servers";
+import {
+  bookingURL,
+  devPort,
+  devURL,
+  prodPort,
+  prodURL,
+} from "./e2e/support/servers";
 
 const isCI = Boolean(process.env.CI);
 
@@ -42,6 +48,10 @@ export default defineConfig({
         // script, style or request the policy would block fails these tests
         // instead of only logging a report. See e2e/security.spec.ts.
         CSP_MODE: "enforce",
+        // Turns the booking section on (and its origin in the CSP). The page is
+        // never reached: no request to it may happen before a click, and the
+        // test that clicks intercepts the request.
+        NEXT_PUBLIC_CAL_URL: bookingURL,
       },
       url: prodURL,
       reuseExistingServer: !isCI,

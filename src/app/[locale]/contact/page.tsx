@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
+import { BookingSection } from "@/components/contact/booking-section";
 import { ContactView } from "@/components/contact/contact-view";
 import { InquiryForm } from "@/components/contact/inquiry-form";
+import { env } from "@/lib/env";
 import { getInquiryRuntime, turnstileSiteKey } from "@/lib/inquiry/runtime";
 import { pageMetadata } from "@/lib/seo";
 
@@ -29,10 +31,14 @@ export default async function ContactPage() {
   const locale = await getLocale();
   const messages = await getMessages();
   const runtime = getInquiryRuntime();
+  const bookingUrl = env.NEXT_PUBLIC_CAL_URL;
 
   return (
     <ContactView
       available={runtime.ready}
+      booking={
+        bookingUrl !== undefined ? <BookingSection url={bookingUrl} /> : null
+      }
       form={
         <NextIntlClientProvider
           locale={locale}

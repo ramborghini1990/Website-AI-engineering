@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { prodURL } from "./support/servers";
+import { bookingOrigin, prodURL } from "./support/servers";
 import { waitForHydration } from "./support/motion";
 
 /**
@@ -85,7 +85,12 @@ test.describe("the CSP header", () => {
     expect(directive(csp, "base-uri")).toEqual(["'none'"]);
     expect(directive(csp, "frame-ancestors")).toEqual(["'none'"]);
     expect(csp).toContain("upgrade-insecure-requests");
-    expect(csp).not.toMatch(/https?:\/\//); // only our own origin, nothing else configured
+    // The only external origin is the booking page's, in frame-src (P2.7, set by
+    // NEXT_PUBLIC_CAL_URL in playwright.config.ts); nothing else is configured.
+    expect(directive(csp, "frame-src")).toEqual([bookingOrigin]);
+    expect(csp.replace(`frame-src ${bookingOrigin}`, "")).not.toMatch(
+      /https?:\/\//,
+    );
   });
 
   for (const path of PAGES) {
@@ -319,7 +324,7 @@ test.describe("what the enforced CSP blocks (negative tests)", () => {
     expect(loaded).toBe(false);
   });
 
-  test("another origin cannot be embedded in the page (frame-src 'none')", async ({
+  test("an unlisted origin cannot be embedded in the page (frame-src allows only the booking origin)", async ({
     page,
   }) => {
     const violations = await violationsFrom(page, () => {

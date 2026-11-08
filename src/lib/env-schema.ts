@@ -41,6 +41,27 @@ const httpsOrigin = httpsUrl.refine(isOrigin, {
   message:
     "must be an origin such as https://example.eu (no path, no trailing slash)",
 });
+/**
+ * Hosts the booking page may be on: the EU instance of Cal.com only (P2.7), so
+ * the visitor's data stays with an EU-hosted processor. The allow-list is the
+ * rule; the exact hosts are an assumption to confirm against the Cal.com
+ * account (docs/PROJECT_STATE D32). A page elsewhere fails the build.
+ */
+const BOOKING_HOSTS = ["cal.eu", "app.cal.eu"] as const;
+const bookingUrl = httpsUrl.refine(
+  (value) => {
+    if (!URL.canParse(value)) return false;
+    const url = new URL(value);
+    return (
+      (BOOKING_HOSTS as readonly string[]).includes(url.hostname) &&
+      url.username === "" &&
+      url.password === ""
+    );
+  },
+  {
+    message: `must be an https URL on ${BOOKING_HOSTS.join(" or ")} (the EU Cal.com instance), without credentials`,
+  },
+);
 /** A host as Vercel exposes it: no scheme, no path. */
 const host = z
   .string()
@@ -58,6 +79,12 @@ const publicShape = {
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: optional(z.string().min(1)),
   /** Origin of the cookieless analytics script and event endpoint (e.g. Plausible). Unset = no analytics origin in the CSP. */
   NEXT_PUBLIC_PLAUSIBLE_ORIGIN: optional(httpsOrigin),
+  /**
+   * The public booking page on the EU Cal.com instance (P2.7), e.g.
+   * https://cal.eu/<handle>/<event>. Unset = no booking section on the contact
+   * page and no extra origin in the CSP. Public by design: it is a link.
+   */
+  NEXT_PUBLIC_CAL_URL: optional(bookingUrl),
 } as const;
 
 /** Server-only values. Anything secret goes here, never in `publicShape`. */

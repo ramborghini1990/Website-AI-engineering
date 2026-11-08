@@ -70,10 +70,33 @@ describe("public variables", () => {
     ["NEXT_PUBLIC_PLAUSIBLE_ORIGIN", "https://plausible.io/"], // trailing slash: not an origin
     ["NEXT_PUBLIC_PLAUSIBLE_ORIGIN", "https://plausible.io/js/script.js"], // a path is not an origin
     ["NEXT_PUBLIC_PLAUSIBLE_ORIGIN", "plausible.io"],
+    ["NEXT_PUBLIC_CAL_URL", "http://cal.eu/handle/intro"], // https only
+    ["NEXT_PUBLIC_CAL_URL", "https://cal.com/handle/intro"], // not the EU instance
+    ["NEXT_PUBLIC_CAL_URL", "https://evil.example/cal.eu/handle"], // the host is what counts, not the path
+    ["NEXT_PUBLIC_CAL_URL", "https://cal.eu.evil.example/handle"], // a look-alike host
+    ["NEXT_PUBLIC_CAL_URL", "https://user:pw@cal.eu/handle/intro"], // no credentials
+    ["NEXT_PUBLIC_CAL_URL", "cal.eu/handle"],
+    ["NEXT_PUBLIC_CAL_URL", "javascript:alert(1)"],
   ])("rejects %s = %s (negative)", (name, value) => {
     expect(
       Object.keys(issuesOf(() => parsePublicEnv({ [name]: value }))),
     ).toEqual([name]);
+  });
+
+  it.each([
+    "https://cal.eu/example-handle/intro",
+    "https://app.cal.eu/example-handle",
+    "https://cal.eu/example-handle/intro?layout=month_view",
+  ])("accepts the EU Cal.com booking page %s", (value) => {
+    expect(
+      parsePublicEnv({ NEXT_PUBLIC_CAL_URL: value }).NEXT_PUBLIC_CAL_URL,
+    ).toBe(value);
+  });
+
+  it("the booking page is optional: blank means no booking section", () => {
+    expect(
+      parsePublicEnv({ NEXT_PUBLIC_CAL_URL: "  " }).NEXT_PUBLIC_CAL_URL,
+    ).toBeUndefined();
   });
 
   it("only ever contains NEXT_PUBLIC_ names: nothing else can reach the browser", () => {

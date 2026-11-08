@@ -93,6 +93,37 @@ describe("buildCsp: optional origins are added only where they are needed", () =
     }
   });
 
+  it("booking origin: frame-src only, and Turnstile stays next to it", () => {
+    const booking = "https://cal.eu";
+    const csp = buildCsp({ ...base, bookingOrigin: booking });
+
+    expect(directive(csp, "frame-src")).toEqual([booking]);
+    for (const name of [
+      "default-src",
+      "script-src",
+      "connect-src",
+      "img-src",
+      "style-src",
+      "font-src",
+      "form-action",
+    ]) {
+      expect(directive(csp, name), name).not.toContain(booking);
+    }
+    expect(
+      directive(
+        buildCsp({ ...base, turnstile: true, bookingOrigin: booking }),
+        "frame-src",
+      ),
+    ).toEqual([TURNSTILE_ORIGIN, booking]);
+  });
+
+  it("without a booking origin frame-src stays 'none' (negative)", () => {
+    expect(directive(buildCsp(base), "frame-src")).toEqual(["'none'"]);
+    expect(
+      directive(buildCsp({ ...base, bookingOrigin: undefined }), "frame-src"),
+    ).toEqual(["'none'"]);
+  });
+
   it("analytics origin: script-src and connect-src only", () => {
     const csp = buildCsp({ ...base, analyticsOrigin: "https://plausible.io" });
 

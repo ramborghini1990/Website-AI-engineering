@@ -103,6 +103,10 @@ Email goes through Resend's REST API (`EMAIL_API_KEY`); `EMAIL_FROM` must be on 
 
 `/sitemap.xml` and `/robots.txt` are generated at **build time**, so the site URL must be known during the build: set `NEXT_PUBLIC_SITE_URL`, or rely on Vercel's `VERCEL_PROJECT_PRODUCTION_URL` (production) and `VERCEL_URL` (previews), as `resolveSiteUrl` does. A wrong origin there is a wrong sitemap. Only a **production** deployment is indexable: on a preview (`VERCEL_ENV=preview`) `robots.txt` disallows everything and lists no sitemap. After the first production deploy, submit `/sitemap.xml` in Google Search Console and Bing Webmaster Tools (that needs your account), and check a page in the Facebook Sharing Debugger, the LinkedIn Post Inspector and a Twitter/X card preview.
 
+### The booking page (P2.7)
+
+Set `NEXT_PUBLIC_CAL_URL` to the public booking page on the **EU instance** of Cal.com (for example `https://cal.eu/<handle>/<event>`); only `cal.eu` and `app.cal.eu` are accepted, so a wrong host fails the build. Create the event type in a Cal.com account on the EU region first. Unset, the contact page simply has no booking section and the CSP has no extra origin. The calendar is embedded only after the visitor clicks; the plain link to the same page is always shown. Add Cal.com as a processor to the record of processing and the privacy notice (P4.2) and check its DPA and the EU data region in your account.
+
 ## 4. Readiness checklist
 
 Done in the repo:

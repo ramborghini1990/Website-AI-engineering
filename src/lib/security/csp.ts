@@ -21,6 +21,12 @@ export type CspOptions = {
   turnstile: boolean;
   /** Origin of the analytics script and event endpoint, e.g. https://plausible.io */
   analyticsOrigin?: string | undefined;
+  /**
+   * Origin of the booking page (the EU Cal.com instance, P2.7), allowed in
+   * `frame-src` ONLY. Allowing a frame is not loading it: the page is embedded
+   * after a click (ConsentGate), so nothing is requested before.
+   */
+  bookingOrigin?: string | undefined;
   /** Optional `report-uri` collector. */
   reportUri?: string | undefined;
   /**
@@ -37,7 +43,14 @@ export function generateNonce(): string {
 }
 
 export function buildCsp(options: CspOptions): string {
-  const { nonce, development, turnstile, analyticsOrigin, reportUri } = options;
+  const {
+    nonce,
+    development,
+    turnstile,
+    analyticsOrigin,
+    bookingOrigin,
+    reportUri,
+  } = options;
 
   const script = [
     "'self'",
@@ -46,6 +59,11 @@ export function buildCsp(options: CspOptions): string {
     ...(development ? ["'unsafe-eval'"] : []),
     ...(turnstile ? [TURNSTILE_ORIGIN] : []),
     ...(analyticsOrigin ? [analyticsOrigin] : []),
+  ];
+
+  const frames = [
+    ...(turnstile ? [TURNSTILE_ORIGIN] : []),
+    ...(bookingOrigin ? [bookingOrigin] : []),
   ];
 
   const directives: Array<[string, readonly string[]]> = [
@@ -73,7 +91,7 @@ export function buildCsp(options: CspOptions): string {
         ...(development ? ["ws:", "wss:"] : []),
       ],
     ],
-    ["frame-src", turnstile ? [TURNSTILE_ORIGIN] : ["'none'"]],
+    ["frame-src", frames.length > 0 ? frames : ["'none'"]],
     ["object-src", ["'none'"]],
     ["base-uri", ["'none'"]],
     ["form-action", ["'self'"]],

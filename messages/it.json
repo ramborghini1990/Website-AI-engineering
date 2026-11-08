@@ -386,6 +386,18 @@
       "title": "Grazie, ho ricevuto la tua richiesta",
       "body": "La leggo con attenzione e ti rispondo di persona all'indirizzo che hai indicato.",
       "home": "Torna alla home"
+    },
+    "booking": {
+      "title": "Preferisci prenotare una conversazione?",
+      "lead": "Puoi scegliere direttamente un orario nel calendario, senza passare dal modulo.",
+      "gate": {
+        "title": "Il calendario non è ancora caricato",
+        "body": "Il calendario è ospitato da Cal.com, nella sua istanza europea. Finché non lo carichi, il tuo browser non contatta Cal.com e nessun dato viene condiviso. Quando lo carichi, Cal.com riceve il tuo indirizzo IP e le informazioni tecniche del browser e può usare propri cookie, secondo la sua informativa privacy.",
+        "load": "Carica il calendario"
+      },
+      "fallback": "Apri la pagina di prenotazione",
+      "newTab": "(si apre in una nuova scheda)",
+      "frameTitle": "Calendario per prenotare una conversazione"
     }
   },
   "notFound": {

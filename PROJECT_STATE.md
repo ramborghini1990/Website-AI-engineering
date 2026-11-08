@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.5 committed as `dc601df`)_
+_Last updated: 2026-11-08 · by: Claude Code · branch: `main` (P2.6 committed as `f05a2dd`)_
 
 ---
 
@@ -10,21 +10,21 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.5 committed a
 
 | Field | Value |
 |---|---|
-| Phase | 2 — Landing page & agency value proposition |
-| Active task | `P2.6` — SEO & sharing: `sitemap.xml` (both languages, hreflang alternates), `robots.txt`, a generated Open Graph / Twitter image per page and language (`next/og`), canonical and alternates on every public page through one helper |
-| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (75 files, 1119 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 464/464 twice in a row; the images were looked at. Not verified: Google/Bing, the social-card debuggers, a deployed preview (section 8) |
-| Next task | `P2.7` — Booking: Cal.com (EU) behind a click-to-load consent gate (needs the consent manager, P4.1, or a click-to-load design: decide before starting); do not start unprompted |
+| Phase | 2 — Landing page & agency value proposition: **7/7 tasks done, closed at the task level** (the exceptions that keep ROADMAP's stricter "every criterion evidenced and CI green on `main`" from being true are listed in section 8, "Phase 2 carry-overs") |
+| Active task | `P2.7` — Booking: a click-to-load Cal.com (EU instance) calendar on the contact page behind a new `<ConsentGate>`, with a plain link, configured by `NEXT_PUBLIC_CAL_URL`; the first registered third party |
+| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (78 files, 1164 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 483/483 twice in a row. The real Cal.com page was never reached (every request to its host is intercepted in the tests); the host allow-list is an assumption to confirm (section 8) |
+| Next task | `P3.0` — start of Phase 3 (agent showcases and funnels): read `ROADMAP.md` Phase 3 first; do not start unprompted. Before it, you may want the Phase 4 items that gate going live (B12 privacy notice, B13 services, the consent banner P4.1) |
 
 **Plan for the active task**
-1. One helper, `pageMetadata` (`src/lib/seo.ts`): title, description, canonical, hreflang (+ `x-default`), Open Graph (type, site name, locale and alternate, url, image with size and alt) and Twitter (large image card). Every public page uses it; `src/app/seo-coverage.test.ts` fails for a page that does not.
-2. `src/app/sitemap.ts` and `src/app/robots.ts` over pure builders (`src/lib/sitemap.ts`, `sitemap-pages.ts`, `robots.ts`): only pages that exist and are public, both languages, every entry listing all language versions; production crawlable except the dev tools, any other deployment disallowed.
-3. Share images: one route, `/[locale]/og/<key>` (`ImageResponse`), text only from our own content for real public pages (404 for anything else, drafts included), colours from a drift-tested copy of the dark tokens.
-4. Tests: unit for each builder, the key resolver, the palette, the route (it renders real PNGs under vitest) and the coverage gate; `e2e/seo.spec.ts` crawls every URL of the sitemap on the production build; three mutations.
+1. `<ConsentGate category="...">` (`src/components/consent/consent-gate.tsx`): its children are not rendered until the visitor presses the button, so the browser makes no request (no iframe, script, image, preconnect); the choice is not remembered (no cookie or storage); before the click it says who the third party is and what it receives; a plain link is always offered and the button is hidden where scripting is off.
+2. The booking option: `BookingSection` under the form (`contact.booking.*`), `CalEmbed` (a sandboxed, titled iframe with no device permissions and a cut referrer), shown only when `NEXT_PUBLIC_CAL_URL` is set; the URL must be on `cal.eu` or `app.cal.eu` or the build fails.
+3. CSP: that URL's ORIGIN is added to `frame-src` only, only when configured (`bookingOrigin` in `buildCsp`, fed by the proxy); otherwise `frame-src` stays `'none'`.
+4. `src/lib/consent/registry.ts`: every third party in one list (the source for the cookie and privacy notices, P4.2); a structure test allows an `<iframe>` only in the booking embed, only as a child of the gate, no `next/script`, no hard-coded provider URL.
+5. Tests: unit for the gate, the section, the registry/structure, the env rule, the CSP and the proxy; `e2e/booking.spec.ts` on the enforced-CSP build with the provider's host intercepted.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. No server of mine is running (checked: no node process, no listener on 3100, 3101, 3200, 3201).
-- Process note: two `next start --port 3101` servers from earlier tasks were still alive (an earlier cleanup stopped only their wrappers) and answered my first image check with an old build; I stopped them by PID and now start temporary servers with `Start-Process -PassThru` and stop them by that PID.
-- **Needs you:** the decisions in section 8, and, after the first production deploy, submitting the sitemap and checking a share card (they need your accounts).
+- Nothing half-done. Checked after the last run: no node process, no listener on 3100, 3101, 3200 or 3201, and `git status` shows only the intended files (new: `e2e/booking.spec.ts`, `src/components/{booking,consent}/`, `src/components/contact/booking-section*`, `src/lib/consent/`; 20 modified). `test-results/` and `tsconfig.tsbuildinfo` are git-ignored.
+- **Needs you:** the decisions in section 8 (first: confirm the Cal.com host and create the event type), then review and commit.
 
 ---
 
@@ -34,7 +34,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.5 committed a
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
 | 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
-| 2 Landing & value proposition | ◐ | 6/7 | P2.1-P2.5 committed; P2.6 verified, awaiting review/commit |
+| 2 Landing & value proposition | ✔ | 7/7 | P2.1-P2.6 committed; P2.7 verified, awaiting review/commit. **Closed at the task level**: ROADMAP also wants every acceptance criterion evidenced and CI green on `main`; the exceptions are in section 8, "Phase 2 carry-overs" |
 | 3 Agent showcases & funnels | ☐ | 0/7 | |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
@@ -64,6 +64,7 @@ _Last updated: 2026-11-06 · by: Claude Code · branch: `main` (P2.5 committed a
 | 2026-11-06 | P2.3 | Services index and detail pages, in-repo Markdown renderer (no MDX library), JSON-LD, no dead links, tracing warning fixed | `68b122d` |
 | 2026-11-06 | P2.4 | Work index with filters and detail pages, draft and client-consent guards, `work` in the navigation | `4f78467` |
 | 2026-11-06 | P2.5 | Inquiry funnel: four-step form, Server Action, honeypot + Turnstile, rate limit, Postgres via Drizzle, email notification, `/contact/thanks`, allow-list logger | `dc601df` |
+| 2026-11-06 | P2.6 | Sitemap, robots, generated share images (`next/og`), one metadata helper for canonical/hreflang/Open Graph/Twitter | `f05a2dd` |
 
 ---
 
@@ -104,6 +105,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D29 | 2026-11-06 | Work pages (P2.4). **Honesty by construction:** both pages read `getWork()` (published only), so a draft or planned entry is absent from the index and a real 404 at its URL, with no title, summary or slug anywhere in the HTML (tested against the real files, which are all drafts today). **Client consent has two locks:** the schema (P2.1) and `clientDisclosure()`, the only reader of `client` and `outcomes` in the work components, which returns nothing without `clientConsent: true` or for a demo; `work-structure.test.ts` fails on any other read, on an image, a logo or `includeDrafts`. There is no logo field in the schema and none is rendered. **Filters:** type, sector and technology as plain links to `/work?kind=&sector=&stack=` (not an ARIA tab widget: choosing one loads a different list, it does not switch panels), parsed with Zod against the options the published entries offer, unknown or oversized values ignored; a group with fewer than two options is hidden; the canonical URL ignores the query; works without JavaScript. **Empty state:** with nothing published `/work` shows `work.empty`, not filters. **Dev fixtures:** the non-empty UI is exercised in a browser through a dev-only route (`/_dev/work`, 404 in production) with synthetic entries, the same pattern as the UI gallery and FX showcase. **Consequences of `work` being available:** the header, the Home demos section (now featuring `demo` entries only, a case study is not an interactive demo), the services pages' demo link (`demoFor`) and Markdown links to `/work` all switch on by themselves once an entry is published; today none appears. **Header:** with a third link the navigation no longer leaves room for the theme switch on its row at 360 px, so the header went from three rows (about 160 px) to four (207 px); the shell test's budget went from 170 to 215 px (see section 8). The closing call to action is shared (`components/content/contact-cta.tsx`) with the services pages | CLAUDE.md §12 (client names, logos and metrics only with consent), docs/CONTENT.md (no entry advertised before it exists) | — |
 | D30 | 2026-11-06 | Inquiry funnel (P2.5). **Shape:** `processInquiry` (`src/lib/inquiry/process.ts`) is one function with its services injected: honeypot → Zod validation → rate limit → bot check → store → email → typed result (`success` / `validation` / `rate_limited` / `bot_check_failed` / `unavailable`); errors reach the visitor as a code, details go to the logger as an event name and an error class. **Real vs stand-in:** `deps.ts` chooses per service from plain config; when `VERCEL_ENV` is set (a deployment) every service is required and a missing one makes the page and the action say "unavailable" (a lead is never accepted and dropped); when it is unset (laptop, tests, CI, `next start` here) a missing service is replaced by an in-process one so the form works with no network and no secrets. `REQUIRED_IN_PRODUCTION` stays empty (it would fail the build before the services exist). **Dependencies (asked-for stack, facts in section 8):** `drizzle-orm`, `postgres`, `@upstash/ratelimit`, `@upstash/redis`; **no** drizzle-kit (its esbuild dependency has an install script) and no email or Turnstile SDK: both are `fetch`. The SQL migration is hand-written (`src/lib/db/migrations/0001_create_inquiries.sql`) and a test fails if it drifts from the Drizzle schema. **Privacy by construction:** the stored record is built field by field, no IP, user agent, referrer or token column; the limiter key is an HMAC of the address with a secret salt; `src/lib/logger.ts` (missing until now, although the rules require it) writes only allow-listed fields and redacts emails, phones, IPs, IBANs, fiscal codes and tokens; a structure test forbids `console.` in the funnel. **Marketing consent:** its own unticked, optional checkbox, stored with `CONSENT_VERSION` and the time. **Turnstile:** the script loads only when the visitor reaches the last step; fail-closed verification. **Honeypot:** a filled one gets a normal-looking success and nothing is stored or counted. **Confirmation:** the action redirects to `/contact/thanks` (noindex, nothing personal in the URL). **Guard change:** `env.guard.test.ts` now treats a `"use server"` module as a boundary (Next compiles a client import of it to a reference), and says so with two tests; the guard had correctly caught my first draft importing a type from a server module, so that type moved to a pure `result.ts`. **Links:** the contact flag is true, the privacy notice is plain text until `/privacy` exists (P4.2) | docs/BLUEPRINT.md D5 and §security, CLAUDE.md §6 and §10, docs/GDPR_CHECKLIST.md §5 and §6 | — |
 | D31 | 2026-11-06 | SEO and sharing (P2.6). **One source of truth:** `pageMetadata` builds canonical, hreflang (with `x-default`), Open Graph and Twitter for every public page, and a gate test fails for a page under `src/app/[locale]` that does not use it (the confirmation page, the dev tools and the 404 are the listed exceptions; the first two are `noindex`). **Sitemap:** `src/app/sitemap.ts`, built at build time, lists only pages that EXIST and are PUBLIC (an unbuilt page, a draft work entry, the confirmation page and the dev tools are not listed), once per language, each entry carrying all language versions and `x-default`; `changefreq` and `priority` are included as asked (Google ignores them), `lastmod` only when a real date exists (none today: a file's mtime is the deploy time on CI). **Robots:** production allows everything except `/*/_dev/` and `/*/dev-tools/` and names the sitemap; any other deployment (a Vercel preview) disallows everything; the confirmation page is deliberately not disallowed so its `noindex` can be read. **Share images:** one route, `/[locale]/og/<key>`, drawing the page's own h1 on the instrument-panel card; the PATH alone decides the content, a query string is ignored, and only real public pages render (a service or published work entry by slug validated with `slugSchema`; unknown, draft and path-trick keys are 404), so our domain cannot be used to print arbitrary text; the cache is one day at the CDN with stale-while-revalidate, not the year-long default. **Colours:** satori cannot read CSS variables and the raw-colour guard forbids hex in `.ts`/`.tsx`, so the dark tokens live in `src/lib/og/palette.json` and `og.test.ts` fails if any differs from `globals.css`. **Font:** the one weight bundled with `ImageResponse` (decision pending, section 8). **Locales:** `og:locale` is `it_IT` and `en_GB` with the other as alternate | docs/BLUEPRINT.md (SEO), CLAUDE.md §7 (tokens), docs/CONTENT.md (nothing indexed that does not exist) | — |
+| D32 | 2026-11-08 | Booking and third-party embeds (P2.7). **`<ConsentGate>`** is a click-to-load gate, not a consent manager (that is P4.1): children are NOT RENDERED until the visitor's click, so there is no request, no preconnect and no iframe before it; nothing is remembered (no cookie, no storage), so every visit starts blocked and there is no consent cookie to document; the disclosure and a plain link come first; the button is hidden where scripting is off (`@media (scripting: none)`), leaving only the link; focus moves to the loaded embed's named region. **Cal.com:** the page is embedded as an **iframe only** (not Cal's embed script), so the only CSP change is `frame-src <origin>` (never the path, never `script-src`); the origin comes from `NEXT_PUBLIC_CAL_URL`, validated to `https` on `cal.eu` or `app.cal.eu` without credentials (**an assumption about Cal.com's EU hosts, to confirm**); unset = no section and `frame-src 'none'`. The origin in the CSP is global (a policy is per request); allowing a frame is not loading it. **Frame hardening:** sandbox with scripts, its own origin, forms and popups only (no top navigation, modals or downloads), `allow=""` (no device permissions), `referrerpolicy=strict-origin`. **Registry:** `src/lib/consent/registry.ts` lists each third party (provider, category, trigger, what it receives, CSP rule); a structure test allows an `<iframe>` only in the booking embed, only inside the gate, forbids `next/script` and hard-coded provider URLs, and requires every gate category to be registered. **E2E:** the server is configured with a placeholder on `cal.eu` and the tests intercept every request to it, so CI never touches Cal.com; the existing CSP strictness test now states that the booking origin in `frame-src` is the one external origin. **Copy:** the disclosure names Cal.com and what it receives (IP address, browser information, its own cookies) and promises nothing about its practices or about the call (length, price) | CLAUDE.md §10 (third parties only through the gate, CSP updated with the docs), docs/GDPR_CHECKLIST.md §3, ROADMAP P2.7 | — |
 
 ---
 
@@ -124,6 +126,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | B11 | **Header at 360 px with more links.** Four rows today (207 px of an 800 px screen); Process and About would make it five. Proposal: below `md` the navigation moves into a menu (Sheet, already in the UI kit); not built because it changes the shell and was not asked for | you | before Process / About ship |
 | B12 | **Privacy notice page.** The form's privacy sentence (Art. 13 summary, legal basis Art. 6(1)(b)) has no link until `/privacy` exists (P4.2). GDPR requires the information at the point of collection: do not point real visitors at the form before the notice exists, or accept that it is a known gap | you | before the form goes live |
 | B13 | **Services to create for a deployment.** EU Postgres (Neon or Supabase) + the migration; Upstash Redis (EU); Cloudflare Turnstile (a real site key per environment); an email provider account with a verified sender domain (Resend was chosen; Brevo is the EU alternative in D5); then set the variables of docs/DEPLOYMENT.md §3. Until then a deployed `/contact` shows "not available" | you | before the form goes live |
+| B14 | **Cal.com account and host.** Create an account on the EU region, an event type and a public page; set `NEXT_PUBLIC_CAL_URL` to it. I could not verify that the EU instance's public pages are on `cal.eu` / `app.cal.eu` (the allow-list in `env-schema.ts` is my assumption); if yours is elsewhere the build fails with a message and the list is the one line to change. Also name Cal.com as a processor in the notices (P4.2) | you | before the calendar goes live |
 
 ---
 
@@ -158,6 +161,12 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P2.7 / decisions for you.** (1) **Confirm the Cal.com host and create the event (B14).** The allow-list accepts only `cal.eu` and `app.cal.eu`; if your EU booking page is on another host, tell me which. Until `NEXT_PUBLIC_CAL_URL` is set, the contact page has no booking section at all. (2) **The disclosure text is draft legal copy** (`contact.booking.gate.body`): it says Cal.com hosts the calendar on its European instance, that nothing is shared until the visitor loads it, and that loading it sends Cal.com the IP address and browser information and may let it use its own cookies. It does not claim GDPR compliance or describe Cal.com's practices. It needs a qualified professional, and the processor entry in the notices (P4.2). (3) **The click is not remembered**: every visit starts blocked and no cookie or storage is written. That is the most private choice and needs no consent cookie, at the price of one extra click on every visit; a remembered choice belongs with the consent manager (P4.1). (4) **iframe, not Cal's embed script.** It keeps the CSP change to one `frame-src` origin and loads no third-party script; the cost is that you get Cal's standard page in a frame (no custom theming through their script API). Say if you want their script (it would need `script-src` and a decision). (5) **The first call's terms** (free or not, length) are not stated anywhere, as docs/CONTENT.md §7 item 4 is still open. (6) **The CSP origin is global**, not only on `/contact`; narrowing it by path means a path-aware policy in the proxy: possible, not done.
+- **P2.7 / measured, and not measured.** Production build, enforced CSP, Chromium, provider host intercepted: before the click, however the page is used (scroll, hover, networkidle), no request to the host, no `<iframe>` in the DOM or the HTML, no preconnect/prefetch hint, nothing in the resource timings; the click requests exactly the configured URL, loads a titled, sandboxed frame (no top navigation or modals), moves focus to its region and raises no CSP violation; Enter on the focused button loads it; a reload blocks it again and nothing is stored; with JavaScript off only the plain link is offered; the inquiry can be sent whether or not the calendar was loaded; the CSP `frame-src` is exactly the booking origin, no other directive has it, another provider's frame is still blocked; axe zero violations blocked and loaded in both themes, at 360 px (no horizontal scroll) and under reduced motion. **Not measured:** the real Cal.com page (not reachable by design in tests): its own accessibility, how it behaves in a sandboxed frame (cookies/third-party storage may be blocked by the browser, which could affect login-less booking), its mobile layout at the fixed 44 rem frame height, and Firefox/WebKit. First live check: load it on a preview with the real URL and complete a test booking.
+- **P2.7 / things I changed outside the new files:** `src/lib/env-schema.ts` and `env.client.ts` (`NEXT_PUBLIC_CAL_URL`, validated), `.env.example`, `src/lib/security/csp.ts` and `src/proxy.ts` (`bookingOrigin`), `ContactView` and the contact page (an optional booking slot), `messages/*.json` (`contact.booking`), `playwright.config.ts` and `e2e/support/servers.ts` (the test server's booking URL), `e2e/security.spec.ts` (two assertions about `frame-src`, see D32), docs/SECURITY.md, DEPLOYMENT.md, CONTENT.md, GDPR_CHECKLIST.md. No existing test was weakened: the one that failed said "no external origin in the CSP", which is now "the booking origin in `frame-src` and nothing else".
+- **P2.7 / defects found on the way (all fixed).** (a) The fallback link's accessible name lost the space before "(opens in a new tab)" (a space inside the `sr-only` span is dropped); the space is now outside the span and a test checks the full name. (b) knip flagged the exported host list. (c) My first batch of test files was lost to a shell quoting limit with apostrophes in heredocs and written again with the file tool.
+- **P2.7 / limits.** No calendar on other pages (only the contact page); no "load it for me automatically"; the frame has a fixed height (44 rem); a visitor who blocks third-party content in the browser sees the placeholder and can still use the plain link.
+- **Phase 2 carry-overs (why "7/7" is a task count, like Phase 1).** ROADMAP's rule is that a phase is done when every acceptance criterion is checked and CI is green on `main`. Not evidenced: **P2.2** LCP < 2.0 s and INP < 200 ms on mid-range mobile (only a fast local machine was measured; Lighthouse CI is P4.6); **P2.3** "Rich results test passes" (Google's tool needs a public URL; there is also no rich-result type for `Service`) and "each page links to a relevant demo" (unmet by design: all four demos are drafts and you approved hiding them); **P2.5** the funnel was never run against a live Postgres, Upstash, Resend or Turnstile (B13), and its privacy notice has no page yet (B12); **P2.6** the sitemap and share cards were not checked in Google, Bing or the social-card debuggers; **P2.7** the real Cal.com page was not reached (B14). CI on `main` has still never been seen by me. Also open from earlier: the About and Process pages have no roadmap task, the 360 px header is at four rows (B11), and the copy and legal wording are drafts for professional review.
 - **P2.6 / decisions for you.** (1) **The card's typeface.** `ImageResponse` bundles one font at one weight, so the headline is regular, not the heavy Instrument Sans of the site. The site's font cannot be reused as is (next/font keeps WOFF2 in `.next`; satori needs TTF/OTF/WOFF) and a font CDN is forbidden. To match the identity exactly I would add a TTF of Instrument Sans (SIL OFL, record it in `docs/THIRD_PARTY.md`) to the repository and load it in the route: say if you want that. (2) **Sitemap and robots are built at build time**, so the site URL must be known then (`NEXT_PUBLIC_SITE_URL` or Vercel's production URL, docs/DEPLOYMENT.md): a wrong origin means a wrong sitemap. On a Vercel preview `robots.txt` disallows everything; production is crawlable. (3) **`lastmod` is absent on purpose** (no real modification dates exist yet; a published project's date is used when one appears); `changefreq` and `priority` are there because you asked, and Google ignores them. (4) **Search Console and Bing Webmaster Tools** need your accounts: submit `/sitemap.xml` after the first production deploy. (5) **Not verified outside this repository:** how Google, Bing, Facebook, LinkedIn and X read the markup and the images (use the Rich Results/URL Inspection tool, the Facebook Sharing Debugger, the LinkedIn Post Inspector and a card preview on a deployed URL); locally I checked the tags, the sitemap and 16 images against the specification and looked at three of them. (6) **`og:locale` is `en_GB`** for English (the practice serves the EU); change it in `src/lib/seo.ts` if you prefer `en_US`. (7) A page that is built later (About, Process) must add its key to `src/lib/og/content.ts` and `src/lib/sitemap-pages.ts` (the sitemap already includes it automatically once its navigation flag is true, but its card key must exist or the gate test names the file). (8) The card shows the site's address in its footer line (the build's origin): on the production build it will read the real domain.
 - **P2.6 / measured, and not measured.** Production build, enforced CSP, Chromium: `/robots.txt` and `/sitemap.xml` are served without a locale redirect; the sitemap has the 16 expected URLs (4 pages + 4 services, in 2 languages), no draft, no thanks page, no dev route, every URL on the site's origin without trailing slash or query, each with `it`, `en` and `x-default`; every listed page was crawled (HTTP 200, canonical equal to its URL, hreflang equal to the sitemap's alternates and each alternate itself listed, `html lang`, `og:type/url/site_name/title/description/locale/locale:alternate/image(+width, height, alt)`, `twitter:card/title/image`); every image is a 1200x630 PNG with the refreshable cache, Italian and English images differ, and 8 kinds of invalid request are 404 (unknown language or page, unknown service, a draft work entry, a path trick, the confirmation page, too many segments), a forged `?title=` changes nothing. **Not measured:** the external validators above; a deployed preview; Firefox/WebKit; image rendering on the platforms' crawlers.
 - **P2.6 / things I changed outside the new files:** the `generateMetadata` of Home, services (index and detail), work (index and detail) and contact now call `pageMetadata` (same titles, descriptions and canonicals as before, plus Open Graph and Twitter), `src/lib/seo.ts` (new helpers, `localeAlternates` unchanged), docs/CONTENT.md §8, docs/DEPLOYMENT.md. No existing test was changed.
@@ -285,31 +294,29 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 75 files,
-                    1119 tests (1049 before P2.6); build without warning; /robots.txt and /sitemap.xml are static
-                    routes, /[locale]/og/[...key] dynamic
-pnpm test:e2e     → pass, 464 tests (Chromium), twice in a row (441 before: +23 in e2e/seo.spec.ts). The second
-                    run printed "[WebServer] ELIFECYCLE exit code 1" once, AFTER the last test: Playwright
-                    stopping the pnpm-wrapped server; the run exited 0
+pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 78 files,
+                    1164 tests (1119 before P2.7); build without warning
+pnpm test:e2e     → pass, 483 tests (Chromium), twice in a row (464 before: +19 in e2e/booking.spec.ts). A first
+                    run had one failure, my own old assertion "no external origin in the CSP", now "the booking
+                    origin in frame-src and nothing else" (D32)
 pnpm knip / pnpm format:check → pass
-no node process and no listener on 3100, 3101, 3200, 3201 afterwards
+after the last run: no node process, no listener on 3100, 3101, 3200, 3201; git status shows only intended files
 
-P2.6 checks:
-  metadata helper   → pageMetadata: title (template or absolute), description, canonical and alternates equal to
-                      localeAlternates, Open Graph with url, locale and alternate, image size and alt, Twitter large
-                      card; gate: every public page uses it, the exceptions are listed and noindex
-  sitemap / robots  → pure builders (both languages, alternates agree, no invented date, trailing slash tolerated,
-                      preview disallowed); real pages: only existing public pages, no draft, no unbuilt page
-  share images      → the route renders real 1200x630 PNGs under vitest; keys resolve to the page's h1; 10 invalid
-                      keys, every draft, a path trick and a forged query are refused or ignored; the palette equals
-                      the design tokens (drift test); the card holds no colour of its own
-  crawl (e2e)       → see section 8: every sitemap URL, canonical, hreflang reciprocity, Open Graph, Twitter,
-                      images, 404s, robots and sitemap without a locale redirect
-  mutation          → palette off by one digit, a page without pageMetadata, drafts allowed into the sitemap: each
-                      failed a test (3); all restored
-  visual            → three share images (Italian home, English service, Italian service) looked at: dark panel,
-                      grid, amber accent, eyebrow, language tag, address, scale ticks; nothing clipped
-  NOT done          → external validators, a deployed preview, Firefox/WebKit, platform crawlers
+P2.7 checks:
+  gate (unit)       → nothing rendered, fetched or stored before the click (a stand-in embed, spies on fetch and
+                      XMLHttpRequest, storage and cookies); the click renders it and moves focus; not remembered;
+                      the button is real and hidden where scripting is off; the plain link is external, noopener,
+                      with the full accessible name "label (opens in a new tab)"
+  booking (unit)    → both languages: h2, disclosure naming the provider and the IP address, no compliance claim;
+                      the frame has the configured URL, a title, a strict-origin referrer, no permissions and a
+                      sandbox without top navigation, modals, downloads, pointer lock or presentation
+  env / CSP (unit)  → the booking URL must be https on cal.eu or app.cal.eu without credentials (look-alike hosts,
+                      other providers, a path trick, http and credentials all refused); frame-src has the origin only,
+                      no other directive does, and 'none' without it; the proxy emits it only when configured
+  structure         → an <iframe> only in the booking embed and only inside the gate; no next/script; no hard-coded
+                      provider URL; every gate category is in the registry
+  e2e (enforced CSP)→ see section 8; the provider host is intercepted, so CI never reaches Cal.com
+  NOT done          → the real Cal.com page; Firefox/WebKit; a mutation sweep
 ```
 
 ---
@@ -319,28 +326,30 @@ P2.6 checks:
 One logical change.
 
 ```
-feat(seo): add sitemap, robots and generated share images
+feat(booking): add a click-to-load Cal.com calendar on the contact page
 
-Add /sitemap.xml and /robots.txt, and a share image per page and
-language at /<locale>/og/<page>, drawn with next/og in the dark
-instrument-panel look. The sitemap lists only pages that exist and are
-public, once per language, each entry carrying every language version
-and x-default; it states no date it does not know. robots.txt allows
-the site, blocks the dev tools and names the sitemap; any deployment
-other than production disallows everything.
+Add <ConsentGate>, a click-to-load wrapper for third-party embeds: until
+the visitor presses its button the embed is not rendered, so the browser
+makes no request to the provider (no frame, script or preconnect). It
+says who the third party is and what it receives, keeps no cookie or
+storage (every visit starts blocked), always offers a plain link, and
+hides the button where scripting is off.
 
-Give every public page its metadata through one helper: title,
-description, canonical, hreflang with x-default, Open Graph and Twitter
-cards with the page's own image. A test fails for a page that does not
-use it, so a new page cannot ship without them.
+Use it for a booking section under the contact form: the Cal.com page
+of the EU instance in a sandboxed, titled iframe with no device
+permissions and a cut referrer. The page is set by NEXT_PUBLIC_CAL_URL,
+which must be an https URL on cal.eu or app.cal.eu; without it the
+section is absent. Only that origin is added to frame-src, never to
+script-src, and frame-src stays 'none' when it is not configured. The
+form is unchanged and works with or without the calendar.
 
-The image route draws only the page's own title, chosen by its path and
-only for real public pages: an unknown page, a draft work entry or the
-confirmation page is a 404, and a query string changes nothing, so the
-domain cannot be used to print arbitrary text. The card colours are a
-copy of the dark design tokens that a test keeps in step with the CSS.
+List every third party in one registry for the future cookie and privacy
+notices, and add a test that allows an iframe only in the booking embed,
+only inside the gate, with no next/script and no hard-coded provider
+URL. The e2e server is configured with a placeholder booking URL and the
+tests intercept every request to it, so CI never reaches Cal.com.
 
-Task: P2.6
+Task: P2.7
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

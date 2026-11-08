@@ -386,6 +386,18 @@
       "title": "Thank you, I have received your request",
       "body": "I will read it carefully and reply to you personally at the address you gave.",
       "home": "Back to home"
+    },
+    "booking": {
+      "title": "Would you rather book a conversation?",
+      "lead": "You can pick a time straight from the calendar, without going through the form.",
+      "gate": {
+        "title": "The calendar is not loaded yet",
+        "body": "The calendar is hosted by Cal.com, on its European instance. Until you load it, your browser does not contact Cal.com and no data is shared. When you load it, Cal.com receives your IP address and technical information about your browser and may use its own cookies, as described in its privacy policy.",
+        "load": "Load the calendar"
+      },
+      "fallback": "Open the booking page",
+      "newTab": "(opens in a new tab)",
+      "frameTitle": "Calendar for booking a conversation"
     }
   },
   "notFound": {

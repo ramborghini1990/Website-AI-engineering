@@ -217,6 +217,27 @@ describe("proxy: Content Security Policy", () => {
     expect(csp()).toContain(TURNSTILE_ORIGIN);
   });
 
+  it("allows the booking page's origin in frame-src only when it is configured, and only its origin", () => {
+    const csp = () =>
+      proxy(request("/it/contact")).headers.get(
+        "content-security-policy-report-only",
+      ) ?? "";
+
+    expect(csp()).not.toContain("cal.eu");
+
+    mocked.env = {
+      NODE_ENV: "production",
+      CSP_MODE: "report-only",
+      NEXT_PUBLIC_CAL_URL:
+        "https://cal.eu/example-handle/intro?layout=month_view",
+    };
+    const policy = csp();
+
+    expect(policy).toContain("frame-src https://cal.eu");
+    expect(policy).not.toContain("example-handle"); // the path is not part of a CSP source
+    expect(policy).not.toMatch(/script-src[^;]*cal\.eu/);
+  });
+
   it("adds the analytics origin and the report collector only when configured", () => {
     mocked.env = {
       NODE_ENV: "production",
