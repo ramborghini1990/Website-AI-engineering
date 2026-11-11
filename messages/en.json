@@ -1053,6 +1053,167 @@
           }
         }
       }
+    },
+    "business": {
+      "brand": "Emporio Rivalta, a fictional neighbourhood grocery and household shop",
+      "intro": "A small back-office in three screens: a till, a cash-flow dashboard and purchase orders, all working on the same sample data. Ring up a sale and watch the stock and the cash balance change.",
+      "sampleDate": "Sample date: {date}. The demo's calendar is fixed, so the numbers never shift while you try it.",
+      "noscript": "The demo needs JavaScript. Below is the till with the sample products; enable JavaScript to ring up sales, see the cash flow and manage orders.",
+      "disclosure": "This is a simulation. The shop, its products, suppliers and every number are made up, and no AI model is used. Nothing you do is sent to a server: your changes are kept only in this browser, in its own storage, and \"Start over\" erases them and restores the sample data.",
+      "ctaTitle": "Need a back-office like this for your business?",
+      "ctaBody": "Tell me which processes live in spreadsheets today: I will tell you what a web application can take over, and what is better left alone.",
+      "limits": {
+        "title": "What this demo is, and is not",
+        "local": "Everything runs in your browser. The sample data and your changes sit in this browser's own storage (IndexedDB) and nowhere else; clearing the site data removes them.",
+        "synthetic": "The shop, the products and the amounts are invented, and generated from a fixed seed.",
+        "rules": "The rules are simplified: one 22% VAT rate, money counted the day a sale is rung up or an order arrives, no card fees and no payment delays.",
+        "scope": "It shows screens and flows, not accounting software: no invoices, no users, no sync between devices."
+      },
+      "storage": {
+        "checking": "Opening this browser's storage…",
+        "saved": "Changes are saved in this browser only.",
+        "unavailable": "This browser does not allow storage here: your changes last until you leave the page."
+      },
+      "tabs": {
+        "label": "Sections of the demo",
+        "pos": "Till",
+        "cashflow": "Cash flow",
+        "orders": "Purchase orders"
+      },
+      "pos": {
+        "title": "Till",
+        "products": "Products",
+        "price": "{price} each",
+        "inStock": "{count} in stock",
+        "inSale": "{count} in the sale",
+        "soldOut": "Sold out",
+        "add": "Add",
+        "addLabel": "Add {name} to the sale",
+        "cart": {
+          "title": "Current sale",
+          "empty": "No items yet. Add a product from the list.",
+          "more": "One more {name}",
+          "less": "One less {name}",
+          "remove": "Remove {name}",
+          "quantity": "{count} of {name}",
+          "total": "Total",
+          "vat": "of which VAT 22%"
+        },
+        "pay": {
+          "title": "Take payment",
+          "cash": "Pay cash",
+          "card": "Pay by card"
+        },
+        "recent": {
+          "title": "Latest sales",
+          "caption": "The five most recent sales, newest first",
+          "no": "No.",
+          "date": "Date",
+          "items": "Items",
+          "method": "Payment",
+          "total": "Total",
+          "cash": "Cash",
+          "card": "Card"
+        }
+      },
+      "notice": {
+        "sale": "Sale {id} recorded: {total}.",
+        "limit": "There is no more {name} on the shelf.",
+        "orderCreated": "Draft order {id} created for {supplier}.",
+        "orderSent": "Order {id} marked as sent.",
+        "orderReceived": "Order {id} received: the stock is updated and the payment is booked today.",
+        "reset": "Sample data restored."
+      },
+      "cash": {
+        "title": "Cash flow",
+        "note": "Money in is every sale, on the day it is rung up. Money out is the expenses (rent, utilities, payroll) and the purchase orders, on the day they are received.",
+        "kpi": {
+          "title": "Key figures",
+          "balance": "Balance today",
+          "in": "Money in, last 30 days",
+          "out": "Money out, last 30 days",
+          "open": "Open orders"
+        },
+        "balance": {
+          "title": "Cash balance, last 30 days",
+          "desc": "Line chart of the closing cash balance for each of the last 30 days, from {start} to {end}. It started at {first}, the lowest point was {min}, the highest {max}, and it ends at {last}."
+        },
+        "flow": {
+          "title": "Money in and out, per week",
+          "desc": "Bar chart of the money in and the money out for each of the last 8 weeks. In the latest week, ending {end}: {in} in and {out} out."
+        },
+        "legend": {
+          "label": "Legend",
+          "in": "Money in",
+          "out": "Money out"
+        },
+        "table": {
+          "show": "Show as a table",
+          "day": "Day",
+          "balance": "Balance",
+          "week": "Week ending",
+          "in": "Money in",
+          "out": "Money out",
+          "net": "Net",
+          "balanceCaption": "Closing cash balance for each of the last 30 days",
+          "flowCaption": "Money in and out for each of the last 8 weeks"
+        }
+      },
+      "orders": {
+        "title": "Purchase orders",
+        "intro": "A product below its reorder level can be ordered from its supplier in one step. An order goes from draft to sent to received; only receiving it changes the stock and the cash.",
+        "reorder": {
+          "title": "Reorder",
+          "create": "Create order",
+          "createLabel": "Create order for {supplier}",
+          "nothing": "Nothing to reorder",
+          "lowCount": "{count} to reorder"
+        },
+        "stock": {
+          "title": "Stock",
+          "caption": "Stock on the shelf and reorder level per product",
+          "product": "Product",
+          "supplier": "Supplier",
+          "shelf": "On the shelf",
+          "level": "Reorder below",
+          "state": "State",
+          "ok": "Fine",
+          "low": "Reorder",
+          "onOrder": "On order"
+        },
+        "list": {
+          "title": "Orders",
+          "ordered": "Ordered {date}",
+          "receivedOn": "Received {date}",
+          "total": "Order total, VAT excluded",
+          "lines": "Lines of order {id}",
+          "line": "{qty} × {name}",
+          "send": "Send",
+          "sendLabel": "Send order {id}",
+          "receive": "Receive",
+          "receiveLabel": "Receive order {id}"
+        },
+        "status": {
+          "draft": "Draft",
+          "sent": "Sent",
+          "received": "Received"
+        }
+      },
+      "items": {
+        "coffee": "Ground coffee, 250 g",
+        "pasta": "Durum wheat pasta, 500 g",
+        "oil": "Extra virgin olive oil, 1 l",
+        "rice": "Carnaroli rice, 1 kg",
+        "biscuits": "Shortbread biscuits, 400 g",
+        "detergent": "Dish detergent, 750 ml",
+        "soap": "Hand soap, 300 ml",
+        "tea": "Black tea, 25 bags"
+      },
+      "suppliers": {
+        "rossi": "Rossi Distribuzione",
+        "verde": "Verde Alimentari",
+        "alpina": "Alpina Casa"
+      }
     }
   }
 }

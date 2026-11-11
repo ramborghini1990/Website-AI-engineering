@@ -1,12 +1,12 @@
 ---
 {
   "title": "Gestionale per cassa, acquisti e flussi di cassa (demo)",
-  "summary": "Un gestionale completo per una piccola attività fittizia, con dashboard e grafici, che funziona interamente nel browser.",
+  "summary": "Un gestionale per un negozio di quartiere fittizio: cassa, cruscotto dei flussi di cassa con grafici accessibili e ordini di acquisto, che funziona interamente nel browser.",
   "seoTitle": "Demo: gestionale per piccole attività",
-  "description": "Un'applicazione web completa per cassa, acquisti e flussi di cassa, con dati di esempio generati nel browser: nulla viene inviato a un server.",
+  "description": "Un'applicazione web per cassa, acquisti e flussi di cassa, con dati di esempio conservati nel tuo browser: nulla viene inviato a un server.",
   "kind": "demo",
-  "status": "planned",
-  "draft": true,
+  "status": "live",
+  "draft": false,
   "clientConsent": false,
   "sector": "Commercio e piccole imprese",
   "stack": ["TypeScript", "Next.js", "React", "Tailwind CSS"],
@@ -16,12 +16,12 @@
 
 ## Che cosa mostra
 
-Un gestionale per una piccola attività fittizia: cassa, acquisti, magazzino e flussi di cassa, con dashboard, grafici e flussi di lavoro realistici. Serve a mostrare come progetto interfacce ricche di dati.
+Tre schermate di un gestionale per un negozio di quartiere inventato, tutte sugli stessi dati. In cassa registri una vendita e paghi in contanti o con carta. Il cruscotto dei flussi di cassa mostra il saldo, le entrate e le uscite e due grafici, ciascuno con le sue cifre disponibili anche come tabella. Negli ordini di acquisto riordini ciò che sta finendo e porti ogni ordine da bozza a inviato a ricevuto. Registra una vendita e magazzino, incassi e saldo cambiano insieme.
 
-## Come è fatta
+## Dove stanno i dati
 
-Funziona interamente nel browser, con dati di esempio generati in locale: nulla viene inviato a un server e un pulsante permette di azzerare tutto e ripartire.
+Il negozio di esempio viene generato nella pagina da un seme fisso. Le tue modifiche sono salvate nell'archivio di questo browser, così le ritrovi se ricarichi la pagina, e da nessun'altra parte: nessun account, nessun server, nessun cookie. Un pulsante le cancella e ripristina i dati di esempio.
 
-## Perché è una demo
+## Limiti dichiarati
 
-È un esempio del tipo di applicazione che costruisco, non un prodotto da usare: i dati sono inventati e restano sul tuo dispositivo.
+Il negozio, i prodotti e ogni importo sono inventati. Le regole sono semplificate di proposito: una sola aliquota IVA, i soldi contati nel giorno in cui si vende o arriva un ordine, niente fatture, niente utenti, niente sincronizzazione tra dispositivi. Mostra come progetto schermate ricche di dati, non è un software di contabilità. Non si scrive nulla al suo interno, quindi nessun dato personale può entrarci.

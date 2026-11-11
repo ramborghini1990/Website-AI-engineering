@@ -93,15 +93,18 @@ describe("resolveOgContent", () => {
     expect(resolveOgContent("it", key, host)).toBeNull();
   });
 
-  it("is null for every draft work entry: a planned demo has no share image (negative)", () => {
+  it("is null for every draft work entry and for a work slug that is not published: a planned demo has no share image (negative)", () => {
+    // P3.4 published the last draft demo, so there may be no draft in the content: an unpublished slug stands in for it.
     const drafts = getWork("it", { includeDrafts: true }).filter(
       (entry) => entry.data.draft,
     );
 
-    expect(drafts.length).toBeGreaterThan(0);
     for (const { slug } of drafts) {
       expect(resolveOgContent("it", ["work", slug], host)).toBeNull();
     }
+    expect(
+      resolveOgContent("it", ["work", "planned-demo-not-published"], host),
+    ).toBeNull();
   });
 });
 

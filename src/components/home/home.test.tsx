@@ -249,10 +249,11 @@ describe.each(["it", "en"] as const)("Demos (%s)", (locale) => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("features exactly the published demos of the real content (Instagram P3.1, LinkedIn outreach P3.2, document intelligence P3.3), each linked to its page", () => {
+  it("features exactly the published demos of the real content (Instagram P3.1, LinkedIn outreach P3.2, document intelligence P3.3, business suite P3.4), each linked to its page", () => {
     renderIn(locale, <HomeDemos demos={getWork(locale)} />);
 
     const slugs = [
+      "business-management-app",
       "document-intelligence-demo",
       "instagram-lead-agent",
       "linkedin-assisted-outreach",
@@ -434,6 +435,7 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
     const services = new Set([
       "/it/contact",
       "/it/work",
+      "/it/work/business-management-app",
       "/it/work/document-intelligence-demo",
       "/it/work/instagram-lead-agent",
       "/it/work/linkedin-assisted-outreach",

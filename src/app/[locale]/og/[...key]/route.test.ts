@@ -53,7 +53,8 @@ describe("the share image route", () => {
     ["an unknown language", "fr", ["home"]],
     ["an unknown page", "it", ["nope"]],
     ["an unknown service", "it", ["services", "does-not-exist"]],
-    ["a draft work entry", "it", ["work", "business-management-app"]],
+    // No draft demo is left after P3.4, so an unpublished slug stands in for one.
+    ["an unpublished work entry", "it", ["work", "planned-demo-not-published"]],
     ["a path trick", "it", ["services", "..%2F..%2Fpackage"]],
     ["the confirmation page", "it", ["contact", "thanks"]],
   ])(

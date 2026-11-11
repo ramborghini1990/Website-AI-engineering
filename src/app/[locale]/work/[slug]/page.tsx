@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getMessages } from "next-intl/server";
 
+import { BusinessSection } from "@/components/demos/business/business-section";
 import { DocintelSection } from "@/components/demos/docintel/docintel-section";
 import { InstagramSection } from "@/components/demos/instagram/instagram-section";
 import { LinkedinSection } from "@/components/demos/linkedin/linkedin-section";
@@ -53,6 +54,19 @@ export default async function WorkEntryPage({
   let demo = null;
   if (isInteractiveDemo(entry.slug)) {
     switch (entry.slug) {
+      case "business-management-app":
+        demo = (
+          <BusinessSection
+            locale={locale}
+            messages={{
+              demos: {
+                shell: messages.demos.shell,
+                business: messages.demos.business,
+              },
+            }}
+          />
+        );
+        break;
       case "document-intelligence-demo":
         demo = (
           <DocintelSection

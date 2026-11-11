@@ -1,12 +1,12 @@
 ---
 {
   "title": "Back-office app for sales, purchases and cash flow (demo)",
-  "summary": "A complete back-office application for a fictional small business, with dashboards and charts, running entirely in the browser.",
+  "summary": "A back-office application for a fictional neighbourhood shop: a till, a cash-flow dashboard with accessible charts and purchase orders, running entirely in the browser.",
   "seoTitle": "Demo: small business back-office app",
-  "description": "A complete web application for sales, purchases and cash flow, with sample data generated in the browser: nothing is sent to a server.",
+  "description": "A web application for sales, purchases and cash flow, with sample data kept in your own browser: nothing is sent to a server.",
   "kind": "demo",
-  "status": "planned",
-  "draft": true,
+  "status": "live",
+  "draft": false,
   "clientConsent": false,
   "sector": "Retail and small businesses",
   "stack": ["TypeScript", "Next.js", "React", "Tailwind CSS"],
@@ -16,12 +16,12 @@
 
 ## What it shows
 
-A back-office application for a fictional small business: sales, purchases, stock and cash flow, with dashboards, charts and realistic workflows. It shows how I design data-rich interfaces.
+Three screens of a back-office for an invented neighbourhood shop, all working on the same data. At the till you ring up a sale and pay in cash or by card. The cash-flow dashboard shows the balance, the money in and out, and two charts, each with its figures available as a table. In purchase orders you reorder what is running low and move each order from draft to sent to received. Ring up a sale and the stock, the takings and the balance change together.
 
-## How it is built
+## Where the data lives
 
-It runs entirely in the browser, with sample data generated locally: nothing is sent to a server, and a button resets everything so you can start over.
+The sample shop is generated in the page from a fixed seed. Your changes are saved in this browser's own storage, so they are still there when you reload, and nowhere else: no account, no server, no cookie. A button erases them and restores the sample data.
 
-## Why it is a demo
+## Stated limits
 
-It is an example of the kind of application I build, not a product to use: the data is made up and stays on your device.
+The shop, the products and every amount are invented. The rules are simplified on purpose: a single VAT rate, money counted on the day a sale is made or an order arrives, no invoices, no users, no sync between devices. It shows how I design data-heavy screens, not accounting software. Nothing is typed into it, so no personal data can enter.

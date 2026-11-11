@@ -30,9 +30,10 @@ describe("demoFor", () => {
     expect(demoFor("live-demo", [], true)).toBeNull();
   });
 
-  it("with the real content, a service links its demo only if that demo is published: AI agents links the Instagram demo (P3.1), document intelligence its own demo (P3.3), the others have none yet", () => {
+  it("with the real content, a service links its demo only if that demo is published: AI agents links the Instagram demo (P3.1), document intelligence its own demo (P3.3), web applications the business suite (P3.4), the others have none yet", () => {
     const linked: Partial<Record<string, string>> = {
       "ai-agents": "instagram-lead-agent",
+      "web-applications": "business-management-app",
       "document-intelligence": "document-intelligence-demo",
     };
     for (const locale of ["it", "en"] as const) {
@@ -48,14 +49,14 @@ describe("demoFor", () => {
     }
   });
 
-  it("a service whose demo is still a draft links nothing (negative)", () => {
+  it("a service whose demo is not published links nothing (negative): every real demo, taken out of the published list, is not advertised", () => {
+    // P3.4 published the last draft demo, so a draft is simulated by leaving each real demo out of the published list.
     for (const locale of ["it", "en"] as const) {
-      const draftDemos = getWork(locale, { includeDrafts: true }).filter(
-        (entry) => entry.data.draft,
-      );
-      expect(draftDemos.length).toBeGreaterThan(0);
-      for (const draft of draftDemos) {
-        expect(demoFor(draft.slug, getWork(locale), true), draft.slug).toBeNull();
+      const all = getWork(locale, { includeDrafts: true });
+      expect(all.length).toBeGreaterThan(0);
+      for (const entry of all) {
+        const withoutIt = getWork(locale).filter((e) => e.slug !== entry.slug);
+        expect(demoFor(entry.slug, withoutIt, true), entry.slug).toBeNull();
       }
     }
   });

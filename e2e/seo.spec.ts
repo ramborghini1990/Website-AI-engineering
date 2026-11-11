@@ -364,17 +364,20 @@ test.describe("share images", () => {
     });
   }
 
-  test("a draft work entry has no share image (negative)", async ({
+  test("a draft or unpublished work entry has no share image (negative)", async ({
     request,
   }) => {
+    // P3.4 published the last draft demo, so there may be none in the content: an unpublished slug stands in.
     const drafts = readWork("it").filter(({ data }) => data.draft);
-    expect(drafts.length).toBeGreaterThan(0);
 
     for (const { slug } of drafts) {
       expect((await request.get(`/it/og/work/${slug}`)).status(), slug).toBe(
         404,
       );
     }
+    expect(
+      (await request.get("/it/og/work/planned-demo-not-published")).status(),
+    ).toBe(404);
   });
 
   test("a query string cannot change what is drawn: nobody can make our domain print their text (negative)", async ({

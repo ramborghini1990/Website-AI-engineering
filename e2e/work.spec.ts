@@ -193,8 +193,9 @@ for (const locale of LOCALES) {
         "%2e%2e%2fservices%2fai-agents",
         "..%5C..%5Cpackage",
         // A published slug followed by a NUL is normalised by the framework before our code
-        // sees it (it serves the same page); a draft slug shows the lookup is by exact match.
-        "business-management-app%00",
+        // sees it (it serves the same page). No draft is left after P3.4, so an unpublished
+        // slug shows the lookup is by exact match.
+        "planned-demo-not-published%00",
       ]) {
         const response = await request.get(`/${locale}/work/${tricky}`);
         expect(response.status(), tricky).toBe(404);
@@ -235,8 +236,12 @@ test.describe("the rest of the site agrees", () => {
       published ? 1 : 0,
     );
     await open(page, "/it/services/web-applications");
-    // Its demo (the business suite) is still a draft: nothing is linked.
-    await expect(page.locator("a[href*='/work/']")).toHaveCount(0);
+    // Its demo (the business suite, P3.4) is published: exactly that one is linked.
+    await expect(page.locator("a[href*='/work/']")).toHaveCount(1);
+    await expect(page.locator("a[href*='/work/']")).toHaveAttribute(
+      "href",
+      "/it/work/business-management-app",
+    );
   });
 
   test("the header reaches the Work page by keyboard", async ({ page }) => {

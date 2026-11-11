@@ -30,6 +30,8 @@ const code = (file: string) =>
     .replace(/\/\*[\s\S]*?\*\//g, "")
     .replace(/^\s*\/\/.*$/gm, "");
 const norm = (file: string) => file.replace(/\\/g, "/");
+/** The only demo file allowed to touch browser storage (P3.4): one IndexedDB database, client-only. */
+const BUSINESS_STORAGE = "src/lib/demos/business/storage.ts";
 
 describe("the demo code is a closed simulation", () => {
   it("finds the files it is meant to guard", () => {
@@ -48,6 +50,10 @@ describe("the demo code is a closed simulation", () => {
         "src/lib/demos/docintel/engine.ts",
         "src/lib/demos/docintel/state.ts",
         "src/components/demos/docintel/docintel-demo.tsx",
+        "src/lib/demos/business/model.ts",
+        "src/lib/demos/business/engine.ts",
+        BUSINESS_STORAGE,
+        "src/components/demos/business/business-demo.tsx",
       ]),
     );
   });
@@ -60,11 +66,14 @@ describe("the demo code is a closed simulation", () => {
     }
   });
 
-  it("stores nothing in the browser and reads no secret or environment", () => {
+  it("stores nothing in the browser and reads no secret or environment (the one exception is the back-office demo's IndexedDB file, below)", () => {
     for (const file of production) {
       expect(code(file), file).not.toMatch(
-        /localStorage|sessionStorage|document\.cookie|indexedDB|process\.env|server-only/,
+        /localStorage|sessionStorage|document\.cookie|process\.env|server-only/,
       );
+      if (norm(file) !== BUSINESS_STORAGE) {
+        expect(code(file), file).not.toMatch(/indexedDB|\bIDB[A-Z]/);
+      }
     }
   });
 
@@ -89,6 +98,7 @@ describe("the demo code is a closed simulation", () => {
       "src/lib/demos/instagram/engine.ts",
       "src/lib/demos/linkedin/engine.ts",
       "src/lib/demos/docintel/engine.ts",
+      "src/lib/demos/business/engine.ts",
     ]) {
       expect(code(engine), engine).toContain('mode: "simulation"');
     }
@@ -157,6 +167,46 @@ describe("the document intelligence demo (P3.3) takes no file and no free text f
     for (const file of docintel) {
       expect(code(file), file).not.toMatch(
         /\bimport\s*\(|require\(|readFile|fs\/promises|from ["']node:/,
+      );
+    }
+  });
+});
+
+describe("the back-office demo (P3.4) keeps its data in the browser and nowhere else", () => {
+  const business = production.filter((file) => /[\\/]business[\\/]/.test(file));
+
+  it("finds its files", () => {
+    expect(business.length).toBeGreaterThanOrEqual(12);
+  });
+
+  it("uses IndexedDB in exactly one file, the storage module, and only there", () => {
+    const users = business.filter((file) => /indexedDB/.test(code(file)));
+
+    expect(users.map(norm)).toEqual([BUSINESS_STORAGE]);
+  });
+
+  it("the storage module opens one database of its own, and validates what it reads back", () => {
+    const storage = code(BUSINESS_STORAGE);
+
+    expect(storage.match(/indexedDB\.open\(/g)).toHaveLength(1);
+    expect(storage).toContain('"demo-business-suite"');
+    expect(storage).toMatch(/schema\.safeParse/);
+    // no way to list or touch other databases of the origin
+    expect(storage).not.toMatch(/indexedDB\.databases|deleteDatabase/);
+  });
+
+  it("takes no text from the visitor: no text input, textarea, file input or editable region", () => {
+    for (const file of business) {
+      expect(code(file), file).not.toMatch(
+        /<textarea|<Textarea|<input|<Input\b|contentEditable|contenteditable|type=["'](?:text|search|url|email|file|number)["']/,
+      );
+    }
+  });
+
+  it("draws its charts as plain SVG: no chart library and no raw HTML", () => {
+    for (const file of business) {
+      expect(code(file), file).not.toMatch(
+        /from ["'](?:recharts|d3|chart\.js|victory|nivo|@nivo|visx|@visx)/,
       );
     }
   });

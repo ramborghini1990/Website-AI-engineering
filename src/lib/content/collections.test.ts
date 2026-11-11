@@ -171,8 +171,9 @@ describe("collections: references and honesty rules", () => {
     }
   });
 
-  it("a demo is published only once it exists: today the Instagram (P3.1), LinkedIn outreach (P3.2) and document intelligence (P3.3) demos are live, the business suite stays a planned draft", () => {
+  it("a demo is published only once it exists: today the Instagram (P3.1), LinkedIn outreach (P3.2), document intelligence (P3.3) and business suite (P3.4) demos are live", () => {
     const LIVE = [
+      "business-management-app",
       "document-intelligence-demo",
       "instagram-lead-agent",
       "linkedin-assisted-outreach",

@@ -1053,6 +1053,167 @@
           }
         }
       }
+    },
+    "business": {
+      "brand": "Emporio Rivalta, un negozio di quartiere fittizio di alimentari e casalinghi",
+      "intro": "Un piccolo gestionale in tre schermate: cassa, cruscotto dei flussi di cassa e ordini di acquisto, tutti sugli stessi dati di esempio. Registra una vendita e guarda cambiare magazzino e saldo.",
+      "sampleDate": "Data di esempio: {date}. Il calendario della demo è fisso, quindi i numeri non cambiano mentre la provi.",
+      "noscript": "La demo richiede JavaScript. Qui sotto trovi la cassa con i prodotti di esempio; abilita JavaScript per registrare vendite, vedere i flussi di cassa e gestire gli ordini.",
+      "disclosure": "Questa è una simulazione. Il negozio, i prodotti, i fornitori e ogni numero sono inventati e non viene usato alcun modello di intelligenza artificiale. Nulla di ciò che fai viene inviato a un server: le modifiche restano solo in questo browser, nel suo archivio, e \"Ricomincia\" le cancella e ripristina i dati di esempio.",
+      "ctaTitle": "Ti serve un gestionale come questo per la tua attività?",
+      "ctaBody": "Raccontami quali processi oggi vivono nei fogli di calcolo: ti dirò cosa può assorbire un'applicazione web e cosa conviene lasciare com'è.",
+      "limits": {
+        "title": "Che cosa è questa demo, e che cosa no",
+        "local": "Tutto gira nel tuo browser. I dati di esempio e le tue modifiche stanno nell'archivio di questo browser (IndexedDB) e da nessun'altra parte; cancellando i dati del sito spariscono.",
+        "synthetic": "Il negozio, i prodotti e gli importi sono inventati e generati da un seme fisso.",
+        "rules": "Le regole sono semplificate: una sola aliquota IVA al 22%, i soldi contati nel giorno in cui si registra una vendita o arriva un ordine, nessuna commissione sulle carte e nessun ritardo di pagamento.",
+        "scope": "Mostra schermate e flussi, non è un software di contabilità: niente fatture, niente utenti, niente sincronizzazione tra dispositivi."
+      },
+      "storage": {
+        "checking": "Apro l'archivio di questo browser…",
+        "saved": "Le modifiche sono salvate solo in questo browser.",
+        "unavailable": "Questo browser non consente l'archivio qui: le modifiche durano finché non lasci la pagina."
+      },
+      "tabs": {
+        "label": "Sezioni della demo",
+        "pos": "Cassa",
+        "cashflow": "Flussi di cassa",
+        "orders": "Ordini di acquisto"
+      },
+      "pos": {
+        "title": "Cassa",
+        "products": "Prodotti",
+        "price": "{price} al pezzo",
+        "inStock": "{count} in magazzino",
+        "inSale": "{count} nella vendita",
+        "soldOut": "Esaurito",
+        "add": "Aggiungi",
+        "addLabel": "Aggiungi {name} alla vendita",
+        "cart": {
+          "title": "Vendita in corso",
+          "empty": "Ancora nessun articolo. Aggiungi un prodotto dall'elenco.",
+          "more": "Uno in più di {name}",
+          "less": "Uno in meno di {name}",
+          "remove": "Togli {name}",
+          "quantity": "{count} di {name}",
+          "total": "Totale",
+          "vat": "di cui IVA 22%"
+        },
+        "pay": {
+          "title": "Incassa",
+          "cash": "Paga in contanti",
+          "card": "Paga con carta"
+        },
+        "recent": {
+          "title": "Ultime vendite",
+          "caption": "Le cinque vendite più recenti, dalla più recente",
+          "no": "N.",
+          "date": "Data",
+          "items": "Articoli",
+          "method": "Pagamento",
+          "total": "Totale",
+          "cash": "Contanti",
+          "card": "Carta"
+        }
+      },
+      "notice": {
+        "sale": "Vendita {id} registrata: {total}.",
+        "limit": "Non c'è più {name} a scaffale.",
+        "orderCreated": "Ordine in bozza {id} creato per {supplier}.",
+        "orderSent": "Ordine {id} segnato come inviato.",
+        "orderReceived": "Ordine {id} ricevuto: il magazzino è aggiornato e il pagamento è registrato oggi.",
+        "reset": "Dati di esempio ripristinati."
+      },
+      "cash": {
+        "title": "Flussi di cassa",
+        "note": "Le entrate sono tutte le vendite, nel giorno in cui vengono registrate. Le uscite sono le spese (affitto, utenze, stipendi) e gli ordini di acquisto, nel giorno in cui arrivano.",
+        "kpi": {
+          "title": "Cifre principali",
+          "balance": "Saldo di oggi",
+          "in": "Entrate, ultimi 30 giorni",
+          "out": "Uscite, ultimi 30 giorni",
+          "open": "Ordini aperti"
+        },
+        "balance": {
+          "title": "Saldo di cassa, ultimi 30 giorni",
+          "desc": "Grafico a linee del saldo di cassa a fine giornata per ciascuno degli ultimi 30 giorni, dal {start} al {end}. Partiva da {first}, il punto più basso è stato {min}, il più alto {max}, e termina a {last}."
+        },
+        "flow": {
+          "title": "Entrate e uscite per settimana",
+          "desc": "Grafico a barre di entrate e uscite per ciascuna delle ultime 8 settimane. Nell'ultima settimana, che termina il {end}: {in} in entrata e {out} in uscita."
+        },
+        "legend": {
+          "label": "Legenda",
+          "in": "Entrate",
+          "out": "Uscite"
+        },
+        "table": {
+          "show": "Mostra come tabella",
+          "day": "Giorno",
+          "balance": "Saldo",
+          "week": "Settimana che termina il",
+          "in": "Entrate",
+          "out": "Uscite",
+          "net": "Netto",
+          "balanceCaption": "Saldo di cassa a fine giornata per ciascuno degli ultimi 30 giorni",
+          "flowCaption": "Entrate e uscite per ciascuna delle ultime 8 settimane"
+        }
+      },
+      "orders": {
+        "title": "Ordini di acquisto",
+        "intro": "Un prodotto sotto la scorta minima si può ordinare al suo fornitore in un solo passaggio. Un ordine passa da bozza a inviato a ricevuto; solo la ricezione cambia magazzino e cassa.",
+        "reorder": {
+          "title": "Riordino",
+          "create": "Crea ordine",
+          "createLabel": "Crea ordine per {supplier}",
+          "nothing": "Niente da riordinare",
+          "lowCount": "{count} da riordinare"
+        },
+        "stock": {
+          "title": "Magazzino",
+          "caption": "Giacenza a scaffale e scorta minima per prodotto",
+          "product": "Prodotto",
+          "supplier": "Fornitore",
+          "shelf": "A scaffale",
+          "level": "Riordina sotto",
+          "state": "Stato",
+          "ok": "Ok",
+          "low": "Da riordinare",
+          "onOrder": "Ordinato"
+        },
+        "list": {
+          "title": "Ordini",
+          "ordered": "Ordinato il {date}",
+          "receivedOn": "Ricevuto il {date}",
+          "total": "Totale ordine, IVA esclusa",
+          "lines": "Righe dell'ordine {id}",
+          "line": "{qty} × {name}",
+          "send": "Invia",
+          "sendLabel": "Invia l'ordine {id}",
+          "receive": "Ricevi",
+          "receiveLabel": "Ricevi l'ordine {id}"
+        },
+        "status": {
+          "draft": "Bozza",
+          "sent": "Inviato",
+          "received": "Ricevuto"
+        }
+      },
+      "items": {
+        "coffee": "Caffè macinato, 250 g",
+        "pasta": "Pasta di semola, 500 g",
+        "oil": "Olio extravergine d'oliva, 1 l",
+        "rice": "Riso Carnaroli, 1 kg",
+        "biscuits": "Frollini, 400 g",
+        "detergent": "Detersivo per piatti, 750 ml",
+        "soap": "Sapone mani, 300 ml",
+        "tea": "Tè nero, 25 filtri"
+      },
+      "suppliers": {
+        "rossi": "Rossi Distribuzione",
+        "verde": "Verde Alimentari",
+        "alpina": "Alpina Casa"
+      }
     }
   }
 }
