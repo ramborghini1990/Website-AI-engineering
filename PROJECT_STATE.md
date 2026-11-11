@@ -2,7 +2,7 @@
 
 Live handoff file between Claude Code sessions. Claude updates it at the end of every task; you review it with the diff. Keep it short: history belongs in git and ADRs, not here. Sections marked *(rolling)* keep only the latest ~10 entries.
 
-_Last updated: 2026-11-08 · by: Claude Code · branch: `main` (P2.6 committed as `f05a2dd`)_
+_Last updated: 2026-11-11 · by: Claude Code · branch: `main` (P2.7 committed as `c91d9da`)_
 
 ---
 
@@ -10,21 +10,21 @@ _Last updated: 2026-11-08 · by: Claude Code · branch: `main` (P2.6 committed a
 
 | Field | Value |
 |---|---|
-| Phase | 2 — Landing page & agency value proposition: **7/7 tasks done, closed at the task level** (the exceptions that keep ROADMAP's stricter "every criterion evidenced and CI green on `main`" from being true are listed in section 8, "Phase 2 carry-overs") |
-| Active task | `P2.7` — Booking: a click-to-load Cal.com (EU instance) calendar on the contact page behind a new `<ConsentGate>`, with a plain link, configured by `NEXT_PUBLIC_CAL_URL`; the first registered third party |
-| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (78 files, 1164 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 483/483 twice in a row. The real Cal.com page was never reached (every request to its host is intercepted in the tests); the host allow-list is an assumption to confirm (section 8) |
-| Next task | `P3.0` — start of Phase 3 (agent showcases and funnels): read `ROADMAP.md` Phase 3 first; do not start unprompted. Before it, you may want the Phase 4 items that gate going live (B12 privacy notice, B13 services, the consent banner P4.1) |
+| Phase | 3 — Interactive agent showcases & order funnels (1 of 7 tasks built; **P3.0, the demo framework, was skipped in order**, see section 8) |
+| Active task | `P3.1` — Instagram engagement & lead agent, SIMULATION: `/[locale]/work/instagram-lead-agent` with a made-up inbox, rule-based classification (inquiry, lead, support, spam), lead scoring with its breakdown, source-grounded reply drafts, a human approval step before any action, a lead board, a "try your own message" box, and a call to action into `/contact?service=ai-agents` |
+| Status | **built and verified, awaiting review (not committed)**: `pnpm verify` passes (82 files, 1303 unit tests, build without warning), knip and format pass, `pnpm test:e2e` passes 528/528 (twice in the last stretch; earlier runs had 6 failures, then one dev-server race, section 8). Live mode (a real model) is NOT built, by decision (section 8) |
+| Next task | `P3.0` (the demo framework: budget guard, per-IP limit, kill switch, generic streaming renderer) or `P3.2` (LinkedIn outreach simulation with its approval gate): your call; do not start unprompted |
 
 **Plan for the active task**
-1. `<ConsentGate category="...">` (`src/components/consent/consent-gate.tsx`): its children are not rendered until the visitor presses the button, so the browser makes no request (no iframe, script, image, preconnect); the choice is not remembered (no cookie or storage); before the click it says who the third party is and what it receives; a plain link is always offered and the button is hidden where scripting is off.
-2. The booking option: `BookingSection` under the form (`contact.booking.*`), `CalEmbed` (a sandboxed, titled iframe with no device permissions and a cut referrer), shown only when `NEXT_PUBLIC_CAL_URL` is set; the URL must be on `cal.eu` or `app.cal.eu` or the build fails.
-3. CSP: that URL's ORIGIN is added to `frame-src` only, only when configured (`bookingOrigin` in `buildCsp`, fed by the proxy); otherwise `frame-src` stays `'none'`.
-4. `src/lib/consent/registry.ts`: every third party in one list (the source for the cookie and privacy notices, P4.2); a structure test allows an `<iframe>` only in the booking embed, only as a child of the gate, no `next/script`, no hard-coded provider URL.
-5. Tests: unit for the gate, the section, the registry/structure, the env rule, the CSP and the proxy; `e2e/booking.spec.ts` on the enforced-CSP build with the provider's host intercepted.
+1. Pure logic first (`src/lib/demos/`): `DemoEngine` (the blueprint's interface), the Instagram analysis as plain rules (`analyze.ts`), a draft builder that can only use knowledge-base sentences (`draft.ts`), the sample inbox (`fixtures.ts`), the simulation engine that streams one step per item (`engine.ts`) and a reducer whose one rule is that nothing is done without a decision (`state.ts`).
+2. UI: `DemoShell` (title, Simulation badge, the disclosure BEFORE the first interaction, a no-JavaScript notice, a call to action) around the interactive island (`src/components/demos/instagram/`): inbox with filter, detail with reasons, score, sources, editable draft and the approval buttons, lead board table, try-your-own-message form, live-region progress.
+3. It lives on the work entry's own page: the entry is published (`status: live`, `draft: false`, both languages) and `/work/[slug]` renders the demo between the summary and the facts (`src/lib/demos/registry.ts`).
+4. The funnel: the call to action goes to `/contact?service=ai-agents`; the contact page pre-selects the need from `?service=` (four known slugs only; a topic, never personal data); the entry's own closing call to action does the same.
+5. Tests: unit for the rules (every fixture in both languages, negatives, determinism), the reducer, the components, a structure gate that keeps the demo a closed simulation; `e2e/demo-instagram.spec.ts` on the enforced-CSP build.
 
 **Where I stopped** (exact file/function, what's half-done)
-- Nothing half-done. Checked after the last run: no node process, no listener on 3100, 3101, 3200 or 3201, and `git status` shows only the intended files (new: `e2e/booking.spec.ts`, `src/components/{booking,consent}/`, `src/components/contact/booking-section*`, `src/lib/consent/`; 20 modified). `test-results/` and `tsconfig.tsbuildinfo` are git-ignored.
-- **Needs you:** the decisions in section 8 (first: confirm the Cal.com host and create the event type), then review and commit.
+- Nothing half-done. Checked after the last run: no node process and no listener on 3100, 3101, 3200, 3201; temporary servers were started with `Start-Process -PassThru` and stopped by PID.
+- **Needs you:** the decisions in section 8; then review and commit.
 
 ---
 
@@ -35,7 +35,7 @@ _Last updated: 2026-11-08 · by: Claude Code · branch: `main` (P2.6 committed a
 | 0 Setup & governance | ✔ | 7/7 | Marked complete at your instruction. P0.7 awaiting commit. ROADMAP says a phase is done only when every acceptance criterion is checked **and CI is green on `main`**; not all are evidenced, see "Phase 0 carry-overs" in section 8 |
 | 1 Core, design system, motion | ✔ | 8/8 | P1.1–P1.7 committed; P1.8 awaiting review/commit. **Closed at the task level**: ROADMAP also wants CI green on `main` and every criterion evidenced; the exceptions are listed in section 9 "NOT done" (Lighthouse a11y 100 not run, securityheaders.com grade, CI never seen) |
 | 2 Landing & value proposition | ✔ | 7/7 | P2.1-P2.6 committed; P2.7 verified, awaiting review/commit. **Closed at the task level**: ROADMAP also wants every acceptance criterion evidenced and CI green on `main`; the exceptions are in section 8, "Phase 2 carry-overs" |
-| 3 Agent showcases & funnels | ☐ | 0/7 | |
+| 3 Agent showcases & funnels | ◐ | 1/7 | P3.1 built, awaiting review/commit; P3.0 (framework) skipped in order, only its minimum was built inside P3.1 |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
 ---
@@ -65,6 +65,7 @@ _Last updated: 2026-11-08 · by: Claude Code · branch: `main` (P2.6 committed a
 | 2026-11-06 | P2.4 | Work index with filters and detail pages, draft and client-consent guards, `work` in the navigation | `4f78467` |
 | 2026-11-06 | P2.5 | Inquiry funnel: four-step form, Server Action, honeypot + Turnstile, rate limit, Postgres via Drizzle, email notification, `/contact/thanks`, allow-list logger | `dc601df` |
 | 2026-11-06 | P2.6 | Sitemap, robots, generated share images (`next/og`), one metadata helper for canonical/hreflang/Open Graph/Twitter | `f05a2dd` |
+| 2026-11-08 | P2.7 | Click-to-load Cal.com calendar behind `<ConsentGate>`, third-party registry, booking origin in `frame-src` only | `c91d9da` |
 
 ---
 
@@ -106,6 +107,7 @@ Short entries; anything structural also gets an ADR in `docs/adr/`.
 | D30 | 2026-11-06 | Inquiry funnel (P2.5). **Shape:** `processInquiry` (`src/lib/inquiry/process.ts`) is one function with its services injected: honeypot → Zod validation → rate limit → bot check → store → email → typed result (`success` / `validation` / `rate_limited` / `bot_check_failed` / `unavailable`); errors reach the visitor as a code, details go to the logger as an event name and an error class. **Real vs stand-in:** `deps.ts` chooses per service from plain config; when `VERCEL_ENV` is set (a deployment) every service is required and a missing one makes the page and the action say "unavailable" (a lead is never accepted and dropped); when it is unset (laptop, tests, CI, `next start` here) a missing service is replaced by an in-process one so the form works with no network and no secrets. `REQUIRED_IN_PRODUCTION` stays empty (it would fail the build before the services exist). **Dependencies (asked-for stack, facts in section 8):** `drizzle-orm`, `postgres`, `@upstash/ratelimit`, `@upstash/redis`; **no** drizzle-kit (its esbuild dependency has an install script) and no email or Turnstile SDK: both are `fetch`. The SQL migration is hand-written (`src/lib/db/migrations/0001_create_inquiries.sql`) and a test fails if it drifts from the Drizzle schema. **Privacy by construction:** the stored record is built field by field, no IP, user agent, referrer or token column; the limiter key is an HMAC of the address with a secret salt; `src/lib/logger.ts` (missing until now, although the rules require it) writes only allow-listed fields and redacts emails, phones, IPs, IBANs, fiscal codes and tokens; a structure test forbids `console.` in the funnel. **Marketing consent:** its own unticked, optional checkbox, stored with `CONSENT_VERSION` and the time. **Turnstile:** the script loads only when the visitor reaches the last step; fail-closed verification. **Honeypot:** a filled one gets a normal-looking success and nothing is stored or counted. **Confirmation:** the action redirects to `/contact/thanks` (noindex, nothing personal in the URL). **Guard change:** `env.guard.test.ts` now treats a `"use server"` module as a boundary (Next compiles a client import of it to a reference), and says so with two tests; the guard had correctly caught my first draft importing a type from a server module, so that type moved to a pure `result.ts`. **Links:** the contact flag is true, the privacy notice is plain text until `/privacy` exists (P4.2) | docs/BLUEPRINT.md D5 and §security, CLAUDE.md §6 and §10, docs/GDPR_CHECKLIST.md §5 and §6 | — |
 | D31 | 2026-11-06 | SEO and sharing (P2.6). **One source of truth:** `pageMetadata` builds canonical, hreflang (with `x-default`), Open Graph and Twitter for every public page, and a gate test fails for a page under `src/app/[locale]` that does not use it (the confirmation page, the dev tools and the 404 are the listed exceptions; the first two are `noindex`). **Sitemap:** `src/app/sitemap.ts`, built at build time, lists only pages that EXIST and are PUBLIC (an unbuilt page, a draft work entry, the confirmation page and the dev tools are not listed), once per language, each entry carrying all language versions and `x-default`; `changefreq` and `priority` are included as asked (Google ignores them), `lastmod` only when a real date exists (none today: a file's mtime is the deploy time on CI). **Robots:** production allows everything except `/*/_dev/` and `/*/dev-tools/` and names the sitemap; any other deployment (a Vercel preview) disallows everything; the confirmation page is deliberately not disallowed so its `noindex` can be read. **Share images:** one route, `/[locale]/og/<key>`, drawing the page's own h1 on the instrument-panel card; the PATH alone decides the content, a query string is ignored, and only real public pages render (a service or published work entry by slug validated with `slugSchema`; unknown, draft and path-trick keys are 404), so our domain cannot be used to print arbitrary text; the cache is one day at the CDN with stale-while-revalidate, not the year-long default. **Colours:** satori cannot read CSS variables and the raw-colour guard forbids hex in `.ts`/`.tsx`, so the dark tokens live in `src/lib/og/palette.json` and `og.test.ts` fails if any differs from `globals.css`. **Font:** the one weight bundled with `ImageResponse` (decision pending, section 8). **Locales:** `og:locale` is `it_IT` and `en_GB` with the other as alternate | docs/BLUEPRINT.md (SEO), CLAUDE.md §7 (tokens), docs/CONTENT.md (nothing indexed that does not exist) | — |
 | D32 | 2026-11-08 | Booking and third-party embeds (P2.7). **`<ConsentGate>`** is a click-to-load gate, not a consent manager (that is P4.1): children are NOT RENDERED until the visitor's click, so there is no request, no preconnect and no iframe before it; nothing is remembered (no cookie, no storage), so every visit starts blocked and there is no consent cookie to document; the disclosure and a plain link come first; the button is hidden where scripting is off (`@media (scripting: none)`), leaving only the link; focus moves to the loaded embed's named region. **Cal.com:** the page is embedded as an **iframe only** (not Cal's embed script), so the only CSP change is `frame-src <origin>` (never the path, never `script-src`); the origin comes from `NEXT_PUBLIC_CAL_URL`, validated to `https` on `cal.eu` or `app.cal.eu` without credentials (**an assumption about Cal.com's EU hosts, to confirm**); unset = no section and `frame-src 'none'`. The origin in the CSP is global (a policy is per request); allowing a frame is not loading it. **Frame hardening:** sandbox with scripts, its own origin, forms and popups only (no top navigation, modals or downloads), `allow=""` (no device permissions), `referrerpolicy=strict-origin`. **Registry:** `src/lib/consent/registry.ts` lists each third party (provider, category, trigger, what it receives, CSP rule); a structure test allows an `<iframe>` only in the booking embed, only inside the gate, forbids `next/script` and hard-coded provider URLs, and requires every gate category to be registered. **E2E:** the server is configured with a placeholder on `cal.eu` and the tests intercept every request to it, so CI never touches Cal.com; the existing CSP strictness test now states that the booking origin in `frame-src` is the one external origin. **Copy:** the disclosure names Cal.com and what it receives (IP address, browser information, its own cookies) and promises nothing about its practices or about the call (length, price) | CLAUDE.md §10 (third parties only through the gate, CSP updated with the docs), docs/GDPR_CHECKLIST.md §3, ROADMAP P2.7 | — |
+| D33 | 2026-11-11 | Instagram demo (P3.1). **Honest by construction:** it is a SIMULATION and says so before the first interaction (Simulation badge, a disclosure that no model is called and the classifications are fixed rules on invented messages, nothing connected, no personal data); the technologies in the entry's frontmatter no longer list the Claude API (the demo does not use it) and its body says the same. **Rules, not a model:** `analyze.ts` classifies by priority (spam, then support, then lead, then inquiry), deterministic, accent- and case-insensitive, text capped before matching; the visitor's text is DATA: an instruction to the agent is recognised as one and handled as spam (it cannot raise its own score), links and promises are spam, money amounts are never read as quantities. **Source-grounded drafts:** a draft is only a greeting, sentences of the sample knowledge base (each tagged with its source) and a closing; with no source the agent does not answer and the item goes to a person; spam and refund/damage cases have no draft. **Human in the loop by construction:** every action the agent proposes (reply, reply and hand to sales, hide and report, assign) needs the person's approval; the reducer refuses a decision before an analysis and a second decision, the draft locks after the decision, and a test fails if any path reaches "done" without approval; outcomes are labelled simulated. **Closed system:** a structure test forbids network calls, browser storage, environment reads, model SDKs and HTML injection anywhere in the demo code, and forbids a live engine; the visitor's own message never leaves the page. **Framework:** only the minimum of P3.0 was built (`DemoEngine`, `DemoShell`); the engine streams one step per item and the page paces it (450 ms, instant under reduced motion). **Publishing consequences:** the entry is live, so the Home demos section, `/work`, the sitemap, the share image and the AI agents service page (its demo link) all switch on by themselves; the other three demos stay drafts. **Funnel:** `?service=` pre-selects a need on the contact page from four known slugs, everything else is ignored, and the canonical URL ignores the query. **Layout:** on a phone, grids must not grow past their container and long button labels must wrap (a 360 px overflow was found and fixed in the demo and on the AI agents service page) | docs/BLUEPRINT.md D2 and demo architecture, CLAUDE.md §10 (AI disclosure, model output as text, nothing from the visitor trusted), ROADMAP P3.1 | — |
 
 ---
 
@@ -161,6 +163,11 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 
 ## 8. Follow-ups noticed (not done)
 
+- **P3.1 / decisions for you.** (1) **P3.0 was skipped in order.** You asked for P3.1 directly. From the framework I built only what the demo needs: the `DemoEngine` type, a small `DemoShell` (badge, disclosure, no-JavaScript notice, call to action) and the demo registry. **Not built:** the budget guard, the per-IP limit for live mode, the `DEMOS_LIVE_ENABLED` kill switch wiring (the variable exists in the env schema and nothing reads it), a generic streaming step renderer and a generic reset/CTA that pre-fills a scenario (the CTA pre-selects the service instead). Say if you want P3.0 before P3.2. (2) **No live mode.** The roadmap's optional live mode (a real model classifies a typed message, output validated by Zod, prompt-injection cases) is not built: you asked for simulation, a live mode needs the P3.0 budget guard first, and it would add the Anthropic SDK and a server route. What exists instead: the visitor can type a message and the same rules classify it, and the injection cases are tested against the rules (the text cannot change behaviour). (3) **The classification is rule-based and the page says so** (disclosure and entry body). If you want it to read as "AI" in the marketing sense, that needs the live mode; I did not word it that way. (4) **The sample brand and its facts are invented** ("Bottega Aurora", prices, hours, return period): they are labelled as a fictional profile and a sample knowledge base, but they are copy you did not write; read them. The lead score weights (intent 25, quantity 25, timeline 15, business 15, contact 10, budget 10; hot from 70, warm from 40) are illustrative and shown to the visitor as a breakdown, not a validated model. (5) **Legal wording** (the disclosure, the "nothing is sent to Instagram" statements) is draft copy for a qualified professional; nothing in the demo processes personal data. (6) **The entry's technologies changed** (the Claude API removed from both languages) because the demo does not use it; the AI agents service page still lists it for the real service. (7) **Home now shows the demos section** and the AI agents page shows its demo link: check the Home composition once with real eyes. (8) A published demo means the first **share image and sitemap entry** for a work page exist; they are generated from the entry's title.
+- **P3.1 / what the first e2e run found (all fixed).** Six failures, none in the agent's logic: (a) at 360 px the page scrolled sideways by 45 px (the demo's grids could grow past the container and the long "approve, send and hand the contact to the team" button did not wrap) and by 164 px on the AI agents service page (the new demo link is a long title in a no-wrap button): grids now have an explicit single column, the board table scrolls inside its own box, and the long-label buttons wrap; (b) two strict-mode selectors matched the header, the shell and the entry's closing call to action (three links named "Parliamone"): scoped to their regions; (c) the path-trick test sent `instagram-lead-agent%00`: the framework drops the NUL before our code and serves the same published page (200), so the test now uses a draft slug for the NUL case (a published slug plus a NUL is the same page, harmless; the lookup stays an exact match).
+- **P3.1 / measured, and not measured.** Production build, enforced CSP, Chromium: both languages, every one of the 12 messages ends in the expected category as the visitor sees it; the hotel is a hot lead (100) with a six-row breakdown, sources and a sourced draft, the shop a warm one (40); an injection attempt is hidden as spam with no draft; a question with no source is not answered; nothing can be approved before the analysis, after it everything is "waiting", approval is the only way a status changes (list and board follow, the draft locks, focus moves to the outcome), discarding does nothing, reset starts over; paced analysis announces progress and keeps the button busy; the visitor's message is analysed, an injection and markup typed by the visitor are not obeyed or interpreted (no element, no dialog), an empty or too long message is refused with a linked error; a whole session makes no cross-origin request, no POST, no `/api` call, stores nothing and raises no CSP violation or console error; the call to action reaches `/contact?service=ai-agents` with the need chosen (also from the entry's closing call to action), hostile `service` values pre-select nothing; keyboard-only works; axe zero violations in both themes and languages (initial, analysed, approved, every kind of item, the error state, 360 px); no horizontal scroll at 360, 768, 1280 and 1920 px; CLS under 0.05; the page, the disclosure and the sample messages are in the HTML without JavaScript. **Not measured:** Lighthouse performance of the demo route, a screen reader, Firefox/WebKit, how the 450 ms pacing feels, the page on a real phone.
+- **P3.1 / things I changed outside the new files:** `content/work/{it,en}/instagram-lead-agent.mdx` (published, technologies, one honest sentence in the body), `src/app/[locale]/work/[slug]/page.tsx` and `WorkDetail` (a demo slot and a service-preselecting closing call to action), `ContactCta` (an optional `query`), the contact page, `InquiryForm` and `inquiry/schema.ts` (`?service=` pre-selection, `needForService`), `ServiceDetail` (the demo link button wraps), `messages/*.json` (`demos.*`), and the tests whose premise "every demo is a draft" changed: `collections.test.ts` (exactly one demo live), `demo-link.test.ts`, `home.test.tsx` (the demos section exists), the OG route test (a draft slug), `e2e/{home,services,work}.spec.ts`. No assertion was weakened; each now states what is true today and still fails for a draft.
+- **P3.1 / limits.** One demo language-independent engine (a visitor can type English in the Italian page); the rules cover the sample vocabulary and common phrases, not natural language in general (a real agent would); no persistence (a reload starts over); no real Instagram anything, by design.
 - **P2.7 / decisions for you.** (1) **Confirm the Cal.com host and create the event (B14).** The allow-list accepts only `cal.eu` and `app.cal.eu`; if your EU booking page is on another host, tell me which. Until `NEXT_PUBLIC_CAL_URL` is set, the contact page has no booking section at all. (2) **The disclosure text is draft legal copy** (`contact.booking.gate.body`): it says Cal.com hosts the calendar on its European instance, that nothing is shared until the visitor loads it, and that loading it sends Cal.com the IP address and browser information and may let it use its own cookies. It does not claim GDPR compliance or describe Cal.com's practices. It needs a qualified professional, and the processor entry in the notices (P4.2). (3) **The click is not remembered**: every visit starts blocked and no cookie or storage is written. That is the most private choice and needs no consent cookie, at the price of one extra click on every visit; a remembered choice belongs with the consent manager (P4.1). (4) **iframe, not Cal's embed script.** It keeps the CSP change to one `frame-src` origin and loads no third-party script; the cost is that you get Cal's standard page in a frame (no custom theming through their script API). Say if you want their script (it would need `script-src` and a decision). (5) **The first call's terms** (free or not, length) are not stated anywhere, as docs/CONTENT.md §7 item 4 is still open. (6) **The CSP origin is global**, not only on `/contact`; narrowing it by path means a path-aware policy in the proxy: possible, not done.
 - **P2.7 / measured, and not measured.** Production build, enforced CSP, Chromium, provider host intercepted: before the click, however the page is used (scroll, hover, networkidle), no request to the host, no `<iframe>` in the DOM or the HTML, no preconnect/prefetch hint, nothing in the resource timings; the click requests exactly the configured URL, loads a titled, sandboxed frame (no top navigation or modals), moves focus to its region and raises no CSP violation; Enter on the focused button loads it; a reload blocks it again and nothing is stored; with JavaScript off only the plain link is offered; the inquiry can be sent whether or not the calendar was loaded; the CSP `frame-src` is exactly the booking origin, no other directive has it, another provider's frame is still blocked; axe zero violations blocked and loaded in both themes, at 360 px (no horizontal scroll) and under reduced motion. **Not measured:** the real Cal.com page (not reachable by design in tests): its own accessibility, how it behaves in a sandboxed frame (cookies/third-party storage may be blocked by the browser, which could affect login-less booking), its mobile layout at the fixed 44 rem frame height, and Firefox/WebKit. First live check: load it on a preview with the real URL and complete a test booking.
 - **P2.7 / things I changed outside the new files:** `src/lib/env-schema.ts` and `env.client.ts` (`NEXT_PUBLIC_CAL_URL`, validated), `.env.example`, `src/lib/security/csp.ts` and `src/proxy.ts` (`bookingOrigin`), `ContactView` and the contact page (an optional booking slot), `messages/*.json` (`contact.booking`), `playwright.config.ts` and `e2e/support/servers.ts` (the test server's booking URL), `e2e/security.spec.ts` (two assertions about `frame-src`, see D32), docs/SECURITY.md, DEPLOYMENT.md, CONTENT.md, GDPR_CHECKLIST.md. No existing test was weakened: the one that failed said "no external origin in the CSP", which is now "the booking origin in `frame-src` and nothing else".
@@ -294,62 +301,70 @@ Local machine note (not in repo): `corepack enable` failed with EPERM on `D:\Pro
 ## 9. Last verification run
 
 ```
-pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 78 files,
-                    1164 tests (1119 before P2.7); build without warning
-pnpm test:e2e     → pass, 483 tests (Chromium), twice in a row (464 before: +19 in e2e/booking.spec.ts). A first
-                    run had one failure, my own old assertion "no external origin in the CSP", now "the booking
-                    origin in frame-src and nothing else" (D32)
+pnpm verify       → pass, exit 0 (typecheck → lint --max-warnings=0 → test → build); test step: 82 files,
+                    1303 tests (1164 before P3.1); build without warning
+pnpm test:e2e     → pass, 528 tests (Chromium), after the fixes in section 8 (483 before: +45 in
+                    e2e/demo-instagram.spec.ts). History: 6 failures (fixed), then a full run with 527/528 whose
+                    one failure was fx.spec.ts "the gallery links to it", a dev-server click-before-hydration race
+                    in an unrelated test (it passes alone), then this clean full run
 pnpm knip / pnpm format:check → pass
-after the last run: no node process, no listener on 3100, 3101, 3200, 3201; git status shows only intended files
+after the last run: no node process, no listener on 3100, 3101, 3200, 3201
 
-P2.7 checks:
-  gate (unit)       → nothing rendered, fetched or stored before the click (a stand-in embed, spies on fetch and
-                      XMLHttpRequest, storage and cookies); the click renders it and moves focus; not remembered;
-                      the button is real and hidden where scripting is off; the plain link is external, noopener,
-                      with the full accessible name "label (opens in a new tab)"
-  booking (unit)    → both languages: h2, disclosure naming the provider and the IP address, no compliance claim;
-                      the frame has the configured URL, a title, a strict-origin referrer, no permissions and a
-                      sandbox without top navigation, modals, downloads, pointer lock or presentation
-  env / CSP (unit)  → the booking URL must be https on cal.eu or app.cal.eu without credentials (look-alike hosts,
-                      other providers, a path trick, http and credentials all refused); frame-src has the origin only,
-                      no other directive does, and 'none' without it; the proxy emits it only when configured
-  structure         → an <iframe> only in the booking embed and only inside the gate; no next/script; no hard-coded
-                      provider URL; every gate category is in the registry
-  e2e (enforced CSP)→ see section 8; the provider host is intercepted, so CI never reaches Cal.com
-  NOT done          → the real Cal.com page; Firefox/WebKit; a mutation sweep
+P3.1 checks:
+  rules (unit)      → each of the 12 samples in BOTH languages is classified as expected; determinism; the score is
+                      the sum of its factors and the buckets are exact; money is not a quantity; an injection
+                      attempt (several phrasings) is spam and a lead that tries it cannot score; a link is spam;
+                      "free shipping?" is a question; empty, huge and odd input do not throw and a hostile long
+                      input is fast
+  drafts / state    → a draft is greeting + sourced sentences + closing, nothing else; no draft for spam, damage,
+                      refunds or no-source questions; a decision is impossible before analysis, final once made;
+                      "done" only after approval; edits only before the decision; analysed once; reset; counts
+  components (unit) → the inbox, the reasons, sources, draft, score table, the approval buttons per action, the
+                      board, filters, the try-your-own box (instruction and markup not obeyed), paced and instant
+                      analysis, reset during a run, no request of any kind during a session
+  gates             → the demo code has no fetch/XHR/WebSocket/beacon, no storage, no environment, no model SDK, no
+                      HTML injection, no live engine; every registered demo is a published demo entry
+  e2e (enforced CSP)→ see section 8
+  NOT done          → Lighthouse on the demo route; Firefox/WebKit; screen reader; a mutation sweep
 ```
 
 ---
 
 ## 10. Proposed commit(s) for the work above
 
-One logical change.
+One logical change (the pre-selection of the contact form and the wrapping button on the service page are small and exist because of this demo).
 
 ```
-feat(booking): add a click-to-load Cal.com calendar on the contact page
+feat(demos): add the instagram lead agent simulation
 
-Add <ConsentGate>, a click-to-load wrapper for third-party embeds: until
-the visitor presses its button the embed is not rendered, so the browser
-makes no request to the provider (no frame, script or preconnect). It
-says who the third party is and what it receives, keeps no cookie or
-storage (every visit starts blocked), always offers a plain link, and
-hides the button where scripting is off.
+Publish the Instagram demo as an interactive page at
+/<locale>/work/instagram-lead-agent. A made-up inbox of direct messages
+and comments is read by a simulated agent: it classifies each item
+(information request, sales contact, support, spam), scores sales
+contacts with a visible breakdown, and drafts replies from a small
+sample knowledge base only. With no source it does not answer, it hands
+the request to a person. Every action it proposes needs the visitor's
+approval, and approving is the only way anything counts as done; the
+outcome is labelled as simulated.
 
-Use it for a booking section under the contact form: the Cal.com page
-of the EU instance in a sandboxed, titled iframe with no device
-permissions and a cut referrer. The page is set by NEXT_PUBLIC_CAL_URL,
-which must be an https URL on cal.eu or app.cal.eu; without it the
-section is absent. Only that origin is added to frame-src, never to
-script-src, and frame-src stays 'none' when it is not configured. The
-form is unchanged and works with or without the calendar.
+It is a closed simulation: fixed rules, no model, no network, no
+storage, deterministic, with a disclosure before the first interaction.
+A visitor can type a message of their own; an instruction in it is
+treated as plain text and recognised as an attempt, never obeyed, and
+markup is never rendered. Add the DemoEngine type and a small demo
+shell with the disclosure and a call to action; the budget guard and a
+live mode are left for later. A test fails if demo code ever makes a
+request, stores something, reads a secret or calls a model.
 
-List every third party in one registry for the future cookie and privacy
-notices, and add a test that allows an iframe only in the booking embed,
-only inside the gate, with no next/script and no hard-coded provider
-URL. The e2e server is configured with a placeholder booking URL and the
-tests intercept every request to it, so CI never reaches Cal.com.
+Send the call to action to /contact?service=ai-agents and pre-select
+the need there from four known service slugs; anything else is ignored.
+Publishing the entry switches on the Home demos section, the sitemap
+entry, the share image and the demo link on the AI agents page. Remove
+the Claude API from the entry's technologies, since the demo does not
+use it. Keep the page inside a 360 px screen: single-column grids and
+buttons whose long labels wrap.
 
-Task: P2.7
+Task: P3.1
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```

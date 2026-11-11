@@ -243,14 +243,21 @@ describe.each(["it", "en"] as const)("Services grid (%s)", (locale) => {
 });
 
 describe.each(["it", "en"] as const)("Demos (%s)", (locale) => {
-  it("renders NOTHING today: every demo is a draft and none may be advertised before it exists", () => {
-    const { container } = renderIn(
-      locale,
-      <HomeDemos demos={getWork(locale)} />,
-    );
+  it("renders NOTHING when no demo is published: none may be advertised before it exists", () => {
+    const { container } = renderIn(locale, <HomeDemos demos={[]} />);
 
-    expect(getWork(locale)).toEqual([]);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("features exactly the published demo of the real content (the Instagram demo, P3.1), linked to its page", () => {
+    renderIn(locale, <HomeDemos demos={getWork(locale)} />);
+
+    expect(getWork(locale).map((entry) => entry.slug)).toEqual([
+      "instagram-lead-agent",
+    ]);
+    expect(
+      screen.getByRole("link", { name: getWork(locale)[0]?.data.title }),
+    ).toHaveAttribute("href", "/it/work/instagram-lead-agent");
   });
 
   it("appears once a demo is published, with the simulation notice and no link when the work pages are not available", () => {
@@ -384,6 +391,7 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
     expect(h2s).toEqual([
       copy.proof.title,
       copy.services.title,
+      copy.demos.title, // the Instagram demo is published (P3.1)
       copy.process.title,
       copy.finalCta.title,
     ]);
@@ -420,6 +428,8 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
     expect(hrefs.length).toBeGreaterThan(2);
     const services = new Set([
       "/it/contact",
+      "/it/work",
+      "/it/work/instagram-lead-agent",
       "/it/services",
       ...getServices(locale).map((service) => `/it/services/${service.slug}`),
     ]);

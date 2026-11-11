@@ -58,8 +58,11 @@ type FormState = SubmitResult | { status: "idle" };
  */
 export function InquiryForm({
   turnstileSiteKey,
+  initialNeed,
 }: {
   turnstileSiteKey?: string;
+  /** Pre-selected need, from `?service=` (a topic, never personal data). */
+  initialNeed?: (typeof needValues)[number] | undefined;
 }) {
   const t = useTranslations("contact.form");
   const locale = useLocale();
@@ -71,7 +74,10 @@ export function InquiryForm({
   );
   const [seen, setSeen] = useState<FormState>(state);
   const [step, setStep] = useState<StepId>("need");
-  const [values, setValues] = useState<RawInquiry>({ marketingConsent: false });
+  const [values, setValues] = useState<RawInquiry>({
+    marketingConsent: false,
+    ...(initialNeed !== undefined ? { need: initialNeed } : {}),
+  });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [attention, setAttention] = useState(0);
   const [token, setToken] = useState("");

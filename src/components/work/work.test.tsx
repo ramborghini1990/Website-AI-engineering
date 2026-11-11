@@ -369,6 +369,49 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
     ).toBeNull();
   });
 
+  it("shows the interactive demo it is given, after the summary and before the facts", () => {
+    renderIn(
+      locale,
+      <WorkDetail
+        work={demoA.data}
+        body={body}
+        service={service}
+        demo={<section aria-label="the demo">demo content</section>}
+      />,
+    );
+
+    const demo = screen.getByRole("region", { name: "the demo" });
+    const facts = screen.getByText(copy.labels.sector);
+    expect(
+      demo.compareDocumentPosition(facts) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      screen.getByText(demoA.data.summary).compareDocumentPosition(demo) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("without a demo there is nothing extra between the summary and the facts", () => {
+    renderIn(
+      locale,
+      <WorkDetail work={demoA.data} body={body} service={service} />,
+    );
+
+    expect(screen.queryByRole("region", { name: "the demo" })).toBeNull();
+  });
+
+  it("the closing call to action pre-selects the entry's service on the contact page (a topic, no personal data)", () => {
+    renderIn(
+      locale,
+      <WorkDetail work={demoA.data} body={body} service={service} />,
+    );
+
+    expect(screen.getByRole("link", { name: copy.cta.cta })).toHaveAttribute(
+      "href",
+      "/it/contact?service=ai-agents",
+    );
+  });
+
   it("shows no image: there is no client logo to show", () => {
     const { container } = renderIn(
       locale,

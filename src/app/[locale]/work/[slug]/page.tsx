@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 
+import { InstagramSection } from "@/components/demos/instagram/instagram-section";
 import { WorkDetail } from "@/components/work/work-detail";
 import { getServices, getWork } from "@/lib/content/read";
+import { isInteractiveDemo } from "@/lib/demos/registry";
 import { pageMetadata } from "@/lib/seo";
 
 /**
@@ -44,10 +46,25 @@ export default async function WorkEntryPage({
     (candidate) => candidate.slug === entry.data.service,
   );
 
+  // An entry with an interactive demo shows it (simulation: nothing is requested from a server).
+  const messages = await getMessages();
+  const demo = isInteractiveDemo(entry.slug) ? (
+    <InstagramSection
+      locale={locale}
+      messages={{
+        demos: {
+          shell: messages.demos.shell,
+          instagram: messages.demos.instagram,
+        },
+      }}
+    />
+  ) : null;
+
   return (
     <WorkDetail
       work={entry.data}
       body={entry.body}
+      demo={demo}
       service={
         service ? { slug: service.slug, title: service.data.title } : null
       }

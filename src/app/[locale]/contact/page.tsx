@@ -7,6 +7,7 @@ import { ContactView } from "@/components/contact/contact-view";
 import { InquiryForm } from "@/components/contact/inquiry-form";
 import { env } from "@/lib/env";
 import { getInquiryRuntime, turnstileSiteKey } from "@/lib/inquiry/runtime";
+import { needForService } from "@/lib/inquiry/schema";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,11 +28,15 @@ export async function generateMetadata(): Promise<Metadata> {
  * required service (database, rate limiting, bot check, email), the page says
  * the form is unavailable instead of accepting an inquiry it could not keep.
  */
-export default async function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: PageProps<"/[locale]/contact">) {
   const locale = await getLocale();
   const messages = await getMessages();
   const runtime = getInquiryRuntime();
   const bookingUrl = env.NEXT_PUBLIC_CAL_URL;
+  // `?service=ai-agents` (from a service or a demo) pre-selects the need; any other value is ignored.
+  const initialNeed = needForService((await searchParams)["service"]);
 
   return (
     <ContactView
@@ -44,7 +49,10 @@ export default async function ContactPage() {
           locale={locale}
           messages={{ contact: { form: messages.contact.form } }}
         >
-          <InquiryForm turnstileSiteKey={turnstileSiteKey()} />
+          <InquiryForm
+            turnstileSiteKey={turnstileSiteKey()}
+            initialNeed={initialNeed}
+          />
         </NextIntlClientProvider>
       }
     />

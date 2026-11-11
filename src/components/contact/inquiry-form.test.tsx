@@ -34,7 +34,14 @@ type L = keyof typeof messages;
 
 function renderForm(
   locale: L = "it",
-  props: { turnstileSiteKey?: string } = {},
+  props: {
+    turnstileSiteKey?: string;
+    initialNeed?:
+      | "ai-agents"
+      | "workflow-automation"
+      | "web-application"
+      | "document-intelligence";
+  } = {},
 ) {
   return render(
     <NextIntlClientProvider
@@ -515,6 +522,84 @@ describe("InquiryForm and Turnstile", () => {
     expect(screen.getByText(it_.contact.form.turnstile)).toBeInTheDocument();
     expect(container.querySelector('input[name="turnstileToken"]')).toHaveValue(
       "",
+    );
+  });
+});
+
+describe("InquiryForm: a pre-selected need (?service= from a service or a demo)", () => {
+  it("starts with that option chosen and the rest unchosen, so the visitor only adds the description", () => {
+    renderForm("it", { initialNeed: "ai-agents" });
+
+    expect(
+      screen.getByRole("radio", {
+        name: it_.contact.form.need.options["ai-agents"],
+      }),
+    ).toBeChecked();
+    expect(
+      screen
+        .getAllByRole("radio")
+        .filter((radio) => (radio as HTMLInputElement).checked),
+    ).toHaveLength(1);
+  });
+
+  it("can be changed: it is a suggestion, not a lock", () => {
+    renderForm("it", { initialNeed: "ai-agents" });
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: it_.contact.form.need.options["web-application"],
+      }),
+    );
+
+    expect(
+      screen.getByRole("radio", {
+        name: it_.contact.form.need.options["web-application"],
+      }),
+    ).toBeChecked();
+  });
+
+  it("still asks for the description before moving on", () => {
+    renderForm("it", { initialNeed: "ai-agents" });
+
+    fireEvent.click(next("it"));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      it_.contact.form.fields.description,
+    );
+  });
+
+  it("without it, nothing is chosen (negative)", () => {
+    renderForm("it");
+
+    expect(
+      screen
+        .getAllByRole("radio")
+        .every((radio) => !(radio as HTMLInputElement).checked),
+    ).toBe(true);
+  });
+
+  it("sends the pre-selected need with the form", async () => {
+    renderForm("it", { initialNeed: "workflow-automation" });
+    fireEvent.change(
+      screen.getByLabelText(it_.contact.form.need.descriptionLabel),
+      {
+        target: {
+          value:
+            "A synthetic description that is long enough to pass validation.",
+        },
+      },
+    );
+    fireEvent.click(next("it"));
+    choose(it_.contact.form.budget.options["5k-15k"]);
+    fireEvent.click(next("it"));
+    choose(it_.contact.form.timeline.options.asap);
+    fireEvent.click(next("it"));
+    fillContact("it");
+
+    await submit("it");
+
+    expect((action.mock.calls[0]?.[1] as FormData).get("need")).toBe(
+      "workflow-automation",
     );
   });
 });

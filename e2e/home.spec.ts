@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import en from "../messages/en.json";
 import it from "../messages/it.json";
-import { readServices } from "./support/content";
+import { readServices, readWork } from "./support/content";
 import {
   layoutShift,
   scrollThroughPage,
@@ -108,14 +108,24 @@ for (const locale of LOCALES) {
         .getByRole("main")
         .getByRole("heading", { level: 2 })
         .allTextContents();
+      // The demos section appears exactly when a demo is published (the Instagram demo, P3.1).
+      const demos = readWork(locale).filter(
+        ({ data }) => !data.draft && data.kind === "demo",
+      );
+      expect(demos.length).toBeGreaterThan(0);
       expect(h2).toEqual([
         copy.proof.title,
         copy.services.title,
+        copy.demos.title,
         copy.process.title,
         copy.finalCta.title,
       ]);
-      await expect(page.locator("#demos")).toHaveCount(0);
-      await expect(page.getByText(copy.demos.title)).toHaveCount(0);
+      await expect(page.locator("#demos")).toHaveCount(1);
+      for (const { slug } of demos) {
+        await expect(
+          page.locator("#demos").locator(`a[href='/${locale}/work/${slug}']`),
+        ).toHaveCount(1);
+      }
     });
 
     test("the proof strip shows the four commitments and no figure", async ({

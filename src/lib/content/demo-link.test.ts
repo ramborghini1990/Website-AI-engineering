@@ -30,15 +30,29 @@ describe("demoFor", () => {
     expect(demoFor("live-demo", [], true)).toBeNull();
   });
 
-  it("with the real content, no service links a demo today: every demo is an unpublished draft", () => {
+  it("with the real content, a service links its demo only if that demo is published: the AI agents service links the Instagram demo (P3.1), the others have none yet", () => {
     for (const locale of ["it", "en"] as const) {
-      const services = getServices(locale);
-      expect(services.some((service) => service.data.demo !== null)).toBe(true);
-      for (const service of services) {
-        expect(
-          demoFor(service.data.demo, getWork(locale), true),
-          `${locale}/${service.slug}`,
-        ).toBeNull();
+      for (const service of getServices(locale)) {
+        const link = demoFor(service.data.demo, getWork(locale), true);
+        if (service.slug === "ai-agents") {
+          expect(link?.slug, `${locale}/${service.slug}`).toBe(
+            "instagram-lead-agent",
+          );
+        } else {
+          expect(link, `${locale}/${service.slug}`).toBeNull();
+        }
+      }
+    }
+  });
+
+  it("a service whose demo is still a draft links nothing (negative)", () => {
+    for (const locale of ["it", "en"] as const) {
+      const draftDemos = getWork(locale, { includeDrafts: true }).filter(
+        (entry) => entry.data.draft,
+      );
+      expect(draftDemos.length).toBeGreaterThan(0);
+      for (const draft of draftDemos) {
+        expect(demoFor(draft.slug, getWork(locale), true), draft.slug).toBeNull();
       }
     }
   });

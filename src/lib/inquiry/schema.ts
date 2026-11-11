@@ -24,6 +24,27 @@ export const needValues = [
   "document-intelligence",
   "not-sure",
 ] as const;
+/**
+ * `?service=<slug>` on the contact page (set by the call to action of a service
+ * or a demo) pre-selects the need. Only these four known slugs count; anything
+ * else is ignored. It carries a topic, never personal data.
+ */
+const serviceNeed: Record<string, (typeof needValues)[number]> = {
+  "ai-agents": "ai-agents",
+  "workflow-automation": "workflow-automation",
+  "web-applications": "web-application",
+  "document-intelligence": "document-intelligence",
+};
+
+export function needForService(
+  value: string | string[] | undefined,
+): (typeof needValues)[number] | undefined {
+  const slug = Array.isArray(value) ? value[0] : value;
+  return slug !== undefined && Object.hasOwn(serviceNeed, slug)
+    ? serviceNeed[slug]
+    : undefined;
+}
+
 export const budgetValues = [
   "under-5k",
   "5k-15k",

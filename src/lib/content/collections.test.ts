@@ -171,14 +171,19 @@ describe("collections: references and honesty rules", () => {
     }
   });
 
-  it("today every work entry is a planned demo kept as a draft: no demo is advertised before it exists", () => {
+  it("a demo is published only once it exists: today only the Instagram demo (P3.1) is live, the other three stay planned drafts", () => {
+    const LIVE = ["instagram-lead-agent"];
     for (const locale of locales) {
       for (const entry of work(locale)) {
         expect(entry.data.kind, entry.slug).toBe("demo");
-        expect(entry.data.status, entry.slug).toBe("planned");
-        expect(entry.data.draft, entry.slug).toBe(true);
+        const live = LIVE.includes(entry.slug);
+        expect(entry.data.status, entry.slug).toBe(live ? "live" : "planned");
+        expect(entry.data.draft, entry.slug).toBe(!live);
       }
-      expect(getWork(locale), `published work in ${locale}`).toEqual([]);
+      expect(
+        getWork(locale).map((entry) => entry.slug),
+        `published work in ${locale}`,
+      ).toEqual(LIVE);
     }
   });
 

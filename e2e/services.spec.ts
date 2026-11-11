@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import en from "../messages/en.json";
 import it from "../messages/it.json";
-import { readServices } from "./support/content";
+import { readServices, readWork } from "./support/content";
 import {
   layoutShift,
   scrollThroughPage,
@@ -266,13 +266,25 @@ for (const locale of LOCALES) {
         }
       });
 
-      test("no demo section while the demos are drafts, and every link on the page resolves", async ({
+      test("the demo section appears exactly when its demo is published, and every link on the page resolves", async ({
         page,
         request,
       }) => {
         await open(page, `/${locale}/services/${slug}`);
 
-        await expect(page.getByText(copy.labels.demo)).toHaveCount(0);
+        const demo = readWork(locale).find(
+          (work) => work.slug === data.demo && !work.data.draft,
+        );
+        if (demo !== undefined) {
+          await expect(
+            page.getByRole("heading", { level: 2, name: copy.labels.demo }),
+          ).toBeVisible();
+          await expect(
+            page.getByRole("link", { name: demo.data.title }),
+          ).toHaveAttribute("href", `/${locale}/work/${demo.slug}`);
+        } else {
+          await expect(page.getByText(copy.labels.demo)).toHaveCount(0);
+        }
         const hrefs = await page
           .getByRole("main")
           .getByRole("link")

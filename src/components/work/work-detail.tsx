@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 import { ContactCta } from "@/components/content/contact-cta";
 import { Markdown } from "@/components/content/markdown";
@@ -21,11 +22,14 @@ export function WorkDetail({
   work,
   body,
   service,
+  demo = null,
 }: {
   work: Work;
   body: string;
   /** The service this entry belongs to, when it exists. */
   service: { slug: string; title: string } | null;
+  /** The interactive demo of this entry (P3.x), shown after the summary. */
+  demo?: ReactNode;
 }) {
   const t = useTranslations("work");
   const nav = useTranslations("nav.items");
@@ -68,6 +72,8 @@ export function WorkDetail({
             {t("labels.simulation")}
           </p>
         ) : null}
+
+        {demo !== null ? <div className="mt-12">{demo}</div> : null}
 
         <dl className="mt-10 grid max-w-3xl gap-x-8 gap-y-4 border-t border-border-strong pt-6 sm:grid-cols-[max-content_1fr]">
           <dt className="text-text-muted">{t("labels.sector")}</dt>
@@ -121,6 +127,7 @@ export function WorkDetail({
         title={t("cta.title")}
         body={t("cta.body")}
         label={t("cta.cta")}
+        query={`service=${work.service}`}
       />
     </>
   );

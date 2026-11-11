@@ -192,7 +192,9 @@ for (const locale of LOCALES) {
         "..%2F..%2Fpackage",
         "%2e%2e%2fservices%2fai-agents",
         "..%5C..%5Cpackage",
-        "instagram-lead-agent%00",
+        // A published slug followed by a NUL is normalised by the framework before our code
+        // sees it (it serves the same page); a draft slug shows the lookup is by exact match.
+        "linkedin-assisted-outreach%00",
       ]) {
         const response = await request.get(`/${locale}/work/${tricky}`);
         expect(response.status(), tricky).toBe(404);
@@ -221,11 +223,19 @@ test.describe("the rest of the site agrees", () => {
     }
   });
 
-  test("a service page links no demo while its demo is a draft", async ({
+  test("a service page links its demo only while that demo is published (the Instagram demo is, P3.1)", async ({
     page,
   }) => {
     await open(page, "/it/services/ai-agents");
+    const published = readWork("it").some(
+      ({ slug, data }) => slug === "instagram-lead-agent" && !data.draft,
+    );
 
+    await expect(page.locator("a[href*='/work/']")).toHaveCount(
+      published ? 1 : 0,
+    );
+    await open(page, "/it/services/web-applications");
+    // Its demo (the business suite) is still a draft: nothing is linked.
     await expect(page.locator("a[href*='/work/']")).toHaveCount(0);
   });
 

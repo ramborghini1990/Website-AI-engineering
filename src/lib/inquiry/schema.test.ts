@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   budgetValues,
   firstStepWithError,
+  needForService,
   needValues,
   parseInquiry,
   parseStep,
@@ -250,5 +251,35 @@ describe("readFields", () => {
       need: "ai-agents",
       marketingConsent: true,
     });
+  });
+});
+
+describe("needForService (?service= on the contact page)", () => {
+  it.each([
+    ["ai-agents", "ai-agents"],
+    ["workflow-automation", "workflow-automation"],
+    ["web-applications", "web-application"],
+    ["document-intelligence", "document-intelligence"],
+  ])("maps the service %s to the need %s", (service, need) => {
+    expect(needForService(service)).toBe(need);
+  });
+
+  it("takes the first value of a repeated parameter", () => {
+    expect(needForService(["ai-agents", "web-applications"])).toBe("ai-agents");
+  });
+
+  it.each([
+    undefined,
+    "",
+    "nope",
+    "AI-AGENTS",
+    "not-sure",
+    "__proto__",
+    "constructor",
+    "toString",
+    "<script>",
+    "ai-agents ",
+  ])("ignores %j: only the four known services count (negative)", (value) => {
+    expect(needForService(value)).toBeUndefined();
   });
 });

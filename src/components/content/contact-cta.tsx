@@ -14,11 +14,14 @@ export function ContactCta({
   title,
   body,
   label,
+  query,
 }: {
   id: string;
   title: string;
   body: string;
   label: string;
+  /** Pre-selects something on the contact page, e.g. `service=ai-agents`. Never personal data. */
+  query?: string;
 }) {
   const target = resolveInternalPath("/contact");
 
@@ -29,7 +32,9 @@ export function ContactCta({
         <div>
           <Button asChild size="lg">
             {target.kind === "page" ? (
-              <Link href={target.href}>{label}</Link>
+              <Link href={query ? `${target.href}?${query}` : target.href}>
+                {label}
+              </Link>
             ) : (
               <a href={target.kind === "anchor" ? target.href : `#${CONTACT_ANCHOR}`}>
                 {label}

@@ -5,11 +5,11 @@
   "seoTitle": "Demo: an agent for Instagram leads",
   "description": "An interactive simulation with synthetic data: an agent sorts messages and comments, scores contacts and drafts replies that a person approves.",
   "kind": "demo",
-  "status": "planned",
-  "draft": true,
+  "status": "live",
+  "draft": false,
   "clientConsent": false,
   "sector": "Marketing and sales",
-  "stack": ["TypeScript", "Next.js", "Claude API"],
+  "stack": ["TypeScript", "Next.js"],
   "service": "ai-agents"
 }
 ---
@@ -24,4 +24,4 @@ Replies do not go out on their own: the draft is shown and approved by a person,
 
 ## How it works in practice
 
-An agent like this works through Instagram's official APIs for business accounts, within the platform's terms. The demo uses only synthetic profiles and messages: no real account is connected and no personal data is processed.
+An agent like this works through Instagram's official APIs for business accounts, within the platform's terms. The demo uses only synthetic profiles and messages: no real account is connected and no personal data is processed. Here the classifications are computed with fixed rules, not by an AI model: a real agent would use a language model, with the same approval step.

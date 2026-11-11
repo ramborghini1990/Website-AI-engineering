@@ -103,7 +103,13 @@ export function ServiceDetail({
               {t("labels.demo")}
             </h2>
             <div>
-              <Button asChild variant="secondary" size="lg">
+              {/* The title can be long: let it wrap instead of pushing the page wider than a phone. */}
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="h-auto max-w-full py-3 text-start whitespace-normal"
+              >
                 <Link href={`/work/${demo.slug}`}>{demo.title}</Link>
               </Button>
             </div>
