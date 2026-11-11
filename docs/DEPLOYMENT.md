@@ -95,7 +95,10 @@ Create the table once per database, before the first inquiry (no migration tool 
 
 ```bash
 psql "$DATABASE_URL" -f src/lib/db/migrations/0001_create_inquiries.sql
+psql "$DATABASE_URL" -f src/lib/db/migrations/0002_create_demo_event_counts.sql   # demo analytics counters (P3.5, docs/ANALYTICS.md)
 ```
+
+Until `0002` is applied (or without `DATABASE_URL`), a deployed site answers the demo-event endpoint with 503 and drops the events; the demos are unaffected.
 
 Email goes through Resend's REST API (`EMAIL_API_KEY`); `EMAIL_FROM` must be on a domain verified with the provider (SPF/DKIM, P4.7). Use the Cloudflare **test** keys in Development and Preview (they are in `.env.example`); only Production gets real ones.
 

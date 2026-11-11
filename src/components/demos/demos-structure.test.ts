@@ -212,6 +212,77 @@ describe("the back-office demo (P3.4) keeps its data in the browser and nowhere 
   });
 });
 
+describe("the demo analytics (P3.5) are cookieless, first party and aggregate", () => {
+  const analytics = walk("src/lib/analytics").filter(
+    (file) => /\.(ts|tsx)$/.test(file) && !/\.test\.(ts|tsx)$/.test(file),
+  );
+  const FUNNEL = "src/components/demos/demo-funnel.tsx";
+  const allowed = [...analytics, FUNNEL, "src/app/api/demo-events/route.ts"];
+
+  it("finds its files", () => {
+    expect(analytics.map(norm)).toEqual(
+      expect.arrayContaining([
+        "src/lib/analytics/client.ts",
+        "src/lib/analytics/record.ts",
+        "src/lib/analytics/counter.ts",
+      ]),
+    );
+  });
+
+  it("creates no identifier and reads nothing that could make one: no storage, cookie, random id, fingerprint or referrer", () => {
+    for (const file of allowed) {
+      expect(code(file), file).not.toMatch(
+        /localStorage|sessionStorage|indexedDB|document\.cookie|cookies\(|set-cookie|Math\.random|randomUUID|getRandomValues|uuid|fingerprint|navigator\.(?:userAgent|language|platform|plugins|hardwareConcurrency)|document\.referrer|screen\.|toDataURL|canvas/i,
+      );
+    }
+  });
+
+  it("talks to no third party and injects no script: no absolute URL, next/script, script element or vendor name", () => {
+    for (const file of allowed) {
+      expect(code(file), file).not.toMatch(
+        /https?:\/\/|next\/script|createElement\(\s*["']script|<script|plausible|umami|google-analytics|gtag|fbq|segment|mixpanel|posthog|hotjar/i,
+      );
+    }
+  });
+
+  it("the only request is one same-site POST, made in one place", () => {
+    const requesters = allowed.filter((file) =>
+      /\bfetch\s*\(/.test(code(file)),
+    );
+
+    expect(requesters.map(norm)).toEqual(["src/lib/analytics/client.ts"]);
+    expect(code("src/lib/analytics/client.ts")).toContain("DEMO_EVENTS_PATH");
+  });
+
+  it("the demos reach the analytics only through the funnel leaves, and the leaves import no server module", () => {
+    for (const file of production) {
+      if (norm(file) === FUNNEL) continue;
+      expect(code(file), file).not.toMatch(/@\/lib\/analytics/);
+    }
+    expect(code(FUNNEL)).not.toMatch(/server-only|@\/lib\/(?:env|db|inquiry)/);
+  });
+
+  it("the browser side ships no Zod: its `new Function` probe is a CSP violation (script-src eval)", () => {
+    for (const file of [
+      FUNNEL,
+      "src/lib/analytics/client.ts",
+      "src/lib/analytics/events.ts",
+    ]) {
+      expect(code(file), file).not.toMatch(
+        /from ["']zod|event-schema|server-only|drizzle/,
+      );
+    }
+  });
+
+  it("adds nothing to the consent registry: no analytics category, no third party", async () => {
+    const { consentCategories, thirdParties } =
+      await import("@/lib/consent/registry");
+
+    expect(consentCategories).toEqual(["booking"]);
+    expect(thirdParties.map((party) => party.id)).toEqual(["cal-booking"]);
+  });
+});
+
 describe("interactive demos belong to published work entries", () => {
   it("every demo in the registry is a published work entry in every language", () => {
     for (const locale of routing.locales) {

@@ -50,7 +50,7 @@ export type InquiryRuntime = {
 };
 
 /** Not a secret: only used where nothing is deployed, so a local limiter needs some key. */
-const DEV_SALT = "development-only-salt-not-a-secret-0000";
+export const DEV_SALT = "development-only-salt-not-a-secret-0000";
 
 export function buildRuntime(config: InquiryConfig): InquiryRuntime {
   const missing: string[] = [];

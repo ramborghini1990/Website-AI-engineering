@@ -27,6 +27,7 @@ export function LinkedinSection({
 
   return (
     <DemoShell
+      demo="linkedin-assisted-outreach"
       id="linkedin-demo"
       title={shell("title")}
       badge={shell("badge")}

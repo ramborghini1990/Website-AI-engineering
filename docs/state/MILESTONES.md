@@ -29,5 +29,6 @@ Moved out of PROJECT_STATE.md (which keeps only the last 3).
 | 2026-11-11 | P3.1 | Instagram engagement and lead agent simulation at `/work/instagram-lead-agent`: rule-based classification, lead score, sourced drafts, approval step, CTA with the service pre-selected | `9b70e3f` |
 | 2026-11-11 | P3.2 | LinkedIn outreach simulation at `/work/linkedin-assisted-outreach`: rule-based fit rating, drafts, per-prospect approval gate enforced by the reducer, compliance rules as structure tests | `8677097` |
 | 2026-11-11 | P3.3 | Document intelligence simulation at `/work/document-intelligence-demo`: three bundled sample documents, fields with evidence, doubtful values flagged for a person, answers citing page and section; no upload surface | `93c06f4` |
+| 2026-11-11 | P3.4 | Back-office suite simulation at `/work/business-management-app`: till, cash-flow charts and purchase orders on an invented shop, one IndexedDB database in the visitor's browser (D36) | `41dbff1` |
 
 ---

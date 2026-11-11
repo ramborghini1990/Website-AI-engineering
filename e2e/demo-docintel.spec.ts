@@ -9,6 +9,7 @@ import {
   trackLayoutShift,
   waitForHydration,
 } from "./support/motion";
+import { isDemoEvent } from "./support/analytics";
 
 /**
  * The document intelligence demo (P3.3) on the PRODUCTION build with the CSP
@@ -153,6 +154,7 @@ test.describe("no uploads, no free text (reduced motion: instant)", () => {
     await open(page, "it");
     await page.waitForLoadState("networkidle");
     page.on("request", (request) => {
+      if (isDemoEvent(request, origin)) return; // the cookieless funnel event (P3.5), checked in demo-analytics.spec.ts
       if (request.method() !== "GET") sent.push(request.url());
       if (new URL(request.url()).origin !== origin) sent.push(request.url());
     });
@@ -502,6 +504,7 @@ test.describe("zero network, zero storage, strict CSP", () => {
     await page.waitForLoadState("networkidle");
     // From here on, only the visitor's actions: nothing may leave the page.
     page.on("request", (request) => {
+      if (isDemoEvent(request, origin)) return; // the cookieless funnel event (P3.5), checked in demo-analytics.spec.ts
       const url = new URL(request.url());
       if (url.origin !== origin) offenders.push(`foreign ${request.url()}`);
       if (request.method() !== "GET")

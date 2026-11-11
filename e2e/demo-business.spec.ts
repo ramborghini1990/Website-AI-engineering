@@ -9,6 +9,7 @@ import {
   trackLayoutShift,
   waitForHydration,
 } from "./support/motion";
+import { isDemoEvent } from "./support/analytics";
 
 /**
  * The back-office demo (P3.4) on the PRODUCTION build with the CSP enforced: a
@@ -550,6 +551,7 @@ test.describe("zero network, strict CSP, nothing else stored", () => {
     await page.waitForLoadState("networkidle");
     // From here on, only the visitor's actions: nothing may leave the page.
     page.on("request", (request) => {
+      if (isDemoEvent(request, origin)) return; // the cookieless funnel event (P3.5), checked in demo-analytics.spec.ts
       const url = new URL(request.url());
       if (url.origin !== origin) offenders.push(`foreign ${request.url()}`);
       if (request.method() !== "GET")

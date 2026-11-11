@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 
+import { useDemoCompleted } from "@/components/demos/demo-funnel";
 import {
   DocumentViewer,
   sectionDomId,
@@ -51,6 +52,8 @@ export function DocintelDemo() {
   const { text, docText } = useDocCopy();
 
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
+  // Done = the visitor asked one of the document's questions and got a cited answer.
+  useDemoCompleted("document-intelligence-demo", state.question !== null);
   // A short note about the last thing the visitor did (a source shown); progress and the result are derived.
   const [notice, setNotice] = useState<string | null>(null);
   const run = useRef(0);

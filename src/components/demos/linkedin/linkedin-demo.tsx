@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 
+import { useDemoCompleted } from "@/components/demos/demo-funnel";
 import { ProspectDetail } from "@/components/demos/linkedin/prospect-detail";
 import { ProspectList } from "@/components/demos/linkedin/prospect-list";
 import { ScheduleQueue } from "@/components/demos/linkedin/schedule-queue";
@@ -49,6 +50,11 @@ export function LinkedinDemo() {
   const sessionId = useId();
 
   const [state, dispatch] = useReducer(reducer, prospects, initialState);
+  // Done = the person approved (scheduled) at least one message.
+  useDemoCompleted(
+    "linkedin-assisted-outreach",
+    state.items.some((item) => item.decision === "scheduled"),
+  );
   // A short note about the last thing the visitor did (a selection); progress and the result are derived.
   const [notice, setNotice] = useState<string | null>(null);
   const run = useRef(0);

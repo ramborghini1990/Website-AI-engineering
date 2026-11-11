@@ -20,6 +20,7 @@ afterEach(() => {
 function shell() {
   return render(
     <DemoShell
+      demo="instagram-lead-agent"
       id="demo"
       title="Try the demo"
       badge="Simulation"

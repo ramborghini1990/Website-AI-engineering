@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-11 · branch `main` (P3.3 committed as `93c06f4`)_
+_Last updated: 2026-11-11 · branch `main` (P3.4 committed as `41dbff1`)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 3 — Agent showcases & funnels (4/7; P3.0 skipped in order, see `docs/state/tasks/P3.1.md`) |
-| Active task | `P3.4` Back-office suite, SIMULATION at `/[locale]/work/business-management-app` |
-| Status | Built and verified, **awaiting review and commit**. IndexedDB in one file only, client-only (D36). Lighthouse not run |
-| Next task | `P3.0` (demo framework, incl. generic shell texts) or `P3.5` (demo analytics): user's call, do not start unprompted |
+| Phase | 3 — Agent showcases & funnels (5/7; P3.0 skipped in order, see `docs/state/tasks/P3.1.md`) |
+| Active task | `P3.5` Demo analytics, cookieless first-party aggregate counters (D37, `docs/ANALYTICS.md`) |
+| Status | Built and verified, **awaiting review and commit**. No Plausible script (D37); funnel read with SQL. Not run against a real Postgres |
+| Next task | `P3.0` (demo framework, incl. generic shell texts) or `P3.6` (only if needed, ADR first): user's call, do not start unprompted |
 | Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | Decisions in `docs/state/tasks/P3.4.md` → "Decisions for you" (invented shop content, IndexedDB in the cookie policy, dropped `> 0 drafts` guards); then review and commit |
+| Needs the user | Decisions in `docs/state/tasks/P3.5.md` → "Decisions for you" (no Plausible, what "completed" means per demo, DNT/GPC); apply migration 0002 when the DB exists (B13); then review and commit |
 
 ## 2. Phase progress
 
@@ -27,7 +27,7 @@ _Last updated: 2026-11-11 · branch `main` (P3.3 committed as `93c06f4`)_
 | 0 Setup & governance | ✔ | 7/7 | carry-overs in `docs/state/tasks/general.md` |
 | 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
-| 3 Agent showcases & funnels | ◐ | 4/7 | P3.4 awaiting commit |
+| 3 Agent showcases & funnels | ◐ | 5/7 | P3.5 awaiting commit |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
@@ -54,10 +54,10 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (P3.4) → PASS 2026-11-11 (3rd run; earlier failures fixed, see tasks/P3.4.md)
-  typecheck, lint, unit (88 files / 1511 tests), knip, format, build → pass
-  e2e 639/639 (chromium + chromium-dev, enforced CSP)
-  NOT done: Lighthouse (P3.4 asks for perf ≥ 90: not evidenced); Firefox/WebKit; screen reader; mutation sweep
+pnpm agent:gate (P3.5) → PASS 2026-11-11 (1st run)
+  typecheck, lint, unit (91 files / 1557 tests), knip, format, build → pass
+  e2e 651/651 (chromium + chromium-dev, enforced CSP)
+  NOT done: Lighthouse; Firefox/WebKit; real Postgres upsert; screen reader; mutation sweep
 ```
 
 ## 6. Rules for updating this file

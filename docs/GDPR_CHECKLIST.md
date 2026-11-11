@@ -41,7 +41,7 @@ Architecture: custom, first-party consent manager (no third-party CMP script nee
 
 ## 4. Analytics privacy
 
-- ☐ Use **cookieless, EU-hosted** analytics (Plausible EU or self-hosted Umami): no cookies, no persistent identifiers, IP not stored. Under the Garante guidelines, analytics that work like technical cookies (aggregate, no cross-site tracking, no re-identification, first-party) don't need consent. Still disclosed in the privacy/cookie notice. **[P2.6 / P3.5]**
+- ☐ Use **cookieless, EU-hosted** analytics (Plausible EU or self-hosted Umami): no cookies, no persistent identifiers, IP not stored. Under the Garante guidelines, analytics that work like technical cookies (aggregate, no cross-site tracking, no re-identification, first-party) don't need consent. Still disclosed in the privacy/cookie notice. **[P2.6 / P3.5]** _P3.5 built it first-party instead (D37, `docs/ANALYTICS.md`): own aggregate counters, no script, no processor; still to disclose in the notice (P4.2) and add to the ROPA (P4.3)._
 - ☐ Disable Vercel Web Analytics/Speed Insights, or confirm their current data handling and list them in the notice.
 - ☐ Custom events carry **no personal data** (no email, no free text, no query strings containing form data). Strip query strings from tracked URLs.
 - ☐ **No GA4, Meta Pixel, LinkedIn Insight Tag** in v1. If ever added: `marketing` category, prior opt-in, Consent Mode v2, transfer assessment, update notices.

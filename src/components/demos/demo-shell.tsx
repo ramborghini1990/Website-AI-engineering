@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
+import { DemoCta, DemoStartTracker } from "@/components/demos/demo-funnel";
+import type { InteractiveDemo } from "@/lib/demos/registry";
 
 /**
  * The frame every demo sits in (a small start of P3.0's demo shell): a title
@@ -10,9 +10,11 @@ import { Link } from "@/i18n/navigation";
  * JavaScript, the demo itself, and a call to action into the inquiry funnel
  * that pre-selects the service (`?service=`), never any personal data.
  *
- * Server-renderable: the disclosure and the call to action are in the HTML.
+ * Server-renderable: the disclosure and the call to action are in the HTML. The
+ * `demo` slug only names the funnel the cookieless counters (P3.5) belong to.
  */
 export function DemoShell({
+  demo,
   id,
   title,
   badge,
@@ -21,6 +23,7 @@ export function DemoShell({
   cta,
   children,
 }: {
+  demo: InteractiveDemo;
   id: string;
   title: string;
   badge: string;
@@ -59,15 +62,13 @@ export function DemoShell({
         {noscript}
       </p>
 
-      {children}
+      <DemoStartTracker demo={demo}>{children}</DemoStartTracker>
 
       <div className="grid max-w-3xl gap-4 border-t border-border-strong pt-8">
         <h3 className="text-2xl text-text">{cta.title}</h3>
         <p className="text-base text-text-secondary">{cta.body}</p>
         <div>
-          <Button asChild size="lg">
-            <Link href={cta.href}>{cta.label}</Link>
-          </Button>
+          <DemoCta demo={demo} href={cta.href} label={cta.label} />
         </div>
       </div>
     </section>

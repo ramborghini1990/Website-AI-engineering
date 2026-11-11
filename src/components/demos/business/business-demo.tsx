@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 
+import { useDemoCompleted } from "@/components/demos/demo-funnel";
 import { CashflowView } from "@/components/demos/business/cashflow-view";
 import { OrdersView } from "@/components/demos/business/orders-view";
 import { PosView } from "@/components/demos/business/pos-view";
@@ -45,6 +46,11 @@ export function BusinessDemo({ store }: { store?: BusinessStore } = {}) {
   const sessionId = useId();
 
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
+  // Done = a sale was rung up or a purchase order was received (a notice only an action sets).
+  useDemoCompleted(
+    "business-management-app",
+    state.notice?.kind === "sale" || state.notice?.kind === "order-received",
+  );
   const [storage, setStorage] = useState<Storage>("checking");
   const active = useRef<BusinessStore | null>(null);
   /** The data last read from or written to storage: a change is saved only when it differs. */

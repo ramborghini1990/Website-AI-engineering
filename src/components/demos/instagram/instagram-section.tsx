@@ -24,6 +24,7 @@ export function InstagramSection({
 
   return (
     <DemoShell
+      demo="instagram-lead-agent"
       id="instagram-demo"
       title={t("title")}
       badge={t("badge")}

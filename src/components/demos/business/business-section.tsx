@@ -27,6 +27,7 @@ export function BusinessSection({
 
   return (
     <DemoShell
+      demo="business-management-app"
       id="business-demo"
       title={shell("title")}
       badge={shell("badge")}

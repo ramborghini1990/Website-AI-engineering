@@ -10,6 +10,7 @@ import {
   trackLayoutShift,
   waitForHydration,
 } from "./support/motion";
+import { isDemoEvent } from "./support/analytics";
 
 /**
  * The Instagram engagement and lead agent demo (P3.1) on the PRODUCTION build
@@ -497,6 +498,7 @@ test.describe("zero network, zero storage, strict CSP", () => {
     await page.waitForLoadState("networkidle");
     // From here on, only the visitor's actions: nothing may leave the page.
     page.on("request", (request) => {
+      if (isDemoEvent(request, origin)) return; // the cookieless funnel event (P3.5), checked in demo-analytics.spec.ts
       const url = new URL(request.url());
       if (url.origin !== origin) offenders.push(`foreign ${request.url()}`);
       if (request.method() !== "GET")

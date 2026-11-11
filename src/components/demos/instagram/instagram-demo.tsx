@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 
+import { useDemoCompleted } from "@/components/demos/demo-funnel";
 import { DetailPanel } from "@/components/demos/instagram/detail-panel";
 import { InboxList } from "@/components/demos/instagram/inbox-list";
 import { LeadBoard } from "@/components/demos/instagram/lead-board";
@@ -54,6 +55,11 @@ export function InstagramDemo() {
     text: t(`items.${fixture.id}.text`),
   }));
   const [state, dispatch] = useReducer(reducer, inbox, initialState);
+  // Done = the person approved at least one of the agent's actions.
+  useDemoCompleted(
+    "instagram-lead-agent",
+    state.items.some((item) => item.decision === "approved"),
+  );
   // A short note about the last thing the visitor did (a selection); progress and the result are derived.
   const [notice, setNotice] = useState<string | null>(null);
   const run = useRef(0);

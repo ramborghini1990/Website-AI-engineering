@@ -1,4 +1,13 @@
-import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  date,
+  integer,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 /**
  * The inquiries table (P2.5, decision D5: EU-hosted Postgres). Only what is
@@ -35,3 +44,22 @@ export const inquiries = pgTable("inquiries", {
 });
 
 export type InquiryRow = typeof inquiries.$inferInsert;
+
+/**
+ * Demo analytics (P3.5): one counter per UTC day, demo and event. AGGREGATE
+ * ONLY: there is no row per event or per visitor, so no timestamp finer than the
+ * day, no ip, no user agent, no id, and nothing that could be linked back to a
+ * person. The counter is raised in place (`count = count + 1`).
+ */
+export const demoEventCounts = pgTable(
+  "demo_event_counts",
+  {
+    day: date("day", { mode: "string" }).notNull(),
+    demo: text("demo").notNull(),
+    event: text("event").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.demo, table.event] })],
+);
+
+export type DemoEventCountRow = typeof demoEventCounts.$inferInsert;

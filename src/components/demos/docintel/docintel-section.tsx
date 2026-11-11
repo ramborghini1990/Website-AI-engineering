@@ -27,6 +27,7 @@ export function DocintelSection({
 
   return (
     <DemoShell
+      demo="document-intelligence-demo"
       id="docintel-demo"
       title={shell("title")}
       badge={shell("badge")}
