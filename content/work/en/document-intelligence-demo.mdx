@@ -1,27 +1,27 @@
 ---
 {
   "title": "Document intelligence on sample documents (simulation)",
-  "summary": "Reading fictional invoices and contracts: extracted fields, classification and questions answered with a source reference.",
+  "summary": "Reading a fictional invoice, contract and transport document: structured fields, doubtful values flagged for a person, and answers that cite the exact sentence and page.",
   "seoTitle": "Demo: document intelligence",
-  "description": "A simulation on sample documents: field extraction, classification and plain-language questions, with a pointer to the passage and human review.",
+  "description": "A simulation on three invented documents: structured fields, unclear values flagged for a person, and answers that cite the page and section.",
   "kind": "demo",
-  "status": "planned",
-  "draft": true,
+  "status": "live",
+  "draft": false,
   "clientConsent": false,
   "sector": "Administration and professional firms",
-  "stack": ["TypeScript", "Next.js", "Claude API"],
+  "stack": ["TypeScript", "Next.js"],
   "service": "document-intelligence"
 }
 ---
 
 ## What it shows
 
-The reading of sample documents included in the demo, such as fictional invoices and contracts: field extraction, classification and plain-language questions, with a pointer to the passage each answer comes from.
+Three sample documents with invented companies: an invoice, a service contract and a transport document. For each one the demo pulls out the key facts as structured fields, such as the invoice number, the amounts and the due date, and shows the words each value was read from. You can then pick a question, and the answer comes with the exact sentence, the page and the section it is based on. Where the document does not say, the answer says it cannot find it instead of guessing.
 
 ## Human review
 
-Doubtful results are highlighted for review, as they would be in a real system: the person checks only what needs checking.
+Each document contains something a person should look at: a smudged order number, a handwritten change to a fee, a blurred weight. Those values are read but flagged, and they stay flagged until someone marks them as checked. Any answer that rests on one of them says so. The person checks only what needs checking.
 
-## Data
+## Stated limits
 
-The demo uses only the sample documents provided with it. You cannot upload your own files, so nobody's data is processed.
+You cannot upload files: the demo opens only the three documents provided with it, so nobody's data is processed, and nothing is sent to a server. It does not use an AI model either: the fields are read and the answers composed with fixed rules, and the questions are a short fixed list, not free text. A real system would read your own documents with a language model, which needs an agreed purpose, a data-processing agreement and a retention rule first.

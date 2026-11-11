@@ -799,6 +799,260 @@
           "about": "carries freight between northern Italy and central Europe"
         }
       }
+    },
+    "docIntel": {
+      "disclosure": "This is a simulation. No AI model is called: the fields are read and the questions answered with fixed rules, on this page and without a network, on invented documents. You cannot upload files, so nobody's data is processed. A real system would use a language model and your own documents, with the same human check you see here for doubtful values.",
+      "noscript": "The demo needs JavaScript. The sample documents are shown below; enable JavaScript to see the fields read and the questions answered.",
+      "ctaTitle": "Need something like this for your documents?",
+      "ctaBody": "Tell me which documents reach you today and what you do with them: I will tell you what can be read automatically, and what a person should still check.",
+      "brand": "Three sample documents between fictional companies: an invoice, a service contract and a transport document.",
+      "intro": "Pick a document and have it read. The demo pulls out the key facts as structured fields, flags what it is not sure about for a person to check, and answers questions showing the exact sentence and page each answer comes from.",
+      "limits": {
+        "title": "How this stays safe",
+        "upload": "No uploads: you cannot add your own files in this version. The demo only opens the three sample documents bundled with the page.",
+        "synthetic": "Invented documents: the companies, people, numbers and addresses are made up.",
+        "rules": "Closed processing: everything runs on this page with fixed rules. Nothing is sent to a server and no AI model is called.",
+        "review": "A person decides on doubtful values: unclear or handwritten values are flagged, and stay flagged until someone marks them as checked.",
+        "future": "A real project that reads your own documents would first need an agreed purpose, a data-processing agreement and a retention rule."
+      },
+      "picker": {
+        "title": "Sample documents",
+        "synthetic": "Synthetic documents: every name, number and address is invented.",
+        "pages": "{pages, plural, one {# page} other {# pages}}",
+        "selected": "Selected: {name}"
+      },
+      "controls": {
+        "read": "Read the document",
+        "reading": "Reading",
+        "progress": "Read {done} of {total} fields",
+        "done": "Reading complete: {total} fields, {ok} read, {review} to check.",
+        "showing": "Showing page {page}, {section} in the document."
+      },
+      "summary": {
+        "title": "Reading results",
+        "read": "Read",
+        "review": "To check",
+        "checked": "Checked",
+        "missing": "Not found"
+      },
+      "viewer": {
+        "title": "The document",
+        "fictional": "Fictional document made for this demo. Dates and amounts use the Italian notation.",
+        "page": "Page {page} of {pages}",
+        "cited": "Shown as a source",
+        "evidence": "Underlined: the words a field was read from"
+      },
+      "fields": {
+        "title": "Extracted fields",
+        "hint": "Each value was read from the words the source button points to, and is shown in your language's notation.",
+        "pending": "Not read yet",
+        "source": "Page {page}, {section}",
+        "status": {
+          "read": "Read",
+          "review": "Needs your check",
+          "missing": "Not found"
+        },
+        "reason": {
+          "ambiguous": "The original is unclear: two readings are possible. Check it against the document.",
+          "handwritten": "A handwritten mark sits next to this value. Check which figure applies.",
+          "missing": "Not found in the document. Nothing was guessed."
+        },
+        "check": "I have checked {field} against the document",
+        "checked": "Checked by you",
+        "sumOk": "Arithmetic check passed: the parts add up to the total.",
+        "sumMismatch": "Arithmetic check failed: the amounts do not add up. Check the document.",
+        "sumUnavailable": "Arithmetic check not possible: a figure was not read."
+      },
+      "qa": {
+        "title": "Questions on this document",
+        "hint": "Pick a question. The answer is built only from the fields read above, and shows the sentence and page it comes from. Typing your own question is not available in this demo.",
+        "locked": "Read the document first: the answers are built from the fields it gives.",
+        "answer": "Answer",
+        "sources": "Where this comes from",
+        "source": "Page {page}, {section}",
+        "notFound": "I cannot find this in the document, so I will not guess.",
+        "noSource": "No source: the document does not say.",
+        "unchecked": "This answer uses a value that still needs your check."
+      },
+      "docs": {
+        "invoice": {
+          "name": "Invoice",
+          "title": "Supplier invoice",
+          "summary": "A supplier invoice with a smudged order number",
+          "sections": {
+            "header": {
+              "heading": "Header",
+              "text": "INVOICE NO. FT-2026/0142\nIssue date: 14/03/2026\nDue date: 13/04/2026"
+            },
+            "parties": {
+              "heading": "Parties and order",
+              "text": "From: Tessitura Valle S.r.l., Via dei Telai 12, 10100 Torino\nTo: Orso Allestimenti S.r.l., Corso Esempio 5, 20100 Milano\nYour order: PO 4471 (the stamp is smudged, it could read 4417)"
+            },
+            "lines": {
+              "heading": "Items",
+              "text": "1 roll of technical fabric, 50 m: € 600,00\n2 hours of cutting service: € 400,00"
+            },
+            "totals": {
+              "heading": "Totals",
+              "text": "Taxable amount: € 1.000,00\nVAT 22%: € 220,00\nTotal due: € 1.220,00"
+            },
+            "payment": {
+              "heading": "Payment",
+              "text": "Payment by bank transfer within 30 days of the invoice date.\nAccount holder: Tessitura Valle S.r.l."
+            }
+          },
+          "fields": {
+            "invoiceNo": "Invoice number",
+            "issueDate": "Issue date",
+            "dueDate": "Due date",
+            "supplier": "Supplier",
+            "customer": "Customer",
+            "po": "Purchase order",
+            "net": "Taxable amount",
+            "vatRate": "VAT rate",
+            "vat": "VAT",
+            "total": "Total due",
+            "paymentDays": "Payment period",
+            "accountHolder": "Account holder"
+          },
+          "questions": {
+            "amountDue": {
+              "q": "How much is due, and by when?",
+              "a": "The invoice total is {total}, due on {dueDate}."
+            },
+            "vat": {
+              "q": "How much VAT is charged?",
+              "a": "{vat} of VAT at {vatRate}, on a taxable amount of {net}."
+            },
+            "payTo": {
+              "q": "Who is paid, and how long do I have?",
+              "a": "The payment goes to {accountHolder}, by bank transfer within {paymentDays} of the invoice date."
+            },
+            "discount": {
+              "q": "Is there a discount for paying early?"
+            }
+          }
+        },
+        "contract": {
+          "name": "Service contract",
+          "title": "IT support agreement",
+          "summary": "An IT support agreement with a handwritten change to the fee",
+          "sections": {
+            "parties": {
+              "heading": "Art. 1 · Parties",
+              "text": "This agreement is made between Studio Rete S.r.l. (the Provider) and Orso Allestimenti S.r.l. (the Client)."
+            },
+            "scope": {
+              "heading": "Art. 2 · Services",
+              "text": "The Provider supplies IT support and maintenance for the Client's systems, on working days from 09:00 to 18:00."
+            },
+            "term": {
+              "heading": "Art. 3 · Effective date and term",
+              "text": "This agreement takes effect on 01/04/2026 and lasts 12 months."
+            },
+            "fees": {
+              "heading": "Art. 4 · Fees and payment",
+              "text": "The monthly fee is € 1.800,00 plus VAT. (Handwritten in the margin, initialled: “1.850”.)\nThe Client pays each invoice within 30 days of receiving it."
+            },
+            "renewal": {
+              "heading": "Art. 5 · Renewal and notice",
+              "text": "The agreement renews automatically for further periods of the same length, unless one party gives written notice at least 60 days before the end of the current period."
+            },
+            "liability": {
+              "heading": "Art. 6 · Liability",
+              "text": "The Provider's liability is limited to the fees paid in the 12 months before the event that caused the damage."
+            },
+            "signatures": {
+              "heading": "Signatures",
+              "text": "Signed in Turin on 20/03/2026.\nFor the Provider: (signature)\nFor the Client: (signature)"
+            }
+          },
+          "fields": {
+            "provider": "Provider",
+            "client": "Client",
+            "effectiveDate": "Effective date",
+            "termMonths": "Initial term",
+            "monthlyFee": "Monthly fee",
+            "paymentDays": "Payment period",
+            "noticeDays": "Notice to stop renewal",
+            "liabilityMonths": "Liability limited to fees of the last",
+            "signDate": "Signature date"
+          },
+          "questions": {
+            "renewal": {
+              "q": "Does the contract renew, and how do I stop it?",
+              "a": "It renews automatically unless a party gives written notice at least {noticeDays} before the end of the current period. The first period starts on {effectiveDate} and lasts {termMonths}."
+            },
+            "fee": {
+              "q": "What does it cost, and when must I pay?",
+              "a": "The fee is {monthlyFee} a month plus VAT, paid within {paymentDays} of receiving each invoice."
+            },
+            "liability": {
+              "q": "What is the limit of the Provider's liability?",
+              "a": "The Provider's liability is limited to the fees paid in the {liabilityMonths} before the event."
+            },
+            "nonCompete": {
+              "q": "Is there a non-compete clause?"
+            }
+          }
+        },
+        "ddt": {
+          "name": "Transport document (DDT)",
+          "title": "Transport document",
+          "summary": "A delivery note with a blurred weight",
+          "sections": {
+            "header": {
+              "heading": "Header",
+              "text": "TRANSPORT DOCUMENT (DDT) NO. 2026/0877\nDate: 02/04/2026\nReason for transport: sale"
+            },
+            "parties": {
+              "heading": "Sender and recipient",
+              "text": "Sender: Tessitura Valle S.r.l., Via dei Telai 12, Torino\nRecipient: Orso Allestimenti S.r.l.\nDelivery address: Via Esempio 7, 20100 Milano"
+            },
+            "carrier": {
+              "heading": "Carrier",
+              "text": "Carrier: Trasporti Rapidi S.n.c.\nVehicle plate: AB123CD\nPickup: 02/04/2026 at 15:30"
+            },
+            "goods": {
+              "heading": "Goods",
+              "text": "Technical fabric, rolls of 50 m, on pallets.\nPackages: 3\nGross weight: 148 kg (blurred in the scan, it could read 146)"
+            },
+            "receipt": {
+              "heading": "Receipt",
+              "text": "Goods received without reservations.\nDelivered on 03/04/2026."
+            }
+          },
+          "fields": {
+            "ddtNo": "DDT number",
+            "ddtDate": "Date",
+            "sender": "Sender",
+            "recipient": "Recipient",
+            "address": "Delivery address",
+            "carrier": "Carrier",
+            "plate": "Vehicle plate",
+            "packages": "Packages",
+            "grossWeight": "Gross weight",
+            "deliveredOn": "Delivered on"
+          },
+          "questions": {
+            "weight": {
+              "q": "How many packages are there, and how much do they weigh?",
+              "a": "{packages} packages, with a gross weight of {grossWeight}."
+            },
+            "who": {
+              "q": "Who ships, who carries and who receives?",
+              "a": "{sender} ships to {recipient}, and {carrier} carries the goods."
+            },
+            "delivered": {
+              "q": "When and where was it delivered?",
+              "a": "It was delivered on {deliveredOn} to {address}, received without reservations."
+            },
+            "insured": {
+              "q": "Is the shipment insured?"
+            }
+          }
+        }
+      }
     }
   }
 }

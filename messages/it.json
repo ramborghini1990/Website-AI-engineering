@@ -799,6 +799,260 @@
           "about": "effettua trasporti di merci tra il Nord Italia e l'Europa centrale"
         }
       }
+    },
+    "docIntel": {
+      "disclosure": "Questa è una simulazione. Nessun modello AI viene chiamato: i campi vengono letti e le domande ricevono risposta con regole fisse, in questa pagina e senza rete, su documenti inventati. Non si possono caricare file, quindi non viene trattato il dato di nessuno. Un sistema reale userebbe un modello linguistico e i tuoi documenti, con lo stesso controllo umano che vedi qui per i valori dubbi.",
+      "noscript": "La demo richiede JavaScript. Qui sotto trovi i documenti di esempio; per vedere i campi letti e le domande con risposta abilita JavaScript.",
+      "ctaTitle": "Ti serve qualcosa di simile per i tuoi documenti?",
+      "ctaBody": "Raccontami quali documenti ti arrivano oggi e che cosa ci fai: ti dico che cosa si può leggere in automatico e che cosa una persona deve comunque controllare.",
+      "brand": "Tre documenti di esempio tra aziende fittizie: una fattura, un contratto di servizio e un documento di trasporto.",
+      "intro": "Scegli un documento e fallo leggere. La demo ne estrae i dati chiave come campi strutturati, segnala ciò di cui non è sicura perché lo controlli una persona, e risponde alle domande mostrando la frase e la pagina esatte da cui nasce ogni risposta.",
+      "limits": {
+        "title": "Come resta sicura",
+        "upload": "Nessun caricamento: in questa versione non puoi aggiungere file tuoi. La demo apre solo i tre documenti di esempio inclusi nella pagina.",
+        "synthetic": "Documenti inventati: aziende, persone, numeri e indirizzi sono di fantasia.",
+        "rules": "Elaborazione chiusa: tutto avviene in questa pagina con regole fisse. Nulla viene inviato a un server e nessun modello AI viene chiamato.",
+        "review": "Una persona decide sui valori dubbi: quelli poco chiari o scritti a mano vengono segnalati e restano segnalati finché qualcuno non li segna come controllati.",
+        "future": "Un progetto reale che legge i tuoi documenti richiederebbe prima una finalità concordata, un accordo sul trattamento dei dati e una regola di conservazione."
+      },
+      "picker": {
+        "title": "Documenti di esempio",
+        "synthetic": "Documenti sintetici: ogni nome, numero e indirizzo è inventato.",
+        "pages": "{pages, plural, one {# pagina} other {# pagine}}",
+        "selected": "Selezionato: {name}"
+      },
+      "controls": {
+        "read": "Leggi il documento",
+        "reading": "Lettura in corso",
+        "progress": "Letti {done} campi su {total}",
+        "done": "Lettura completata: {total} campi, {ok} letti, {review} da controllare.",
+        "showing": "Nel documento è mostrata pagina {page}, {section}."
+      },
+      "summary": {
+        "title": "Risultati della lettura",
+        "read": "Letti",
+        "review": "Da controllare",
+        "checked": "Controllati",
+        "missing": "Non trovati"
+      },
+      "viewer": {
+        "title": "Il documento",
+        "fictional": "Documento fittizio creato per questa demo. Date e importi usano la notazione italiana.",
+        "page": "Pagina {page} di {pages}",
+        "cited": "Indicato come fonte",
+        "evidence": "Sottolineato: le parole da cui è stato letto un campo"
+      },
+      "fields": {
+        "title": "Campi estratti",
+        "hint": "Ogni valore è stato letto dalle parole a cui rimanda il pulsante della fonte ed è scritto con la notazione della tua lingua.",
+        "pending": "Non ancora letto",
+        "source": "Pagina {page}, {section}",
+        "status": {
+          "read": "Letto",
+          "review": "Da controllare",
+          "missing": "Non trovato"
+        },
+        "reason": {
+          "ambiguous": "L'originale non è chiaro: sono possibili due letture. Controllalo sul documento.",
+          "handwritten": "Accanto a questo valore c'è un segno scritto a mano. Controlla quale cifra vale.",
+          "missing": "Non trovato nel documento. Non è stato inventato nulla."
+        },
+        "check": "Ho controllato {field} sul documento",
+        "checked": "Controllato da te",
+        "sumOk": "Verifica aritmetica superata: le parti sommano al totale.",
+        "sumMismatch": "Verifica aritmetica non superata: gli importi non tornano. Controlla il documento.",
+        "sumUnavailable": "Verifica aritmetica non possibile: una cifra non è stata letta."
+      },
+      "qa": {
+        "title": "Domande su questo documento",
+        "hint": "Scegli una domanda. La risposta è costruita solo dai campi letti qui sopra e mostra la frase e la pagina da cui viene. In questa demo non è possibile scrivere domande proprie.",
+        "locked": "Prima leggi il documento: le risposte sono costruite con i campi che ne escono.",
+        "answer": "Risposta",
+        "sources": "Da dove viene",
+        "source": "Pagina {page}, {section}",
+        "notFound": "Non trovo questa informazione nel documento, quindi non la invento.",
+        "noSource": "Nessuna fonte: il documento non lo dice.",
+        "unchecked": "Questa risposta usa un valore che richiede ancora il tuo controllo."
+      },
+      "docs": {
+        "invoice": {
+          "name": "Fattura",
+          "title": "Fattura di un fornitore",
+          "summary": "Una fattura di un fornitore con un numero d'ordine sbavato",
+          "sections": {
+            "header": {
+              "heading": "Intestazione",
+              "text": "FATTURA N. FT-2026/0142\nData di emissione: 14/03/2026\nScadenza: 13/04/2026"
+            },
+            "parties": {
+              "heading": "Parti e ordine",
+              "text": "Da: Tessitura Valle S.r.l., Via dei Telai 12, 10100 Torino\nA: Orso Allestimenti S.r.l., Corso Esempio 5, 20100 Milano\nVostro ordine: PO 4471 (il timbro è sbavato, potrebbe leggersi 4417)"
+            },
+            "lines": {
+              "heading": "Righe",
+              "text": "1 rotolo di tessuto tecnico, 50 m: € 600,00\n2 ore di servizio di taglio: € 400,00"
+            },
+            "totals": {
+              "heading": "Totali",
+              "text": "Imponibile: € 1.000,00\nIVA 22%: € 220,00\nTotale da pagare: € 1.220,00"
+            },
+            "payment": {
+              "heading": "Pagamento",
+              "text": "Pagamento con bonifico bancario entro 30 giorni dalla data della fattura.\nIntestatario: Tessitura Valle S.r.l."
+            }
+          },
+          "fields": {
+            "invoiceNo": "Numero fattura",
+            "issueDate": "Data di emissione",
+            "dueDate": "Scadenza",
+            "supplier": "Fornitore",
+            "customer": "Cliente",
+            "po": "Ordine d'acquisto",
+            "net": "Imponibile",
+            "vatRate": "Aliquota IVA",
+            "vat": "IVA",
+            "total": "Totale da pagare",
+            "paymentDays": "Termine di pagamento",
+            "accountHolder": "Intestatario"
+          },
+          "questions": {
+            "amountDue": {
+              "q": "Quanto c'è da pagare, ed entro quando?",
+              "a": "Il totale della fattura è {total}, in scadenza il {dueDate}."
+            },
+            "vat": {
+              "q": "Quanta IVA viene applicata?",
+              "a": "{vat} di IVA al {vatRate}, su un imponibile di {net}."
+            },
+            "payTo": {
+              "q": "A chi si paga, e di quanto tempo dispongo?",
+              "a": "Il pagamento va a {accountHolder}, con bonifico bancario entro {paymentDays} dalla data della fattura."
+            },
+            "discount": {
+              "q": "C'è uno sconto per pagamento anticipato?"
+            }
+          }
+        },
+        "contract": {
+          "name": "Contratto di servizio",
+          "title": "Contratto di assistenza informatica",
+          "summary": "Un contratto di assistenza informatica con una modifica a mano del canone",
+          "sections": {
+            "parties": {
+              "heading": "Art. 1 · Parti",
+              "text": "Il presente contratto è stipulato tra Studio Rete S.r.l. (il Fornitore) e Orso Allestimenti S.r.l. (il Cliente)."
+            },
+            "scope": {
+              "heading": "Art. 2 · Servizi",
+              "text": "Il Fornitore presta assistenza e manutenzione informatica sui sistemi del Cliente, nei giorni lavorativi dalle 09:00 alle 18:00."
+            },
+            "term": {
+              "heading": "Art. 3 · Decorrenza e durata",
+              "text": "Il presente contratto decorre dal 01/04/2026 e dura 12 mesi."
+            },
+            "fees": {
+              "heading": "Art. 4 · Canone e pagamento",
+              "text": "Il canone mensile è di € 1.800,00 più IVA. (Scritto a mano a margine, siglato: “1.850”.)\nIl Cliente paga ogni fattura entro 30 giorni dal ricevimento."
+            },
+            "renewal": {
+              "heading": "Art. 5 · Rinnovo e disdetta",
+              "text": "Il contratto si rinnova automaticamente per periodi successivi di pari durata, salvo disdetta scritta di una delle parti almeno 60 giorni prima della fine del periodo in corso."
+            },
+            "liability": {
+              "heading": "Art. 6 · Responsabilità",
+              "text": "La responsabilità del Fornitore è limitata ai corrispettivi pagati nei 12 mesi precedenti l'evento che ha causato il danno."
+            },
+            "signatures": {
+              "heading": "Firme",
+              "text": "Firmato a Torino il 20/03/2026.\nPer il Fornitore: (firma)\nPer il Cliente: (firma)"
+            }
+          },
+          "fields": {
+            "provider": "Fornitore",
+            "client": "Cliente",
+            "effectiveDate": "Data di decorrenza",
+            "termMonths": "Durata iniziale",
+            "monthlyFee": "Canone mensile",
+            "paymentDays": "Termine di pagamento",
+            "noticeDays": "Preavviso per evitare il rinnovo",
+            "liabilityMonths": "Responsabilità limitata ai corrispettivi degli ultimi",
+            "signDate": "Data di firma"
+          },
+          "questions": {
+            "renewal": {
+              "q": "Il contratto si rinnova, e come lo fermo?",
+              "a": "Si rinnova automaticamente, salvo disdetta scritta di una parte almeno {noticeDays} prima della fine del periodo in corso. Il primo periodo decorre dal {effectiveDate} e dura {termMonths}."
+            },
+            "fee": {
+              "q": "Quanto costa, e quando devo pagare?",
+              "a": "Il canone è di {monthlyFee} al mese più IVA, da pagare entro {paymentDays} dal ricevimento di ogni fattura."
+            },
+            "liability": {
+              "q": "Qual è il limite di responsabilità del Fornitore?",
+              "a": "La responsabilità del Fornitore è limitata ai corrispettivi pagati nei {liabilityMonths} precedenti l'evento."
+            },
+            "nonCompete": {
+              "q": "C'è un patto di non concorrenza?"
+            }
+          }
+        },
+        "ddt": {
+          "name": "Documento di trasporto (DDT)",
+          "title": "Documento di trasporto",
+          "summary": "Un documento di consegna con un peso sfocato",
+          "sections": {
+            "header": {
+              "heading": "Intestazione",
+              "text": "DOCUMENTO DI TRASPORTO (DDT) N. 2026/0877\nData: 02/04/2026\nCausale del trasporto: vendita"
+            },
+            "parties": {
+              "heading": "Mittente e destinatario",
+              "text": "Mittente: Tessitura Valle S.r.l., Via dei Telai 12, Torino\nDestinatario: Orso Allestimenti S.r.l.\nLuogo di consegna: Via Esempio 7, 20100 Milano"
+            },
+            "carrier": {
+              "heading": "Vettore",
+              "text": "Vettore: Trasporti Rapidi S.n.c.\nTarga del mezzo: AB123CD\nRitiro: 02/04/2026 alle 15:30"
+            },
+            "goods": {
+              "heading": "Merce",
+              "text": "Tessuto tecnico, rotoli da 50 m, su bancali.\nColli: 3\nPeso lordo: 148 kg (sfocato nella scansione, potrebbe leggersi 146)"
+            },
+            "receipt": {
+              "heading": "Ricezione",
+              "text": "Merce ricevuta senza riserve.\nConsegnata il 03/04/2026."
+            }
+          },
+          "fields": {
+            "ddtNo": "Numero DDT",
+            "ddtDate": "Data",
+            "sender": "Mittente",
+            "recipient": "Destinatario",
+            "address": "Luogo di consegna",
+            "carrier": "Vettore",
+            "plate": "Targa del mezzo",
+            "packages": "Colli",
+            "grossWeight": "Peso lordo",
+            "deliveredOn": "Consegnata il"
+          },
+          "questions": {
+            "weight": {
+              "q": "Quanti colli sono, e quanto pesano?",
+              "a": "{packages} colli, con un peso lordo di {grossWeight}."
+            },
+            "who": {
+              "q": "Chi spedisce, chi trasporta e chi riceve?",
+              "a": "{sender} spedisce a {recipient}, e {carrier} trasporta la merce."
+            },
+            "delivered": {
+              "q": "Quando e dove è stata consegnata?",
+              "a": "È stata consegnata il {deliveredOn} a {address}, ricevuta senza riserve."
+            },
+            "insured": {
+              "q": "La spedizione è assicurata?"
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -27,5 +27,6 @@ Moved out of PROJECT_STATE.md (which keeps only the last 3).
 | 2026-11-06 | P2.6 | Sitemap, robots, generated share images (`next/og`), one metadata helper for canonical/hreflang/Open Graph/Twitter | `f05a2dd` |
 | 2026-11-08 | P2.7 | Click-to-load Cal.com calendar behind `<ConsentGate>`, third-party registry, booking origin in `frame-src` only | `c91d9da` |
 | 2026-11-11 | P3.1 | Instagram engagement and lead agent simulation at `/work/instagram-lead-agent`: rule-based classification, lead score, sourced drafts, approval step, CTA with the service pre-selected | `9b70e3f` |
+| 2026-11-11 | P3.2 | LinkedIn outreach simulation at `/work/linkedin-assisted-outreach`: rule-based fit rating, drafts, per-prospect approval gate enforced by the reducer, compliance rules as structure tests | `8677097` |
 
 ---

@@ -30,14 +30,17 @@ describe("demoFor", () => {
     expect(demoFor("live-demo", [], true)).toBeNull();
   });
 
-  it("with the real content, a service links its demo only if that demo is published: the AI agents service links the Instagram demo (P3.1), the others have none yet", () => {
+  it("with the real content, a service links its demo only if that demo is published: AI agents links the Instagram demo (P3.1), document intelligence its own demo (P3.3), the others have none yet", () => {
+    const linked: Partial<Record<string, string>> = {
+      "ai-agents": "instagram-lead-agent",
+      "document-intelligence": "document-intelligence-demo",
+    };
     for (const locale of ["it", "en"] as const) {
       for (const service of getServices(locale)) {
         const link = demoFor(service.data.demo, getWork(locale), true);
-        if (service.slug === "ai-agents") {
-          expect(link?.slug, `${locale}/${service.slug}`).toBe(
-            "instagram-lead-agent",
-          );
+        const expected = linked[service.slug];
+        if (expected !== undefined) {
+          expect(link?.slug, `${locale}/${service.slug}`).toBe(expected);
         } else {
           expect(link, `${locale}/${service.slug}`).toBeNull();
         }

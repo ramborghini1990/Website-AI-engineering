@@ -44,6 +44,10 @@ describe("the demo code is a closed simulation", () => {
         "src/lib/demos/linkedin/engine.ts",
         "src/lib/demos/linkedin/state.ts",
         "src/components/demos/linkedin/linkedin-demo.tsx",
+        "src/lib/demos/docintel/extract.ts",
+        "src/lib/demos/docintel/engine.ts",
+        "src/lib/demos/docintel/state.ts",
+        "src/components/demos/docintel/docintel-demo.tsx",
       ]),
     );
   });
@@ -84,6 +88,7 @@ describe("the demo code is a closed simulation", () => {
     for (const engine of [
       "src/lib/demos/instagram/engine.ts",
       "src/lib/demos/linkedin/engine.ts",
+      "src/lib/demos/docintel/engine.ts",
     ]) {
       expect(code(engine), engine).toContain('mode: "simulation"');
     }
@@ -119,6 +124,39 @@ describe("the LinkedIn outreach demo (P3.2) touches no platform and automates no
     for (const file of linkedin) {
       expect(code(file), file).not.toMatch(
         /approveAll|scheduleAll|sendAll|bulk[A-Z]|setInterval/,
+      );
+    }
+  });
+});
+
+describe("the document intelligence demo (P3.3) takes no file and no free text from the visitor", () => {
+  const docintel = production.filter((file) => /[\\/]docintel[\\/]/.test(file));
+
+  it("finds its files", () => {
+    expect(docintel.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it("has no upload surface: no file input, drop zone, file reader, object URL or drag handler", () => {
+    // Uploads are disabled in v1: the visitor may only choose a bundled document and one of its questions.
+    for (const file of docintel) {
+      expect(code(file), file).not.toMatch(
+        /type=["']file["']|type:\s*["']file["']|showOpenFilePicker|FileReader|\bFile\s*\(|\bBlob\s*\(|createObjectURL|dataTransfer|onDrop|onDragOver|\baccept=|webkitdirectory/,
+      );
+    }
+  });
+
+  it("has no free-text surface: no textarea, text input, search box or editable region", () => {
+    for (const file of docintel) {
+      expect(code(file), file).not.toMatch(
+        /<textarea|<Textarea|<input|<Input\b|contentEditable|contenteditable|type=["'](?:text|search|url|email)["']/,
+      );
+    }
+  });
+
+  it("reads only the bundled sample documents, from the messages", () => {
+    for (const file of docintel) {
+      expect(code(file), file).not.toMatch(
+        /\bimport\s*\(|require\(|readFile|fs\/promises|from ["']node:/,
       );
     }
   });

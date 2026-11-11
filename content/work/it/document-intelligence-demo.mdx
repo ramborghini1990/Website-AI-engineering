@@ -1,27 +1,27 @@
 ---
 {
   "title": "Document intelligence su documenti di esempio (simulazione)",
-  "summary": "La lettura di fatture e contratti fittizi: campi estratti, classificazione e domande con il riferimento alla fonte.",
+  "summary": "La lettura di una fattura, un contratto e un documento di trasporto fittizi: campi strutturati, valori dubbi segnalati a una persona e risposte che citano la frase e la pagina esatte.",
   "seoTitle": "Demo: document intelligence",
-  "description": "Simulazione su documenti di esempio: estrazione dei campi, classificazione e domande in linguaggio naturale, con riferimento alla fonte e revisione umana.",
+  "description": "Simulazione su tre documenti inventati: campi strutturati, valori poco chiari segnalati a una persona e risposte che citano pagina e sezione.",
   "kind": "demo",
-  "status": "planned",
-  "draft": true,
+  "status": "live",
+  "draft": false,
   "clientConsent": false,
   "sector": "Amministrazione e studi professionali",
-  "stack": ["TypeScript", "Next.js", "Claude API"],
+  "stack": ["TypeScript", "Next.js"],
   "service": "document-intelligence"
 }
 ---
 
 ## Che cosa mostra
 
-La lettura di documenti di esempio inclusi nella demo, come fatture e contratti fittizi: l'estrazione dei campi, la classificazione e le domande in linguaggio naturale, con il riferimento al passaggio da cui nasce ogni risposta.
+Tre documenti di esempio con aziende inventate: una fattura, un contratto di servizio e un documento di trasporto. Per ciascuno la demo estrae i dati chiave come campi strutturati, per esempio il numero della fattura, gli importi e la scadenza, e mostra le parole da cui è stato letto ogni valore. Poi puoi scegliere una domanda, e la risposta arriva con la frase esatta, la pagina e la sezione su cui si basa. Dove il documento non dice nulla, la risposta dice che non lo trova invece di inventare.
 
 ## Revisione umana
 
-I risultati dubbi vengono evidenziati per la revisione, come accadrebbe in un sistema reale: la persona controlla solo ciò che serve.
+Ogni documento contiene qualcosa che una persona deve guardare: un numero d'ordine sbavato, una modifica a mano a un canone, un peso sfocato. Quei valori sono letti ma segnalati, e restano segnalati finché qualcuno non li segna come controllati. Ogni risposta che si basa su uno di loro lo dice. La persona controlla solo ciò che serve.
 
-## Dati
+## Limiti dichiarati
 
-La demo usa soltanto i documenti di esempio forniti con la demo stessa. Non è possibile caricare file propri, così non vengono trattati dati di nessuno.
+Non si possono caricare file: la demo apre soltanto i tre documenti forniti con essa, quindi non viene trattato il dato di nessuno e nulla viene inviato a un server. Non usa nemmeno un modello AI: i campi sono letti e le risposte composte con regole fisse, e le domande sono un breve elenco fisso, non testo libero. Un sistema reale leggerebbe i tuoi documenti con un modello linguistico, e questo richiede prima una finalità concordata, un accordo sul trattamento dei dati e una regola di conservazione.

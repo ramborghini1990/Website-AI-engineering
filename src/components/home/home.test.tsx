@@ -249,10 +249,14 @@ describe.each(["it", "en"] as const)("Demos (%s)", (locale) => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("features exactly the published demos of the real content (Instagram P3.1, LinkedIn outreach P3.2), each linked to its page", () => {
+  it("features exactly the published demos of the real content (Instagram P3.1, LinkedIn outreach P3.2, document intelligence P3.3), each linked to its page", () => {
     renderIn(locale, <HomeDemos demos={getWork(locale)} />);
 
-    const slugs = ["instagram-lead-agent", "linkedin-assisted-outreach"];
+    const slugs = [
+      "document-intelligence-demo",
+      "instagram-lead-agent",
+      "linkedin-assisted-outreach",
+    ];
     expect(getWork(locale).map((entry) => entry.slug)).toEqual(slugs);
     for (const entry of getWork(locale)) {
       expect(
@@ -430,6 +434,7 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
     const services = new Set([
       "/it/contact",
       "/it/work",
+      "/it/work/document-intelligence-demo",
       "/it/work/instagram-lead-agent",
       "/it/work/linkedin-assisted-outreach",
       "/it/services",

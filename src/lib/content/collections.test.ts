@@ -171,8 +171,12 @@ describe("collections: references and honesty rules", () => {
     }
   });
 
-  it("a demo is published only once it exists: today the Instagram (P3.1) and LinkedIn outreach (P3.2) demos are live, the other two stay planned drafts", () => {
-    const LIVE = ["instagram-lead-agent", "linkedin-assisted-outreach"];
+  it("a demo is published only once it exists: today the Instagram (P3.1), LinkedIn outreach (P3.2) and document intelligence (P3.3) demos are live, the business suite stays a planned draft", () => {
+    const LIVE = [
+      "document-intelligence-demo",
+      "instagram-lead-agent",
+      "linkedin-assisted-outreach",
+    ];
     for (const locale of locales) {
       for (const entry of work(locale)) {
         expect(entry.data.kind, entry.slug).toBe("demo");

@@ -7,6 +7,7 @@
 export const interactiveDemos = [
   "instagram-lead-agent",
   "linkedin-assisted-outreach",
+  "document-intelligence-demo",
 ] as const;
 export type InteractiveDemo = (typeof interactiveDemos)[number];
 

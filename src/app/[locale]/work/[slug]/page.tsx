@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getMessages } from "next-intl/server";
 
+import { DocintelSection } from "@/components/demos/docintel/docintel-section";
 import { InstagramSection } from "@/components/demos/instagram/instagram-section";
 import { LinkedinSection } from "@/components/demos/linkedin/linkedin-section";
 import { WorkDetail } from "@/components/work/work-detail";
@@ -51,28 +52,47 @@ export default async function WorkEntryPage({
   const messages = await getMessages();
   let demo = null;
   if (isInteractiveDemo(entry.slug)) {
-    demo =
-      entry.slug === "linkedin-assisted-outreach" ? (
-        <LinkedinSection
-          locale={locale}
-          messages={{
-            demos: {
-              shell: messages.demos.shell,
-              linkedin: messages.demos.linkedin,
-            },
-          }}
-        />
-      ) : (
-        <InstagramSection
-          locale={locale}
-          messages={{
-            demos: {
-              shell: messages.demos.shell,
-              instagram: messages.demos.instagram,
-            },
-          }}
-        />
-      );
+    switch (entry.slug) {
+      case "document-intelligence-demo":
+        demo = (
+          <DocintelSection
+            locale={locale}
+            messages={{
+              demos: {
+                shell: messages.demos.shell,
+                docIntel: messages.demos.docIntel,
+              },
+            }}
+          />
+        );
+        break;
+      case "linkedin-assisted-outreach":
+        demo = (
+          <LinkedinSection
+            locale={locale}
+            messages={{
+              demos: {
+                shell: messages.demos.shell,
+                linkedin: messages.demos.linkedin,
+              },
+            }}
+          />
+        );
+        break;
+      case "instagram-lead-agent":
+        demo = (
+          <InstagramSection
+            locale={locale}
+            messages={{
+              demos: {
+                shell: messages.demos.shell,
+                instagram: messages.demos.instagram,
+              },
+            }}
+          />
+        );
+        break;
+    }
   }
 
   return (
