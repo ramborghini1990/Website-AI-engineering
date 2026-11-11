@@ -40,6 +40,10 @@ describe("the demo code is a closed simulation", () => {
         "src/lib/demos/instagram/engine.ts",
         "src/components/demos/instagram/instagram-demo.tsx",
         "src/components/demos/demo-shell.tsx",
+        "src/lib/demos/linkedin/qualify.ts",
+        "src/lib/demos/linkedin/engine.ts",
+        "src/lib/demos/linkedin/state.ts",
+        "src/components/demos/linkedin/linkedin-demo.tsx",
       ]),
     );
   });
@@ -77,11 +81,45 @@ describe("the demo code is a closed simulation", () => {
   });
 
   it("declares itself a simulation, and no engine is live", () => {
-    expect(code("src/lib/demos/instagram/engine.ts")).toContain(
-      'mode: "simulation"',
-    );
+    for (const engine of [
+      "src/lib/demos/instagram/engine.ts",
+      "src/lib/demos/linkedin/engine.ts",
+    ]) {
+      expect(code(engine), engine).toContain('mode: "simulation"');
+    }
     for (const file of production) {
       expect(code(file), file).not.toMatch(/mode:\s*"live"/);
+    }
+  });
+});
+
+describe("the LinkedIn outreach demo (P3.2) touches no platform and automates nothing", () => {
+  const linkedin = production.filter((file) => /[\\/]linkedin[\\/]/.test(file));
+
+  it("finds its files", () => {
+    expect(linkedin.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("names no LinkedIn address or API, and uses no scraping, crawling or browser-automation tool", () => {
+    // The network calls themselves (fetch, XHR, sockets, beacons) are already banned for all demo code above.
+    for (const file of production) {
+      expect(code(file), file).not.toMatch(
+        /linkedin\.com|licdn\.com|voyager|puppeteer|playwright|selenium|cheerio|jsdom|headless|\bcrawl|\bwebdriver/i,
+      );
+    }
+  });
+
+  it("has no way to approve or schedule several prospects at once: approval takes one id", () => {
+    const state = code("src/lib/demos/linkedin/state.ts");
+
+    expect(state).toMatch(/type:\s*"approve";\s*id:\s*string\s*\}/);
+    expect(state).not.toMatch(
+      /approveAll|scheduleAll|ids:\s*string\[\]|setInterval|setTimeout/,
+    );
+    for (const file of linkedin) {
+      expect(code(file), file).not.toMatch(
+        /approveAll|scheduleAll|sendAll|bulk[A-Z]|setInterval/,
+      );
     }
   });
 });

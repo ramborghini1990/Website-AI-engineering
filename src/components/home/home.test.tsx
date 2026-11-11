@@ -249,15 +249,16 @@ describe.each(["it", "en"] as const)("Demos (%s)", (locale) => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("features exactly the published demo of the real content (the Instagram demo, P3.1), linked to its page", () => {
+  it("features exactly the published demos of the real content (Instagram P3.1, LinkedIn outreach P3.2), each linked to its page", () => {
     renderIn(locale, <HomeDemos demos={getWork(locale)} />);
 
-    expect(getWork(locale).map((entry) => entry.slug)).toEqual([
-      "instagram-lead-agent",
-    ]);
-    expect(
-      screen.getByRole("link", { name: getWork(locale)[0]?.data.title }),
-    ).toHaveAttribute("href", "/it/work/instagram-lead-agent");
+    const slugs = ["instagram-lead-agent", "linkedin-assisted-outreach"];
+    expect(getWork(locale).map((entry) => entry.slug)).toEqual(slugs);
+    for (const entry of getWork(locale)) {
+      expect(
+        screen.getByRole("link", { name: entry.data.title }),
+      ).toHaveAttribute("href", `/it/work/${entry.slug}`);
+    }
   });
 
   it("appears once a demo is published, with the simulation notice and no link when the work pages are not available", () => {
@@ -430,6 +431,7 @@ describe.each(["it", "en"] as const)("The whole page (%s)", (locale) => {
       "/it/contact",
       "/it/work",
       "/it/work/instagram-lead-agent",
+      "/it/work/linkedin-assisted-outreach",
       "/it/services",
       ...getServices(locale).map((service) => `/it/services/${service.slug}`),
     ]);

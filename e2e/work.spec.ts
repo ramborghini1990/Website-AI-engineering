@@ -194,7 +194,7 @@ for (const locale of LOCALES) {
         "..%5C..%5Cpackage",
         // A published slug followed by a NUL is normalised by the framework before our code
         // sees it (it serves the same page); a draft slug shows the lookup is by exact match.
-        "linkedin-assisted-outreach%00",
+        "business-management-app%00",
       ]) {
         const response = await request.get(`/${locale}/work/${tricky}`);
         expect(response.status(), tricky).toBe(404);

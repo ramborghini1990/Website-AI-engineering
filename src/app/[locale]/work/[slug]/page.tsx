@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getMessages } from "next-intl/server";
 
 import { InstagramSection } from "@/components/demos/instagram/instagram-section";
+import { LinkedinSection } from "@/components/demos/linkedin/linkedin-section";
 import { WorkDetail } from "@/components/work/work-detail";
 import { getServices, getWork } from "@/lib/content/read";
 import { isInteractiveDemo } from "@/lib/demos/registry";
@@ -48,17 +49,31 @@ export default async function WorkEntryPage({
 
   // An entry with an interactive demo shows it (simulation: nothing is requested from a server).
   const messages = await getMessages();
-  const demo = isInteractiveDemo(entry.slug) ? (
-    <InstagramSection
-      locale={locale}
-      messages={{
-        demos: {
-          shell: messages.demos.shell,
-          instagram: messages.demos.instagram,
-        },
-      }}
-    />
-  ) : null;
+  let demo = null;
+  if (isInteractiveDemo(entry.slug)) {
+    demo =
+      entry.slug === "linkedin-assisted-outreach" ? (
+        <LinkedinSection
+          locale={locale}
+          messages={{
+            demos: {
+              shell: messages.demos.shell,
+              linkedin: messages.demos.linkedin,
+            },
+          }}
+        />
+      ) : (
+        <InstagramSection
+          locale={locale}
+          messages={{
+            demos: {
+              shell: messages.demos.shell,
+              instagram: messages.demos.instagram,
+            },
+          }}
+        />
+      );
+  }
 
   return (
     <WorkDetail

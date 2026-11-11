@@ -3,25 +3,25 @@
   "title": "Assisted sales outreach assistant (simulation)",
   "summary": "How AI helps prepare a first sales contact, with a person who reads, edits and decides whether to send it.",
   "seoTitle": "Demo: assisted sales outreach",
-  "description": "A simulation with synthetic profiles: AI summarises a company and drafts a first message, which a person reviews and approves before anything is sent.",
+  "description": "A simulation with synthetic profiles: AI summarises a company and drafts a first message, which a person reviews and approves before anything is scheduled.",
   "kind": "demo",
-  "status": "planned",
-  "draft": true,
+  "status": "live",
+  "draft": false,
   "clientConsent": false,
   "sector": "B2B sales",
-  "stack": ["TypeScript", "Next.js", "Claude API"],
+  "stack": ["TypeScript", "Next.js"],
   "service": "ai-agents"
 }
 ---
 
 ## What it shows
 
-A list of synthetic profiles, a short research summary for each and a draft of a first message. The aim is to show how AI helps you prepare well, not how to send messages in bulk.
+A short list of invented companies and people. For each one the assistant writes a research summary, rates how well it fits the ideal customer and, only where contact makes sense, drafts a first message. It also says who should not be contacted, and why. The aim is to show how AI helps you prepare well, not how to send messages in bulk.
 
 ## Explicit human control
 
-Every message goes through a clearly visible approval step: a person reads it, edits it and decides whether to send it. The agent sends nothing on its own.
+Every message goes through an approval step that cannot be skipped: a person reads it, edits it, confirms they read it and approves it, one prospect at a time. Only then does it show as scheduled. There is no "approve all" and no automatic follow-up.
 
 ## Stated limits
 
-The demo does not connect to LinkedIn and does not automate any account. A real use would require the tools and APIs approved by the platform and respect for its terms: that is why I talk about assisted outreach and lead qualification, not about automation that works around limits.
+The demo does not connect to LinkedIn, reads no profile and automates no account: it uses only invented data, and the research and the rating are computed with fixed rules, not by an AI model. A real use would require the tools and APIs approved by the platform and respect for its terms: that is why I talk about assisted outreach and lead qualification, not about scraping or automation that works around limits.

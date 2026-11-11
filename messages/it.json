@@ -621,6 +621,184 @@
           "text": "Seguimi e ti seguo 🔥 follow for follow, passa dal mio profilo"
         }
       }
+    },
+    "linkedin": {
+      "disclosure": "Questa è una simulazione. Nessun modello AI viene chiamato: la ricerca e la valutazione di adeguatezza sono calcolate con regole fisse, in questa pagina e senza rete, su aziende e persone inventate. Nessun account LinkedIn è collegato, nessuna pagina viene letta e nessun messaggio viene inviato: lo stato \"programmato\" esiste solo qui. Un assistente reale userebbe un modello linguistico e gli strumenti ufficiali e approvati della piattaforma, con lo stesso passaggio di approvazione che vedi qui.",
+      "noscript": "La demo richiede JavaScript. Qui sotto trovi i potenziali clienti di esempio; per vederla in funzione abilita JavaScript.",
+      "ctaTitle": "Ti serve qualcosa di simile per il tuo team commerciale?",
+      "ctaBody": "Raccontami come prepari oggi i primi contatti: ti dico se e dove un assistente può aiutarti, e dove una persona deve restare al comando.",
+      "brand": "Quadro Produzione, un fornitore fittizio di software per la pianificazione della produzione",
+      "intro": "Un breve elenco di aziende inventate. L'assistente ricerca ciascuna, valuta quanto somiglia al cliente ideale e prepara un primo messaggio solo dove ha senso contattare. Tu lo leggi, lo modifichi e decidi se programmarlo.",
+      "compliance": {
+        "title": "Come resta nelle regole",
+        "official": "Solo canali ufficiali: una versione reale lavora con le API e gli strumenti approvati dalla piattaforma, nel rispetto dei suoi termini. Questa demo non si collega a nulla.",
+        "assisted": "Bozze assistite: l'assistente ricerca e prepara, una persona legge, modifica e decide, un messaggio alla volta.",
+        "qualify": "Prima la qualificazione: l'assistente dice anche chi non va contattato e rispetta ogni richiesta di non essere più contattati.",
+        "minimal": "Solo informazioni aziendali: ruolo, azienda, notizie pubbliche sull'azienda. Niente di personale."
+      },
+      "forbidden": {
+        "title": "Che cosa questo metodo non fa mai",
+        "scraping": "Estrarre profili o pagine web, o raccogliere dati in massa.",
+        "automation": "Automatizzare un account: niente bot, niente script nel browser, niente account falsi.",
+        "bulk": "Inviare in massa o in sequenze: non esiste \"approva tutto\" e non c'è alcun sollecito automatico.",
+        "unapproved": "Programmare o inviare un messaggio che una persona non ha letto e approvato."
+      },
+      "boundary": {
+        "title": "Chi fa che cosa",
+        "auto": "In autonomia: ricercare l'azienda, valutare l'adeguatezza, preparare la bozza.",
+        "approval": "Solo con la tua approvazione: programmare un messaggio. Prima di allora non è programmato nulla, e l'approvazione vale per un contatto alla volta."
+      },
+      "controls": {
+        "research": "Ricerca i potenziali clienti",
+        "researching": "Ricerca in corso",
+        "progress": "Ricercati {done} di {total}",
+        "done": "Ricerca completata: {total} potenziali clienti, {drafts} bozze scritte, {pending} in attesa della tua approvazione."
+      },
+      "summary": {
+        "title": "Risultati della ricerca per tipo"
+      },
+      "prospects": {
+        "title": "Potenziali clienti",
+        "synthetic": "Profili sintetici: aziende e persone sono inventate.",
+        "selected": "Selezionato: {name}"
+      },
+      "sector": {
+        "manufacturing": "Manifattura",
+        "logistics": "Logistica",
+        "retail": "Commercio al dettaglio"
+      },
+      "verdict": {
+        "draft": "Da contattare",
+        "hold": "Non ora",
+        "skip": "Non adatto",
+        "blocked": "Non contattare"
+      },
+      "status": {
+        "new": "Da ricercare",
+        "pending": "Bozza in attesa di approvazione",
+        "hold": "Nessun messaggio: da tenere in elenco",
+        "skip": "Nessun messaggio: non adatto",
+        "blocked": "Bloccato: ha chiesto di non essere contattato",
+        "scheduled": "Programmato (simulato)",
+        "discarded": "Scartato"
+      },
+      "propose": {
+        "draft": "Scrivere un primo messaggio da farti rivedere",
+        "hold": "Non scrivere ora; riguardare se qualcosa cambia",
+        "skip": "Non contattare",
+        "blocked": "Non contattare: la persona ha chiesto di non essere contattata"
+      },
+      "factor": {
+        "sector": "Settore tra quelli di interesse",
+        "size": "Dimensione dell'azienda nell'intervallo di interesse",
+        "role": "Ruolo che decide sulle operazioni",
+        "news": "Notizia pubblica recente a cui fare riferimento"
+      },
+      "detail": {
+        "title": "Potenziale cliente",
+        "unresearched": "Non ancora ricercato. Premi \"Ricerca i potenziali clienti\" per vedere che cosa trova l'assistente.",
+        "name": "Nome",
+        "role": "Ruolo",
+        "company": "Azienda",
+        "place": "Luogo",
+        "sector": "Settore",
+        "size": "Dimensione",
+        "employees": "{count} dipendenti",
+        "summary": "Riepilogo della ricerca",
+        "summaryText": "{company} {about}.",
+        "newsText": "Notizia pubblica recente: {company} {signal}.",
+        "newsNone": "Nessuna notizia pubblica recente a cui fare riferimento.",
+        "origin": "Solo informazioni aziendali, da fonti che l'azienda pubblica da sé (inventate per questa demo). Nessun profilo è stato letto.",
+        "fit": "Adeguatezza al cliente ideale",
+        "scoreOf": "{score} su 100",
+        "proposal": "Che cosa propone l'assistente",
+        "breakdown": "Come si compone l'adeguatezza",
+        "blockedNote": "Segnato come \"non contattare\" dopo una richiesta di interrompere i contatti. L'assistente non lo valuta e non gli scrive.",
+        "draftLabel": "Primo messaggio (puoi modificarlo)",
+        "draftCount": "{count} caratteri su {max}",
+        "noDraft": "Nessun messaggio da preparare."
+      },
+      "gate": {
+        "title": "La tua approvazione",
+        "waiting": "In attesa della tua approvazione. Non è programmato nulla finché non approvi.",
+        "step1": "Leggi il messaggio e modificalo se serve.",
+        "step2": "Conferma di averlo letto.",
+        "step3": "Approvalo per programmarlo.",
+        "confirm": "Ho letto questo messaggio così com'è ora e sono io a inviarlo.",
+        "needConfirm": "Conferma di aver letto il messaggio per abilitare l'approvazione.",
+        "ready": "Confermato. Puoi approvare questo messaggio.",
+        "approve": "Approva e programma questo messaggio",
+        "discard": "Scarta, non contattare",
+        "scheduled": "Programmato per il giorno lavorativo {day} alle {time}.",
+        "simulated": "Simulato: nulla è stato inviato a LinkedIn e nulla lo sarà."
+      },
+      "queue": {
+        "title": "Messaggi programmati",
+        "caption": "Messaggi che hai approvato, con quando partirebbero",
+        "prospect": "Potenziale cliente",
+        "when": "Quando",
+        "slot": "Giorno lavorativo {day}, ore {time}",
+        "empty": "Ancora nulla di programmato. Un messaggio compare qui solo dopo la tua approvazione.",
+        "note": "Distanziati e uno alla volta, mai in massa."
+      },
+      "draft": {
+        "greeting": "Buongiorno {name},",
+        "hookNews": "Ho letto che {company} {signal}.",
+        "hookAbout": "Ho visto che {company} {about}.",
+        "value": "Mi occupo di software per la pianificazione della produzione per piccole imprese manifatturiere e di logistica, e ho pensato potesse interessarvi.",
+        "ask": "Le andrebbe di parlarne per venti minuti, o c'è qualcuno più indicato per valutarlo?",
+        "optOut": "Se non è pertinente, mi dica pure e non le scriverò più.",
+        "signOff": "Anna, Quadro Produzione"
+      },
+      "news": {
+        "expansion": "ha appena aperto un secondo stabilimento",
+        "hub": "ha annunciato un nuovo polo di distribuzione",
+        "certification": "ha ottenuto una certificazione sui materiali riciclati"
+      },
+      "items": {
+        "alfa": {
+          "name": "Chiara B.",
+          "title": "Direttrice delle operazioni",
+          "company": "Officina Alfa",
+          "place": "Brescia",
+          "about": "produce componenti metallici su misura per l'industria alimentare"
+        },
+        "borgo": {
+          "name": "Marco T.",
+          "title": "Responsabile marketing",
+          "company": "Borgo Logistica",
+          "place": "Verona",
+          "about": "gestisce magazzini e consegne regionali per i negozi"
+        },
+        "cima": {
+          "name": "Elena V.",
+          "title": "Titolare",
+          "company": "Cima Meccanica",
+          "place": "Biella",
+          "about": "produce piccoli utensili di precisione in un laboratorio di famiglia"
+        },
+        "delta": {
+          "name": "Paolo R.",
+          "title": "Direttore finanziario",
+          "company": "Delta Moda",
+          "place": "Milano",
+          "about": "gestisce una catena nazionale di negozi di abbigliamento"
+        },
+        "eco": {
+          "name": "Luca F.",
+          "title": "Responsabile operations",
+          "company": "Eco Packaging",
+          "place": "Bologna",
+          "about": "produce imballaggi in materiale riciclato"
+        },
+        "fiume": {
+          "name": "Sara M.",
+          "title": "Responsabile delle operazioni",
+          "company": "Fiume Trasporti",
+          "place": "Padova",
+          "about": "effettua trasporti di merci tra il Nord Italia e l'Europa centrale"
+        }
+      }
     }
   }
 }

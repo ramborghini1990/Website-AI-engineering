@@ -621,6 +621,184 @@
           "text": "Follow me and I follow you 🔥 follow for follow, check my profile"
         }
       }
+    },
+    "linkedin": {
+      "disclosure": "This is a simulation. No AI model is called: the research and the fit rating are computed with fixed rules, on this page and without a network, on invented companies and people. No LinkedIn account is connected, no page is read and no message is sent: the \"scheduled\" state exists only here. A real assistant would use a language model and the platform's official, approved tools, with the same approval step you see here.",
+      "noscript": "The demo needs JavaScript. The sample prospects are listed below; enable JavaScript to see it work.",
+      "ctaTitle": "Need something like this for your sales team?",
+      "ctaBody": "Tell me how you prepare first contacts today: I will tell you if and where an assistant can help, and where a person must stay in charge.",
+      "brand": "Quadro Produzione, a fictional supplier of production-planning software",
+      "intro": "A short list of invented companies. The assistant researches each one, rates how well it fits the ideal customer and drafts a first message only where contact makes sense. You read it, edit it and decide whether it is scheduled.",
+      "compliance": {
+        "title": "How this stays within the rules",
+        "official": "Official channels only: a real version works through the platform's approved APIs and tools, within its terms. This demo connects to nothing.",
+        "assisted": "Assisted drafting: the assistant researches and drafts, a person reads, edits and decides, one message at a time.",
+        "qualify": "Qualification first: the assistant also says who should not be contacted, and respects every request to stop.",
+        "minimal": "Business information only: role, company, public company news. Nothing personal."
+      },
+      "forbidden": {
+        "title": "What this approach never does",
+        "scraping": "Scrape profiles or web pages, or collect data in bulk.",
+        "automation": "Automate an account: no bots, no browser scripts, no fake accounts.",
+        "bulk": "Send in bulk or in sequences: there is no \"approve all\" and no automatic follow-up.",
+        "unapproved": "Schedule or send a message a person has not read and approved."
+      },
+      "boundary": {
+        "title": "Who does what",
+        "auto": "On its own: researching the company, rating the fit, preparing the draft.",
+        "approval": "Only with your approval: scheduling a message. Nothing is scheduled before that, and the approval is for one prospect at a time."
+      },
+      "controls": {
+        "research": "Research the prospects",
+        "researching": "Researching",
+        "progress": "Researched {done} of {total}",
+        "done": "Research complete: {total} prospects, {drafts} drafts written, {pending} waiting for your approval."
+      },
+      "summary": {
+        "title": "Research results by type"
+      },
+      "prospects": {
+        "title": "Prospects",
+        "synthetic": "Synthetic profiles: the companies and people are invented.",
+        "selected": "Selected: {name}"
+      },
+      "sector": {
+        "manufacturing": "Manufacturing",
+        "logistics": "Logistics",
+        "retail": "Retail"
+      },
+      "verdict": {
+        "draft": "Worth contacting",
+        "hold": "Not now",
+        "skip": "Not a fit",
+        "blocked": "Do not contact"
+      },
+      "status": {
+        "new": "To research",
+        "pending": "Draft waiting for approval",
+        "hold": "No message: keep on a list",
+        "skip": "No message: not a fit",
+        "blocked": "Blocked: asked not to be contacted",
+        "scheduled": "Scheduled (simulated)",
+        "discarded": "Discarded"
+      },
+      "propose": {
+        "draft": "Write a first message for you to review",
+        "hold": "Do not write now; look again if something changes",
+        "skip": "Do not contact",
+        "blocked": "Do not contact: this person asked not to be contacted"
+      },
+      "factor": {
+        "sector": "Sector in the target list",
+        "size": "Company size in the target range",
+        "role": "Role that decides on operations",
+        "news": "Recent public news to refer to"
+      },
+      "detail": {
+        "title": "Prospect",
+        "unresearched": "Not researched yet. Press \"Research the prospects\" to see what the assistant finds.",
+        "name": "Name",
+        "role": "Role",
+        "company": "Company",
+        "place": "Place",
+        "sector": "Sector",
+        "size": "Size",
+        "employees": "{count} employees",
+        "summary": "Research summary",
+        "summaryText": "{company} {about}.",
+        "newsText": "Recent public news: {company} {signal}.",
+        "newsNone": "No recent public news to refer to.",
+        "origin": "Business information only, from sources the company publishes itself (invented for this demo). No profile was read.",
+        "fit": "Fit with the ideal customer",
+        "scoreOf": "{score} out of 100",
+        "proposal": "What the assistant proposes",
+        "breakdown": "How the fit is made up",
+        "blockedNote": "Marked \"do not contact\" after a request to stop. The assistant does not rate or write to this contact.",
+        "draftLabel": "First message (you can edit it)",
+        "draftCount": "{count} of {max} characters",
+        "noDraft": "No message to prepare."
+      },
+      "gate": {
+        "title": "Your approval",
+        "waiting": "Waiting for your approval. Nothing is scheduled until you approve.",
+        "step1": "Read the message and edit it if needed.",
+        "step2": "Confirm that you read it.",
+        "step3": "Approve it to schedule it.",
+        "confirm": "I have read this message as it is now, and I am the one sending it.",
+        "needConfirm": "Confirm that you read the message to enable the approval.",
+        "ready": "Confirmed. You can approve this message.",
+        "approve": "Approve and schedule this message",
+        "discard": "Discard, do not contact",
+        "scheduled": "Scheduled for working day {day} at {time}.",
+        "simulated": "Simulated: nothing was sent to LinkedIn and nothing will be."
+      },
+      "queue": {
+        "title": "Scheduled messages",
+        "caption": "Messages you approved, with when they would go out",
+        "prospect": "Prospect",
+        "when": "When",
+        "slot": "Working day {day}, {time}",
+        "empty": "Nothing scheduled yet. A message appears here only after you approve it.",
+        "note": "Spaced out and one at a time, never in bulk."
+      },
+      "draft": {
+        "greeting": "Hello {name},",
+        "hookNews": "I read that {company} {signal}.",
+        "hookAbout": "I saw that {company} {about}.",
+        "value": "I work on production-planning software for small manufacturers and logistics firms, and I thought it might be relevant.",
+        "ask": "Would twenty minutes to talk it over be useful, or is someone else better placed to look at this?",
+        "optOut": "If this is not relevant, just tell me and I will not write again.",
+        "signOff": "Anna, Quadro Produzione"
+      },
+      "news": {
+        "expansion": "has just opened a second plant",
+        "hub": "has announced a new distribution hub",
+        "certification": "has earned a certification for recycled materials"
+      },
+      "items": {
+        "alfa": {
+          "name": "Chiara B.",
+          "title": "Operations Director",
+          "company": "Officina Alfa",
+          "place": "Brescia",
+          "about": "makes custom metal parts for the food industry"
+        },
+        "borgo": {
+          "name": "Marco T.",
+          "title": "Marketing Manager",
+          "company": "Borgo Logistica",
+          "place": "Verona",
+          "about": "runs regional warehousing and deliveries for shops"
+        },
+        "cima": {
+          "name": "Elena V.",
+          "title": "Owner",
+          "company": "Cima Meccanica",
+          "place": "Biella",
+          "about": "makes small precision tools in a family workshop"
+        },
+        "delta": {
+          "name": "Paolo R.",
+          "title": "Chief Financial Officer",
+          "company": "Delta Moda",
+          "place": "Milan",
+          "about": "runs a national chain of clothing shops"
+        },
+        "eco": {
+          "name": "Luca F.",
+          "title": "Operations Manager",
+          "company": "Eco Packaging",
+          "place": "Bologna",
+          "about": "produces packaging from recycled material"
+        },
+        "fiume": {
+          "name": "Sara M.",
+          "title": "Head of Operations",
+          "company": "Fiume Trasporti",
+          "place": "Padua",
+          "about": "carries freight between northern Italy and central Europe"
+        }
+      }
     }
   }
 }

@@ -4,7 +4,10 @@
  * test checks). The page for a slug renders its demo between the summary and
  * the facts.
  */
-export const interactiveDemos = ["instagram-lead-agent"] as const;
+export const interactiveDemos = [
+  "instagram-lead-agent",
+  "linkedin-assisted-outreach",
+] as const;
 export type InteractiveDemo = (typeof interactiveDemos)[number];
 
 export function isInteractiveDemo(slug: string): slug is InteractiveDemo {

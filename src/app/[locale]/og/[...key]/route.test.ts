@@ -53,7 +53,7 @@ describe("the share image route", () => {
     ["an unknown language", "fr", ["home"]],
     ["an unknown page", "it", ["nope"]],
     ["an unknown service", "it", ["services", "does-not-exist"]],
-    ["a draft work entry", "it", ["work", "linkedin-assisted-outreach"]],
+    ["a draft work entry", "it", ["work", "business-management-app"]],
     ["a path trick", "it", ["services", "..%2F..%2Fpackage"]],
     ["the confirmation page", "it", ["contact", "thanks"]],
   ])(

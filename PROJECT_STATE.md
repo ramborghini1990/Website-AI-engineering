@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-11 · branch `main` (P2.7 committed as `c91d9da`)_
+_Last updated: 2026-11-11 · branch `main` (P3.1 committed as `9b70e3f`)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 3 — Agent showcases & funnels (1/7; P3.0 skipped in order, see `docs/state/tasks/P3.1.md`) |
-| Active task | `P3.1` Instagram lead agent, SIMULATION at `/[locale]/work/instagram-lead-agent` |
-| Status | Built and verified, **awaiting review and commit**. Live mode not built, by decision (D33) |
-| Next task | `P3.0` (demo framework) or `P3.2` (LinkedIn simulation): user's call, do not start unprompted |
+| Phase | 3 — Agent showcases & funnels (2/7; P3.0 skipped in order, see `docs/state/tasks/P3.1.md`) |
+| Active task | `P3.2` LinkedIn outreach agent, SIMULATION at `/[locale]/work/linkedin-assisted-outreach` |
+| Status | Built and verified, **awaiting review and commit**. No live mode, by decision (D33, D34) |
+| Next task | `P3.0` (demo framework, incl. generic shell texts) or `P3.3` (document intelligence): user's call, do not start unprompted |
 | Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | Decisions listed in `docs/state/tasks/P3.1.md` → "decisions for you"; then review and commit |
+| Needs the user | Decisions listed in `docs/state/tasks/P3.2.md` → "Decisions for you"; then review and commit |
 
 ## 2. Phase progress
 
@@ -27,7 +27,7 @@ _Last updated: 2026-11-11 · branch `main` (P2.7 committed as `c91d9da`)_
 | 0 Setup & governance | ✔ | 7/7 | carry-overs in `docs/state/tasks/general.md` |
 | 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
-| 3 Agent showcases & funnels | ◐ | 1/7 | P3.1 awaiting commit |
+| 3 Agent showcases & funnels | ◐ | 2/7 | P3.2 awaiting commit |
 | 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
@@ -54,10 +54,10 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm verify + pnpm test:e2e (pre-kit) → PASS 2026-11-11
-  typecheck, lint, unit (82 files / 1303 tests), build, knip, format → pass
-  e2e 528/528 (chromium + chromium-dev, enforced CSP)
-  NOT done: Lighthouse on demo route; Firefox/WebKit; screen reader; mutation sweep
+pnpm agent:gate (P3.2) → PASS 2026-11-11
+  typecheck, lint, unit (84 files / 1348 tests), knip, format, build → pass
+  e2e 561/561 (chromium + chromium-dev, enforced CSP)
+  NOT done: Lighthouse on demo routes; Firefox/WebKit; screen reader; mutation sweep
 ```
 
 ## 6. Rules for updating this file
