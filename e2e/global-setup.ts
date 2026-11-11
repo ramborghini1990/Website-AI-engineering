@@ -8,6 +8,8 @@ import { devRoutes, devURL } from "./support/servers";
  * one after another, before any test runs. (Production routes need no warm-up.)
  */
 export default async function globalSetup(): Promise<void> {
+  // Production-only run (E2E_SERVERS=prod, set by scripts/agent/gate.mjs): no dev server to warm.
+  if (process.env.E2E_SERVERS === "prod") return;
   for (const route of devRoutes) {
     let lastStatus = 0;
     for (let attempt = 1; attempt <= 3; attempt++) {

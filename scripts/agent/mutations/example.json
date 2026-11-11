@@ -1,0 +1,16 @@
+[
+  {
+    "id": "csp-allows-unsafe-inline",
+    "file": "src/lib/security/csp.ts",
+    "find": "REPLACE_WITH_AN_EXACT_LINE_FROM_csp.ts",
+    "replace": "REPLACE_WITH_THE_SAME_LINE_PLUS_'unsafe-inline'",
+    "check": "pnpm exec vitest run src/lib/security"
+  },
+  {
+    "id": "client-imports-server-env",
+    "file": "src/components/contact/inquiry-form.tsx",
+    "find": "REPLACE_WITH_AN_IMPORT_LINE",
+    "replace": "import { env } from \"@/lib/env\";\nREPLACE_WITH_THE_SAME_IMPORT_LINE",
+    "check": "pnpm build"
+  }
+]

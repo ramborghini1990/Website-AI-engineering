@@ -39,7 +39,27 @@
       "PowerShell(git log)",
       "PowerShell(git log *)",
       "PowerShell(git show *)",
-      "PowerShell(git branch --list *)"
+      "PowerShell(git branch --list *)",
+      "Bash(pnpm agent:check)",
+      "Bash(pnpm agent:check *)",
+      "Bash(pnpm agent:e2e)",
+      "Bash(pnpm agent:e2e *)",
+      "Bash(pnpm agent:gate)",
+      "Bash(pnpm agent:gate *)",
+      "Bash(pnpm agent:mutate *)",
+      "Bash(pnpm state:check)",
+      "Bash(pnpm knip)",
+      "Bash(pnpm format:check)",
+      "PowerShell(pnpm agent:check)",
+      "PowerShell(pnpm agent:check *)",
+      "PowerShell(pnpm agent:e2e)",
+      "PowerShell(pnpm agent:e2e *)",
+      "PowerShell(pnpm agent:gate)",
+      "PowerShell(pnpm agent:gate *)",
+      "PowerShell(pnpm agent:mutate *)",
+      "PowerShell(pnpm state:check)",
+      "PowerShell(pnpm knip)",
+      "PowerShell(pnpm format:check)"
     ],
     "deny": [
       "Read(**/.env)",
@@ -113,8 +133,55 @@
       "PowerShell(* .env.local)",
       "PowerShell(* .env.development)",
       "PowerShell(* .env.production)",
-      "PowerShell(* .env.test)"
+      "PowerShell(* .env.test)",
+      "Read(./.next/**)",
+      "Read(./node_modules/.cache/**)",
+      "Read(./test-results/**)",
+      "Read(./playwright-report/**)",
+      "Read(./blob-report/**)",
+      "Read(./coverage/**)",
+      "Read(./pnpm-lock.yaml)",
+      "Read(./next-env.d.ts)"
     ]
   },
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "env": {
+    "BASH_MAX_OUTPUT_LENGTH": "20000"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/guard-bash.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/guard-read.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/state-size.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
 }

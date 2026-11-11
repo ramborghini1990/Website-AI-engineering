@@ -18,7 +18,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "agent:check": "node scripts/agent/gate.mjs check",
+    "agent:e2e": "node scripts/agent/gate.mjs e2e",
+    "agent:gate": "node scripts/agent/gate.mjs full",
+    "agent:mutate": "node scripts/agent/mutate.mjs",
+    "state:check": "node scripts/hooks/state-size.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
