@@ -165,3 +165,32 @@ Every third party is listed in `src/lib/consent/registry.ts` (provider, category
 | The booking URL must be on the EU instance, https, without credentials | `src/lib/env-schema.test.ts` |
 | `frame-src` gets the booking origin only when configured, and nothing else gets it | `src/lib/security/csp.test.ts`, `src/proxy.test.ts`, `e2e/booking.spec.ts` |
 | Real browser, enforced CSP: no request to the booking host before the click however the page is used, exactly the configured page after it, no violation, no hint in `<head>`, not remembered after a reload, link-only without JavaScript, the form still works, axe in both themes | `e2e/booking.spec.ts` |
+
+## 9. Observability: errors, health, telemetry, spend (P4.5)
+
+**Error reporting is an allow-list, not a filter.** A report is *built* from a few safe facts; it is never a copy of the error with things removed (`src/lib/observability/scrub.ts`).
+
+| Sent (log and tracker) | Never read, never sent |
+|---|---|
+| error class name, Next's `digest`, route **pattern** (`/[locale]/work/[slug]`), HTTP method, route type, stack as `function (file:line:col)` with the file's base name only | the error **message** (it can quote form input), the request path and query, headers (cookies, `authorization`, forwarded IPs), bodies, user agent, any directory name (it can hold a user name) |
+
+- **Second layer:** everything that is sent still passes `redactString` (`src/lib/logger.ts`): emails, IPv4/IPv6, phones, IBANs, fiscal codes, bearer tokens, JWTs, `token=`/`key=`/`password=` pairs, vendor key prefixes (`sk-ant-`, `re_`, `ghp_`, `AKIA`…) and any 32+ character opaque run that contains a digit. A UUID (the request id) is exempt. **Names of people cannot be recognised by a pattern**: that is why the message is not sent at all.
+- **Where it runs:** Next's `onRequestError` (`src/instrumentation.ts`) covers unhandled server errors in renders, route handlers, Server Actions and the proxy. Errors our own handlers catch are logged there by class only. **The browser reports nothing**: `app/[locale]/error.tsx` and `app/global-error.tsx` do not receive the error, do not log and do not fetch (a test enforces it), so the CSP needs no tracker origin. Consequence: a crash that happens only in the browser is not seen; accept that, or add a consented, separate channel later.
+- **The sink** (`sink.ts`) is a single HTTPS POST to the EU ingest host in `SENTRY_DSN`, without an SDK (an SDK collects request data, cookies and IPs by default). The env schema refuses any DSN whose host does not end in `.de.sentry.io`, so a US host fails the build. Unset (the default; always in dev and CI) = nothing leaves the server. 2 s timeout, never throws, `credentials: omit`, `redirect: error`.
+- **Enabling it is a legal step first:** Sentry becomes a processor (the DSN's public key and the report). Add it to `src/lib/consent/registry.ts`, `docs/ROPA.md` and the privacy notice **before** setting the variable. Server-side project settings in Sentry: *Prevent Storing of IP Addresses* on, *Data Scrubber* and *Use Default Scrubbers* on, short event retention, EU data storage chosen **at organisation creation** (it cannot be changed later). Sentry's own page says some account data (e.g. DSN keys) is stored in the US: read it before signing the DPA.
+- **Not verified against a live project** (no account). The unit tests prove what the payload contains with a fake `fetch`; the first real report must be checked by eye (DEPLOYMENT.md §8).
+
+**Health endpoint.** `GET /api/health` returns `{"status":"ok"}`, `no-store`, `noindex`, nothing else: no version, commit, region, uptime, or list of configured services. It deliberately does not call Postgres, Redis or any provider: a public URL that fans out to paid or rate-limited services is a way to exhaust them, and "the database is down" is not for strangers. It proves the build, the environment validation and the function runtime work.
+
+**Telemetry stays off.** Vercel Web Analytics and Speed Insights are **not installed** (no `@vercel/analytics`, no `@vercel/speed-insights`, no `/_vercel/insights` script, no insights origin in the CSP) and a test fails if that changes, or if any analytics, replay or error-tracking SDK appears in `package.json`. The only analytics is the cookieless demo counter on our own server (docs/ANALYTICS.md). Check the Vercel dashboard once as well: Project → Analytics and Speed Insights must say *disabled*, because enabling them there injects a script without a code change.
+
+**Spend alerts** (Vercel and Anthropic) are account settings, not code: DEPLOYMENT.md §8. Rule: a budget alert is a smoke detector, not a cap. Only the Anthropic workspace limit and `DEMOS_LIVE_ENABLED=false` actually stop spending.
+
+| Claim | Evidence |
+|---|---|
+| Planted emails, IPs, phones, names, keys, cookies, paths in message, stack, URL, headers never reach the report or the envelope | `src/lib/observability/scrub.test.ts`, `sink.test.ts`, `request-error.test.ts` |
+| Only EU Sentry hosts are accepted (US host, suffix and prefix tricks, http, password, port, query refused) | `src/lib/observability/dsn.test.ts`, `src/lib/env-schema.test.ts` |
+| Redaction of JWTs, key pairs, vendor keys, long hex; UUID and long identifiers kept | `src/lib/logger.test.ts` |
+| The reporter never throws, even if the tracker, the logger or the error is hostile | `src/lib/observability/request-error.test.ts` |
+| The error pages carry no reporter; no analytics/replay/error SDK; no Vercel insights | `src/lib/observability/telemetry-off.test.ts` |
+| Health body and headers leak nothing; uncached; HEAD works, POST is 405 | `src/app/api/health/route.test.ts`, `e2e/health.spec.ts` |

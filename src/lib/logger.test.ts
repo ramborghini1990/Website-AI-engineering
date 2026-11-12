@@ -27,11 +27,44 @@ describe("redactString: personal-looking text never survives", () => {
     ["an IBAN", "IT60 X054 2811 1010 0000 0123 456", "0123"],
     ["an Italian fiscal code", "RSSMRA85T10A562S", "RSSMRA"],
     ["a bearer token", "Authorization: Bearer abcdef1234567890", "abcdef1234"],
+    [
+      "a JWT",
+      "jwt eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbm5hIn0.c2lnbmF0dXJl end",
+      "eyJhbGci",
+    ],
+    ["an Anthropic key", "key sk-ant-api03-AbCdEf1234567890xyz", "AbCdEf1234"],
+    ["a Resend key", "using re_Ab12Cd34Ef56Gh78", "Ab12Cd34"],
+    [
+      "a token in a query string",
+      "GET /x?token=s3cr3tvalue&a=1",
+      "s3cr3tvalue",
+    ],
+    ["an api_key pair", "config api_key=abc123def456", "abc123def456"],
+    ["a password pair", "password=hunter2hunter2", "hunter2"],
+    [
+      "a long hex digest",
+      "hash 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "9f86d081",
+    ],
   ])("removes %s", (_name, input, leaked) => {
     const output = redactString(input);
 
     expect(output).not.toContain(leaked);
     expect(output).toContain("[redacted:");
+  });
+
+  it("keeps what is not personal: a request id (UUID), long identifiers, file:line", () => {
+    const uuid = "3f2b8c1e-9a4d-4e7b-8c55-0d1e2f3a4b5c";
+
+    expect(redactString(uuid)).toBe(uuid);
+    expect(redactString(`id ${uuid} end`)).toBe(`id ${uuid} end`);
+    expect(redactString("createInquiryFromValidatedSubmissionHandler")).toBe(
+      "createInquiryFromValidatedSubmissionHandler",
+    );
+    expect(redactString("route.ts:123:45")).toBe("route.ts:123:45");
+    expect(redactString("/api/cron/purge-expired")).toBe(
+      "/api/cron/purge-expired",
+    );
   });
 
   it("leaves ordinary text alone", () => {

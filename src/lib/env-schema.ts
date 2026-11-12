@@ -1,6 +1,7 @@
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import { z } from "zod";
 
+import { parseSentryDsn, SENTRY_EU_HOST_SUFFIX } from "@/lib/observability/dsn";
 import {
   DEFAULT_RETENTION_DAYS,
   MAX_RETENTION_DAYS,
@@ -123,6 +124,19 @@ const privateShape = {
   SECURITY_CONTACT: optional(z.email()),
   /** Optional collector for violation reports. A third party if it is not ours: list it in the privacy notice. */
   CSP_REPORT_URI: optional(httpsUrl),
+
+  /**
+   * Error tracker (P4.5): the DSN of a Sentry project in the EU region
+   * (`https://<key>@o<id>.ingest.de.sentry.io/<project>`). Unset = errors are
+   * logged only and nothing leaves the server. Any other host fails the build.
+   * A processor: add it to the registry, the record of processing and the
+   * privacy notice BEFORE setting it (docs/DEPLOYMENT.md §8).
+   */
+  SENTRY_DSN: optional(
+    z.string().refine((value) => parseSentryDsn(value) !== null, {
+      message: `must be https://<key>@<host>/<project id> with a host ending in ${SENTRY_EU_HOST_SUFFIX} (the EU region), no password, no query`,
+    }),
+  ),
 
   // Data and services (consumers arrive in P2.5 and later)
   DATABASE_URL: optional(z.url({ protocol: /^postgres(ql)?$/ })),

@@ -39,6 +39,25 @@ type LogFields = Partial<Record<AllowedField, string | number | boolean>>;
 
 const REDACTIONS: ReadonlyArray<[RegExp, string]> = [
   [/\bBearer\s+[A-Za-z0-9._~+/=-]{8,}/gi, "[redacted:token]"],
+  // A JSON Web Token: three base64url parts, the first two start with `eyJ` ({" ).
+  [/\beyJ[\w-]{5,}\.eyJ[\w-]{5,}\.[\w-]*/g, "[redacted:token]"],
+  // `token=…`, `api_key=…`, `password=…` (query strings, config dumps): keep the name, drop the value.
+  [
+    /\b((?:access_|refresh_|id_)?token|api[_-]?key|apikey|secret|password|passwd|pwd|signature|sig|auth|authorization|key)=[^&\s"'<>]+/gi,
+    "$1=[redacted:secret]",
+  ],
+  // Vendor key prefixes: Anthropic, Stripe-style, Resend, GitHub, AWS.
+  [
+    /\b(?:sk-ant-|sk_(?:live|test)_|pk_(?:live|test)_|re_|ghp_|gho_|github_pat_|AKIA)[A-Za-z0-9_-]{8,}/g,
+    "[redacted:token]",
+  ],
+  // Any other long opaque run with a digit in it (hex digests, base64url secrets); a long
+  // identifier made of letters only is code, not a secret. A UUID (a request id) is exempt,
+  // and the run must start at its beginning so a UUID's tail is never matched on its own.
+  [
+    /(?<![\w-])(?![0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![\w-]))(?=[A-Za-z_-]*\d)[A-Za-z0-9_-]{32,}(?![\w-])/gi,
+    "[redacted:token]",
+  ],
   [/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted:email]"],
   [
     /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){3,7}(?:\s?[A-Z0-9]{1,4})?\b/g,

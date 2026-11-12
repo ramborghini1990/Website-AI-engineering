@@ -69,6 +69,7 @@ Rules:
 | `CSP_MODE` | unset (`enforce`) | unset (`enforce`) | Leave unset: production enforces. `report-only` only as a temporary rollback; `off` is ignored in production (SECURITY.md §4) |
 | `SECURITY_CONTACT` | optional | optional | The address published in `/.well-known/security.txt`; set it to a mailbox you read (without it the file points to the contact page only) |
 | `CSP_REPORT_URI` | empty | empty | empty unless you run a collector; a third-party collector is a processor (privacy notice) |
+| `SENTRY_DSN` | empty | empty | empty until Sentry (EU) is in the registry, ROPA and privacy notice; then the EU DSN `https://<key>@o<id>.ingest.de.sentry.io/<project>`. Any other host fails the build (§8) |
 | `NEXT_PUBLIC_PLAUSIBLE_ORIGIN` | empty | empty | set only when analytics is wired (P2.6): an origin like `https://plausible.io`, no path |
 
 Build-only setting, deliberately not in `.env.example` because app code never reads it: `ENABLE_EXPERIMENTAL_COREPACK=1`.
@@ -150,7 +151,7 @@ To do in Vercel (you):
 1. In the build log confirm **Node 24.x** and **pnpm 12.16.1**.
 2. Open the Preview URL while signed in to Vercel; the page renders.
 3. Region: the scaffold has no function (both routes are static), so `fra1` cannot be observed yet. Re-check on the first dynamic route (the inquiry handler, P2.5): the deployment's Functions/Runtime Logs view shows the region, and the `x-vercel-id` response header carries it (exact format **unverified**).
-4. Confirm Analytics and Speed Insights are off.
+4. Confirm Analytics and Speed Insights are off (Project → Analytics, Project → Speed Insights: both *disabled*; the code does not install either, a test guards it). `curl -i https://<host>/api/health` answers `200 {"status":"ok"}` with `cache-control: no-store`.
 
 ## 6. Known risks and fallbacks
 
@@ -171,9 +172,55 @@ Vercel is a processor (hosting, build, CDN, logs). Facts still to be established
 
 This text is a working note, not legal advice; it needs review by a qualified professional (CLAUDE.md §14).
 
+## 8. Observability (P4.5)
+
+What the code does and why it is safe: [SECURITY.md](SECURITY.md) §9. This section is what **you** set up.
+
+### Uptime check
+
+`GET /api/health` → `200 {"status":"ok"}` (also `HEAD`), uncached, nothing else in the body. Point an external monitor at `https://<production host>/api/health`: 1–5 minute interval, alert on any non-200 or a timeout, two locations if the tool offers it, alerts to a mailbox you read (and a second channel). Any EU-hosted or EU-region monitor will do; **the monitor sees only a status code**, but check its DPA anyway, and record it in `docs/ROPA.md` if it is a third party. It deliberately does not touch the database or Redis (SECURITY.md §9), so a green check means "the site answers", not "the form works": watch the `inquiry.*` log lines for that. To test the alert: pause the monitor's target or point a second monitor at `/api/health-does-not-exist` and confirm the alert arrives.
+
+### Error tracking (optional, EU)
+
+Off by default: with `SENTRY_DSN` unset, an unhandled server error produces **one log line** (`request.error`: route pattern, error class, digest, request id) and nothing leaves the server. To switch the tracker on:
+
+1. **Legal first:** add Sentry to the processors in `src/lib/consent/registry.ts` (+ `messages/*.json` legal wording), `docs/ROPA.md` §3 and the privacy notice; accept the DPA. Do **not** set the variable before this: `legal-structure.test.ts` lists `SENTRY_DSN` as "not a service" only while it is unset (B4, legal review).
+2. Create the Sentry **organisation** with *Data Storage Location = EU (Frankfurt)*: chosen at creation, not changeable later. Read Sentry's "Data Storage Location" page: it lists data that stays in the US (for example DSN keys).
+3. Project settings (names from memory of the Sentry UI, **not re-checked**: find the equivalents if they moved): *Prevent Storing of IP Addresses* on, *Data Scrubber* and *Use Default Scrubbers* on, event retention as short as useful (30 days), no session replay, no performance tracing, no user feedback widget.
+4. Copy the DSN (Project → Settings → Client Keys). It must look like `https://<key>@o<number>.ingest.de.sentry.io/<project id>`. Set it as `SENTRY_DSN` in **Production only** (Preview and Development stay empty so test errors do not pollute it). A DSN on any other host fails `next build` by design.
+5. **Check by eye**, once (the payload has been tested with a fake `fetch`, never against a live project): on a Preview deployment, temporarily make a route throw an error whose message contains `test.person@example.com 203.0.113.9`, load it, and open the event in Sentry. Expected: type = the error class, value `[message withheld]`, tags `route` (a pattern), `route_type`, `method`, `digest`; frames with file base names; **no** message, URL, headers, user, IP or cookies. If Sentry shows an IP, the IP setting in step 3 is off. Remove the throw.
+6. Alerts: Sentry → Alerts → "new issue" to your mailbox. It is the error tracker's own alert, separate from the spend alerts below.
+
+Not covered: errors that only happen in the browser (the error pages do not report, SECURITY.md §9) and errors our handlers catch and answer with a typed result (they are logged by class).
+
+### Spend alerts (Vercel and Anthropic)
+
+An alert tells you; only a hard limit stops the spending. Set both kinds, and test the alert on a low threshold before relying on it.
+
+**Vercel** (Pro plan, B5; Settings → Billing → Spend Management; needs Owner or Billing role). Checked against Vercel's Spend Management docs on 2026-11-12; labels can change.
+
+1. Enable Spend Management and set the **on-demand budget**: start with a figure you would be annoyed, not ruined, by (the site is light: one region, few functions, no images service use).
+2. Notifications: web and email at 50 %, 75 % and 100 % are enabled automatically; add SMS (sent at 100 % only) and a second recipient.
+3. Turn on **Pause Production Deployments** if you want a stop, not only an alert. Know the trade: a paused production site is an outage (and the uptime check will fire); resuming is manual, per project, and raising the amount does not unpause. Checks run every few minutes, so the real spend can overshoot.
+4. Optional webhook (HTTPS POST with `budgetAmount`, `currentSpend`, `thresholdPercent`, signed in `x-vercel-signature`): only if something will consume it; a consumer must verify the signature.
+5. **Test:** set the budget to just above the current month's spend (or to the minimum allowed), wait for the next check, confirm the web and email notification arrive, then restore the real figure. Cron at 03:17 UTC and the health probe cost nothing noticeable.
+
+**Anthropic** (Claude Console, only needed once `ANTHROPIC_API_KEY` is set, P3.0 deferred; `DEMOS_LIVE_ENABLED` stays `false` until then):
+
+1. Create a **dedicated workspace** for this site (Console → Settings → Workspaces) and issue the API key **from that workspace**, so its spend is separate. The default workspace cannot have a limit.
+2. In that workspace: **Spend limits** → monthly limit (must be below the organisation limit) and an **email notification** at a lower amount (for example 50 % of the limit). At the limit, requests fail with HTTP 400 `invalid_request_error` until 00:00 UTC on the 1st, or until you raise it: when P3.0 is built, the demos must fall back to simulation on any upstream error, including this one.
+3. Prepaid credits with auto-reload **off** are a second brake.
+4. The app has its own guard (Upstash budget counter, required when `DEMOS_LIVE_ENABLED=true`, `env-schema.ts`); the Console limit is the one that cannot be bypassed by a bug.
+5. **Test:** set the notification threshold just above current spend, make one demo call from a Preview with a test key, confirm the email arrives; do not test the hard limit on a production key.
+
+**Status:** none of the four account steps (monitor, Sentry, Vercel budget, Anthropic workspace) is done: they need your accounts. Record the date and the amounts you chose here when done.
+
 ## Sources
 
 - Corepack and `packageManager`: <https://vercel.com/docs/builds/configure-a-build>
+- Vercel Spend Management: <https://vercel.com/docs/spend-management>
+- Anthropic workspaces and spend limits: <https://platform.claude.com/docs/en/manage-claude/workspaces>
+- Sentry data storage location: <https://docs.sentry.io/organization/data-storage-location/>
 - `regions` in `vercel.json`: <https://vercel.com/docs/functions/configuring-functions/region>
 - Node.js versions: <https://vercel.com/docs/functions/runtimes/node-js/node-js-versions>
 - Hobby plan and commercial use: <https://vercel.com/docs/limits/fair-use-guidelines>

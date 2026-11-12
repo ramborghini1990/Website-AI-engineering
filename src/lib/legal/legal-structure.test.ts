@@ -130,6 +130,8 @@ const NOT_A_SERVICE: Record<string, string> = {
     "the owner's own address, published in security.txt so researchers can report a vulnerability (no third party receives data)",
   CSP_REPORT_URI:
     "optional report collector, unset: if it is ever set it receives violation reports and needs a processors entry",
+  SENTRY_DSN:
+    "optional EU error tracker, unset: if it is ever set it receives scrubbed error reports (class, route pattern, stack frames; no message, URL or request data) and needs a processors entry first (docs/DEPLOYMENT.md §8)",
   RATE_LIMIT_IP_SALT: "a secret key used to hash IPs before the limiter",
   CRON_SECRET:
     "the shared secret that lets the platform's scheduler call the site's own purge route (no third party receives data)",

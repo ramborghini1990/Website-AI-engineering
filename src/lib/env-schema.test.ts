@@ -178,6 +178,11 @@ describe("server variables", () => {
     ["CSP_MODE", "enforcing"],
     ["SECURITY_CONTACT", "not-an-email"],
     ["CSP_REPORT_URI", "http://collector.example.eu/r"],
+    ["SENTRY_DSN", "https://key@o1.ingest.sentry.io/2"], // US region
+    ["SENTRY_DSN", "https://key@o1.ingest.us.sentry.io/2"], // US region, newer host
+    ["SENTRY_DSN", "https://key@o1.ingest.de.sentry.io.evil.example/2"], // suffix trick
+    ["SENTRY_DSN", "http://key@o1.ingest.de.sentry.io/2"], // https only
+    ["SENTRY_DSN", "o1.ingest.de.sentry.io"], // not a URL
     ["VERCEL_ENV", "staging"],
     ["VERCEL_URL", "https://deploy.vercel.app"], // a host, not a URL
     ["NODE_ENV", "staging"],
@@ -185,6 +190,14 @@ describe("server variables", () => {
     const issues = issuesOf(() => parseServerEnv({ [name]: value }));
 
     expect(Object.keys(issues)).toEqual([name]);
+  });
+
+  it("accepts an EU Sentry DSN, and blank means no tracker", () => {
+    const dsn = "https://abc123@o4500.ingest.de.sentry.io/4501";
+
+    expect(parseServerEnv({ SENTRY_DSN: dsn }).SENTRY_DSN).toBe(dsn);
+    expect(parseServerEnv({ SENTRY_DSN: "" }).SENTRY_DSN).toBeUndefined();
+    expect(parseServerEnv({}).SENTRY_DSN).toBeUndefined();
   });
 
   it("reports ALL problems at once, not just the first", () => {
