@@ -1,5 +1,5 @@
 import createMiddleware from "next-intl/middleware";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { routing } from "@/i18n/routing";
 import { env, isDevelopment } from "@/lib/env";
@@ -7,19 +7,31 @@ import {
   buildCsp,
   cspHeaderName,
   generateNonce,
+  resolveCspMode,
   securityHeaders,
 } from "@/lib/security/csp";
 
 const handleI18nRouting = createMiddleware(routing);
+
+/** True when the path has a percent-escape that is not valid UTF-8. */
+function isMalformedPath(pathname: string): boolean {
+  try {
+    decodeURIComponent(pathname);
+    return false;
+  } catch {
+    return true;
+  }
+}
 
 /**
  * Next 16 renamed `middleware.ts` to `proxy.ts`.
  *
  * 1. Locale: redirects locale-less paths ("/", "/foo") to the visitor's
  *    locale, chosen from Accept-Language (no cookie, see src/i18n/routing.ts).
- * 2. Security: a fresh CSP nonce per request, the CSP itself (Report-Only
- *    until `CSP_MODE=enforce`) and the fixed security headers, on every
- *    response including redirects.
+ * 2. Security: a fresh CSP nonce per request, the CSP itself (enforced in
+ *    production unless `CSP_MODE=report-only` is set as a rollback; see
+ *    `resolveCspMode`) and the fixed security headers, on every response
+ *    including redirects.
  *
  * The nonce travels two ways: in the CSP header on the response (what the
  * browser enforces) and in the REQUEST headers handed to the app (what Next
@@ -29,7 +41,7 @@ const handleI18nRouting = createMiddleware(routing);
  */
 export default function proxy(request: NextRequest) {
   const nonce = generateNonce();
-  const mode = env.CSP_MODE;
+  const mode = resolveCspMode(env.CSP_MODE, env.NODE_ENV === "production");
   const headerName = cspHeaderName(mode);
 
   const requestHeaders = new Headers(request.headers);
@@ -53,9 +65,11 @@ export default function proxy(request: NextRequest) {
     requestHeaders.set(headerName, policy);
   }
 
-  const response = handleI18nRouting(
-    new NextRequest(request, { headers: requestHeaders }),
-  );
+  // A path with a broken percent-escape ("/it/%E0%A4%A") makes Next answer 500.
+  // It is the visitor's mistake, not ours: refuse it as a bad request.
+  const response = isMalformedPath(request.nextUrl.pathname)
+    ? new NextResponse(null, { status: 400 })
+    : handleI18nRouting(new NextRequest(request, { headers: requestHeaders }));
 
   if (headerName !== null && policy !== null) {
     response.headers.set(headerName, policy);

@@ -147,10 +147,11 @@ describe("server variables", () => {
     expect(() => parseServerEnv({})).not.toThrow();
   });
 
-  it("applies safe defaults: report-only CSP, demos in simulation", () => {
+  it("applies safe defaults: CSP mode left to resolveCspMode (enforce in production), demos in simulation", () => {
     const env = parseServerEnv({});
 
-    expect(env.CSP_MODE).toBe("report-only");
+    expect(env.CSP_MODE).toBeUndefined();
+    expect(parseServerEnv({ CSP_MODE: "" }).CSP_MODE).toBeUndefined(); // blank = unset
     expect(env.DEMOS_LIVE_ENABLED).toBe(false);
     expect(env.NODE_ENV).toBe("development");
   });
@@ -175,6 +176,7 @@ describe("server variables", () => {
     ["EMAIL_FROM", "not-an-email"],
     ["INQUIRY_NOTIFY_TO", "nope"],
     ["CSP_MODE", "enforcing"],
+    ["SECURITY_CONTACT", "not-an-email"],
     ["CSP_REPORT_URI", "http://collector.example.eu/r"],
     ["VERCEL_ENV", "staging"],
     ["VERCEL_URL", "https://deploy.vercel.app"], // a host, not a URL
@@ -228,7 +230,7 @@ describe("server variables", () => {
     >();
     expectTypeOf<ServerEnv["DEMOS_LIVE_ENABLED"]>().toEqualTypeOf<boolean>();
     expectTypeOf<ServerEnv["CSP_MODE"]>().toEqualTypeOf<
-      "report-only" | "enforce" | "off"
+      "report-only" | "enforce" | "off" | undefined
     >();
     expectTypeOf<ServerEnv["DATABASE_URL"]>().toEqualTypeOf<
       string | undefined
@@ -466,7 +468,7 @@ describe("SKIP_ENV_VALIDATION", () => {
 
     expect(env.DATABASE_URL).toBeUndefined(); // dropped, not passed through
     expect(env.NEXT_PUBLIC_SITE_URL).toBe("https://www.example.eu"); // valid value kept
-    expect(env.CSP_MODE).toBe("report-only"); // invalid -> the safe default
+    expect(env.CSP_MODE).toBeUndefined(); // invalid -> dropped, so the default applies (enforce in production)
     expect(env.NODE_ENV).toBe("development");
     expect(env.VERCEL_ENV).toBeUndefined();
     expect(env.DEMOS_LIVE_ENABLED).toBe(true);

@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-12 · branch `main` (P4.2 committed as `1d687f2`; P4.3 uncommitted)_
+_Last updated: 2026-11-12 · branch `main` (P4.3 committed as `59aad4a`; P4.4 uncommitted)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 4 — GDPR, CI/CD, hardening (3/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
-| Active task | `P4.3` Data subject rights & retention: DSR CLI, purge cron, `docs/DSR.md`, `docs/ROPA.md` (D40, `docs/state/tasks/P4.3.md`) |
-| Status | Built and verified, **awaiting review and commit**. Not run against a real Postgres or a real Vercel Cron (B13, B5). Last full gate: clean pass (732/732 e2e) |
-| Next task | `P4.4` Hardening (CSP enforced, security.txt, audit, ZAP): do not start unprompted |
+| Phase | 4 — GDPR, CI/CD, hardening (4/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
+| Active task | `P4.4` Hardening: CSP enforced by default, `security.txt`, `global-error.tsx`, error-leak tests, audit job (D41, `docs/state/tasks/P4.4.md`) |
+| Status | Built and verified, **awaiting review and commit**. Observatory/ZAP not run (no deployed URL, B5/B6). Last full gate: see §5 |
+| Next task | `P4.5` Observability: do not start unprompted |
 | Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | Decisions in `P4.3.md` → "Decisions for you" (notice wording "from last contact" vs the purge's `created_at`; retention of receipts and of the request register; `data_events` table or not; DB trigger making receipts immutable). Set `CRON_SECRET` in Vercel Production. Legal review of DSR.md and ROPA.md (B4). Review and commit |
+| Needs the user | Decisions in `P4.4.md` → "Decisions for you": set `SECURITY_CONTACT` in Vercel Production; consent limiter on Upstash or not (needs a registry/notice change); `minimatch` override for a dev-only advisory. Still open from P4.3: notice wording, receipt retention, `CRON_SECRET` in Vercel, legal review of DSR.md/ROPA.md (B4). Review and commit |
 
 ## 2. Phase progress
 
@@ -28,7 +28,7 @@ _Last updated: 2026-11-12 · branch `main` (P4.2 committed as `1d687f2`; P4.3 un
 | 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
 | 3 Agent showcases & funnels | ✔ | 6/7 | P3.0 deferred, P3.6 not needed (`docs/state/tasks/P3.1.md`) |
-| 4 GDPR, CI/CD, hardening | ◐ | 3/7 | P4.3 awaiting commit |
+| 4 GDPR, CI/CD, hardening | ◐ | 4/7 | P4.4 awaiting commit |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
 
@@ -53,9 +53,10 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (P4.3) → CLEAN PASS, 2026-11-12 (2nd full run; 1st failed on a 5 s test timeout, fixed)
-  typecheck, lint, unit (103 files / 1739 tests), knip, format, build, e2e 732/732 → pass
-  NOT done: real Postgres run of the DSR tool and purge; real Vercel Cron call; Lighthouse; Firefox/WebKit; mutation sweep
+pnpm agent:gate (P4.4) → 739/740 e2e, 2026-11-12 (one run)
+  typecheck, lint, unit (105 files / 1765 tests), knip, format, build → pass
+  e2e: 1 failure, fx.spec.ts:673 [chromium-dev] (URL assertion timed out at 5 s); passed alone on re-run → flake, not looped
+  NOT done: Observatory, ZAP, HSTS preload submission (no deployed URL); Firefox/WebKit; mutation sweep; real Postgres/Cron (P4.3)
 ```
 
 ## 6. Rules for updating this file

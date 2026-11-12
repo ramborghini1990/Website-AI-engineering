@@ -66,7 +66,8 @@ Rules:
 | `INQUIRY_NOTIFY_TO` | your own inbox | your own inbox, never a client mailbox | real inbox |
 | `ANTHROPIC_API_KEY` | empty (simulation) | empty | empty until P3.0, then a dedicated key with a spend cap |
 | `DEMOS_LIVE_ENABLED` | `false` | `false` | `false` (kill switch; flip deliberately) |
-| `CSP_MODE` | `report-only` (default) | `report-only` (default) | `report-only` first, then `enforce` once a deployment shows no violations (SECURITY.md §4) |
+| `CSP_MODE` | unset (`enforce`) | unset (`enforce`) | Leave unset: production enforces. `report-only` only as a temporary rollback; `off` is ignored in production (SECURITY.md §4) |
+| `SECURITY_CONTACT` | optional | optional | The address published in `/.well-known/security.txt`; set it to a mailbox you read (without it the file points to the contact page only) |
 | `CSP_REPORT_URI` | empty | empty | empty unless you run a collector; a third-party collector is a processor (privacy notice) |
 | `NEXT_PUBLIC_PLAUSIBLE_ORIGIN` | empty | empty | set only when analytics is wired (P2.6): an origin like `https://plausible.io`, no path |
 

@@ -10,6 +10,23 @@
 
 export type CspMode = "report-only" | "enforce" | "off";
 
+/**
+ * The mode that actually applies. Secure by default (P4.4):
+ * - unset: `enforce` in production, `report-only` in development (`next dev`
+ *   needs a relaxed policy and a console that is not full of blocked reports);
+ * - `off` is honoured only outside production: a production site never runs
+ *   without a CSP, whatever a variable says, so a typo or a leftover debugging
+ *   value cannot silently remove the main XSS defence.
+ * `report-only` stays possible in production as the documented rollback.
+ */
+export function resolveCspMode(
+  configured: CspMode | undefined,
+  production: boolean,
+): CspMode {
+  if (production) return configured === "report-only" ? configured : "enforce";
+  return configured ?? "report-only";
+}
+
 /** Where Cloudflare Turnstile loads its script and widget iframe from. */
 export const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
 

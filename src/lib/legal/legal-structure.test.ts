@@ -126,6 +126,8 @@ const NOT_A_SERVICE: Record<string, string> = {
   NEXT_PHASE: "build phase flag",
   SKIP_ENV_VALIDATION: "build-time switch for CI",
   CSP_MODE: "the site's own security-header mode",
+  SECURITY_CONTACT:
+    "the owner's own address, published in security.txt so researchers can report a vulnerability (no third party receives data)",
   CSP_REPORT_URI:
     "optional report collector, unset: if it is ever set it receives violation reports and needs a processors entry",
   RATE_LIMIT_IP_SALT: "a secret key used to hash IPs before the limiter",

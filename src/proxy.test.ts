@@ -78,6 +78,26 @@ describe("proxy: locale redirect", () => {
   });
 });
 
+describe("proxy: malformed input", () => {
+  it.each(["/it/%E0%A4%A", "/%E0%A4%A", "/it/%ZZ"])(
+    "answers a broken percent-escape (%s) with a bodyless 400 that still has the security headers",
+    (path) => {
+      const response = proxy(request(path));
+
+      expect(response.status).toBe(400);
+      expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(response.headers.get("location")).toBeNull();
+    },
+  );
+
+  it.each(["/%00", "/it/%C3%A8", "/it/%2e%2e%2fetc"])(
+    "leaves a valid escape (%s) to the normal routing",
+    (path) => {
+      expect(proxy(request(path)).status).not.toBe(400);
+    },
+  );
+});
+
 describe("proxy: security headers", () => {
   it.each(["/it", "/en/services", "/", "/foo"])(
     "sets the fixed headers on %s, redirects included",
@@ -109,7 +129,7 @@ describe("proxy: security headers", () => {
 });
 
 describe("proxy: Content Security Policy", () => {
-  it("report-only (the default): the policy is reported, not enforced", () => {
+  it("report-only (the explicit production rollback): the policy is reported, not enforced", () => {
     const response = proxy(request("/it"));
 
     expect(
@@ -131,8 +151,32 @@ describe("proxy: Content Security Policy", () => {
     ).toBeNull();
   });
 
-  it("off: no CSP and no nonce, the other headers stay", () => {
+  it("unset in production: ENFORCED by default (secure by default, P4.4)", () => {
+    mocked.env = { NODE_ENV: "production" };
+
+    const response = proxy(request("/it"));
+
+    expect(response.headers.get("content-security-policy")).toContain(
+      "script-src",
+    );
+    expect(
+      response.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
+  });
+
+  it("off in production is ignored: the CSP is still enforced (negative)", () => {
     mocked.env = { NODE_ENV: "production", CSP_MODE: "off" };
+
+    const response = proxy(request("/it"));
+
+    expect(response.headers.get("content-security-policy")).toContain(
+      "default-src 'self'",
+    );
+    expect(appNonce(response)).not.toBeNull();
+  });
+
+  it("off in development: no CSP and no nonce, the other headers stay", () => {
+    mocked.env = { NODE_ENV: "development", CSP_MODE: "off" };
 
     const response = proxy(request("/it"));
 

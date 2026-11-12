@@ -366,3 +366,151 @@ test.describe("the site cannot be framed by another origin", () => {
     expect(loadedSite).toEqual([]);
   });
 });
+
+test.describe("/.well-known/security.txt (RFC 9116)", () => {
+  test("is plain text, has Contact, a future Expires under a year, and a Canonical that points at itself", async ({
+    request,
+  }) => {
+    const response = await request.get("/.well-known/security.txt");
+    const body = await response.text();
+
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toMatch(/^text\/plain/);
+    expect(response.headers()["content-type"]).toMatch(/charset=utf-8/i);
+    expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+
+    expect(body).toMatch(/^Contact: (https:\/\/|http:\/\/|mailto:)\S+$/m);
+    const expires = /^Expires: (\S+)$/m.exec(body)?.[1] ?? "";
+    const when = Date.parse(expires);
+    expect(Number.isNaN(when)).toBe(false);
+    expect(when).toBeGreaterThan(Date.now());
+    expect(when).toBeLessThan(Date.now() + 365 * 24 * 3600 * 1000);
+    expect(body).toMatch(
+      new RegExp(`^Canonical: ${prodURL}/\.well-known/security\.txt$`, "m"),
+    );
+  });
+
+  test("is not served through the locale redirect and is not a 404 page", async ({
+    request,
+  }) => {
+    const response = await request.get("/.well-known/security.txt", {
+      maxRedirects: 0,
+    });
+
+    expect(response.status()).toBe(200);
+    expect(await response.text()).not.toMatch(/<html/i);
+  });
+});
+
+/** What a failing response must never contain: stack frames, file paths, framework internals. */
+const LEAKS =
+  /node_modules|webpack-internal|\.next[\\/]|\b[A-Za-z]:\\[\w.-]{2,}\\|\/(?:Users|home|var|app)\/\S|\bsrc[\\/](?:app|lib|components|i18n)\b|\bat\s+[\w$.<>]+\s+\(|\bstack ?trace\b|"stack"|\.stack\b|\bdigest\b|ECONNREFUSED|postgres(?:ql)?:\/\/|\bDATABASE_URL\b|CRON_SECRET/i;
+
+/**
+ * The first leak in `body`, or null. Next marks its own 404 page with a fixed
+ * `"digest":"NEXT_HTTP_ERROR_FALLBACK;404"`: a status code, not an error id, so
+ * it is removed before looking.
+ */
+const firstLeak = (body: string) => {
+  // The marker appears both plain and inside an escaped JSON string.
+  const marker = /\\*"digest\\*":\\*"NEXT_HTTP_ERROR_FALLBACK;404\\*"/g;
+  const clean = body.replaceAll(marker, "");
+  const hit = LEAKS.exec(clean);
+  return hit === null
+    ? null
+    : clean.slice(Math.max(0, hit.index - 60), hit.index + 60);
+};
+
+test.describe("errors leak nothing (P4.4)", () => {
+  test("the detector itself finds a stack frame, a path, a connection string and a digest (not vacuous)", () => {
+    for (const leak of [
+      "Error: x\n    at handler (/app/server.js:10:5)",
+      "/Users/dev/project/src/app/page.tsx",
+      "postgres://user:pw@host/db",
+      "see node_modules/next/dist/server.js",
+      '{"digest":"3849201"}',
+    ]) {
+      expect(firstLeak(leak), leak).not.toBeNull();
+    }
+    expect(firstLeak("Pagina non trovata, full-stack")).toBeNull();
+  });
+
+  test("API error responses carry no body details, only a status", async ({
+    request,
+  }) => {
+    const responses = [
+      await request.get("/api/cron/purge-expired"), // no secret: 401 or 503
+      await request.get("/api/cron/purge-expired", {
+        headers: { authorization: "Bearer wrong" },
+      }),
+      await request.post("/api/consent", {
+        headers: { "content-type": "text/plain" },
+        data: "x",
+      }),
+      await request.post("/api/consent", {
+        headers: { "content-type": "application/json" },
+        data: "{not json",
+      }),
+      await request.post("/api/demo-events", {
+        headers: { "content-type": "application/json" },
+        data: "{not json",
+      }),
+      await request.get("/api/consent"), // wrong method
+    ];
+
+    for (const response of responses) {
+      const body = await response.text();
+      expect(response.status(), response.url()).toBeGreaterThanOrEqual(400);
+      expect(firstLeak(body), response.url()).toBeNull();
+      expect(
+        response.headers()["x-powered-by"],
+        response.url(),
+      ).toBeUndefined();
+    }
+  });
+
+  test("an unknown API path and unknown pages are generic 404s with no internals", async ({
+    request,
+  }) => {
+    for (const path of ["/api/does-not-exist", "/it/non-esiste", "/en/a/b/c"]) {
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(404);
+      expect(firstLeak(await response.text()), path).toBeNull();
+    }
+  });
+
+  test("a broken percent-escape in a page path is a 400, with no body (it used to be a 500)", async ({
+    request,
+  }) => {
+    for (const path of ["/it/%E0%A4%A", "/%E0%A4%A", "/en/%ZZ"]) {
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(400);
+      expect(await response.text(), path).toBe("");
+    }
+  });
+
+  test("other hostile paths and a broken escape under /api never show a stack or a path", async ({
+    request,
+  }) => {
+    // /api is outside the proxy, so Next itself answers a broken escape there
+    // (500, plain "Internal Server Error": a framework behaviour, recorded in
+    // docs/state/tasks/P4.4.md). What matters here is that nothing leaks.
+    for (const path of [
+      "/api/%E0%A4%A",
+      "/%00",
+      "/it/..%2f..%2fetc%2fpasswd",
+    ]) {
+      const response = await request.get(path);
+      expect(firstLeak(await response.text()), path).toBeNull();
+    }
+  });
+
+  test("responses do not advertise the framework or its version", async ({
+    request,
+  }) => {
+    const headers = (await request.get("/it")).headers();
+
+    expect(headers["x-powered-by"]).toBeUndefined();
+    expect(headers["server"] ?? "").not.toMatch(/next|node|express/i);
+  });
+});

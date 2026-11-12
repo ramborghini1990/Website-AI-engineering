@@ -47,7 +47,7 @@ describe("src/lib/env.ts (server)", () => {
 
     const { env, isDevelopment, siteUrl } = await loadServerEnv();
 
-    expect(env.CSP_MODE).toBe("report-only");
+    expect(env.CSP_MODE).toBeUndefined();
     expect(isDevelopment).toBe(false);
     expect(siteUrl.origin).toBe("https://www.example.eu");
   });

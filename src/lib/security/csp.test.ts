@@ -5,12 +5,30 @@ import {
   buildCsp,
   cspHeaderName,
   generateNonce,
+  resolveCspMode,
   securityHeaders,
   TURNSTILE_ORIGIN,
   type CspOptions,
 } from "@/lib/security/csp";
 
 const NONCE = "bm9uY2UtZm9yLXRlc3Rz"; // synthetic
+
+describe("resolveCspMode: secure by default", () => {
+  it.each([
+    [undefined, true, "enforce"],
+    ["enforce", true, "enforce"],
+    ["report-only", true, "report-only"], // the documented rollback
+    ["off", true, "enforce"], // production never runs without a CSP
+    [undefined, false, "report-only"],
+    ["enforce", false, "enforce"],
+    ["off", false, "off"], // development only
+  ] as const)(
+    "configured %s, production %s -> %s",
+    (configured, production, expected) => {
+      expect(resolveCspMode(configured, production)).toBe(expected);
+    },
+  );
+});
 
 const base: CspOptions = {
   nonce: NONCE,

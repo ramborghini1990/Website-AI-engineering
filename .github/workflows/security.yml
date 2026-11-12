@@ -1,6 +1,6 @@
 name: Security
 
-# Secret scanning with gitleaks. CodeQL and dependency-review are left out on
+# Secret scanning with gitleaks and a production dependency audit. CodeQL and dependency-review are left out on
 # purpose: they need GitHub Advanced Security on private repositories, which
 # this repo does not have.
 
@@ -54,3 +54,29 @@ jobs:
       # matched values out of the CI log. A finding exits non-zero and fails the check.
       - name: Scan git history for secrets
         run: gitleaks git --redact --no-banner --verbose .
+
+  # Known vulnerabilities in what ships to visitors (P4.4). Production
+  # dependencies only: the dev-tooling advisories (lint, test) never reach a
+  # visitor and are reviewed through Dependabot instead. Runs weekly too, so a
+  # new advisory against an unchanged lockfile still turns this red.
+  audit:
+    name: pnpm audit (production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Enable Corepack (pnpm from the packageManager field)
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level moderate

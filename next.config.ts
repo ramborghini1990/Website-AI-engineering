@@ -5,6 +5,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
+  // No `X-Powered-By: Next.js` (P4.4): it tells a scanner which framework to
+  // aim at and buys nothing.
+  poweredByHeader: false,
   // `cacheComponents` and `partialPrefetching` (the create-next-app defaults)
   // are OFF on purpose (P1.7, docs/SECURITY.md §3): a nonce-based CSP needs
   // every page rendered per request, because the nonce can only be stamped on

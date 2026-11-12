@@ -68,14 +68,15 @@ upgrade-insecure-requests          (enforce mode only)
 - **`style-src-attr 'unsafe-inline'`** is the one deliberate looseness: React renders `style="…"` attributes (Radix, the FX layers) and a nonce cannot be put on an attribute. Attributes cannot run script. Style *elements* need the nonce.
 - **`strict-dynamic`** means scripts created at runtime by a trusted (nonced) script are allowed whatever their host. That is how Next's chunks and Turnstile load, and also why a hostile *parser-inserted* tag or inline handler is blocked while a script appended by already-running trusted code is not. The `script-src` host list is ignored by modern browsers and kept only for old ones.
 - **Development** (`next dev`) adds `'unsafe-eval'` (React's debugging), `'unsafe-inline'` styles and `ws:`; never in production (tested).
-- **`CSP_MODE`**: `report-only` (default) sends `Content-Security-Policy-Report-Only`, `enforce` sends `Content-Security-Policy`, `off` sends none. Next reads the nonce from either header name. `upgrade-insecure-requests` is left out of a report-only policy (browsers ignore it there and warn). `CSP_REPORT_URI` adds a `report-uri`; leave it unset unless you run a collector, because a third-party collector is a processor and reports contain URLs.
+- **`CSP_MODE`** (P4.4: enforced by default): unset means `enforce` in production and `report-only` in `next dev` (`resolveCspMode`, `src/lib/security/csp.ts`). `enforce` sends `Content-Security-Policy`, `report-only` sends `Content-Security-Policy-Report-Only` (the production rollback, below), `off` sends none and is honoured **only outside production**: a production deployment ignores it and enforces. Next reads the nonce from either header name. `upgrade-insecure-requests` is left out of a report-only policy (browsers ignore it there and warn). `CSP_REPORT_URI` adds a `report-uri`; leave it unset unless you run a collector, because a third-party collector is a processor and reports contain URLs.
 - **The e2e production server runs `enforce`** (`playwright.config.ts`). In it the site loads, hydrates, runs Lenis and navigates with zero violations, and the negative tests show it blocks an injected inline handler, a `<base>`, a `fetch`/image/iframe/form to another origin, and being framed.
 
-### Rollout (BLUEPRINT: "Report-Only for one deploy, then enforce")
+### Rollout and rollback
 
-1. Deploy as is (`report-only`). Open the site in a real browser with the console open, on a preview or production, in both languages and a couple of interactions. A violation shows as `[Report Only] Refused to …`.
-2. There is no collector, so reports are visible only in browser consoles. If you want them centrally, set `CSP_REPORT_URI` to a collector you control (and list it in the privacy notice), or add a small report route handler later (Zod-validated, rate-limited, no request bodies in logs).
-3. Set `CSP_MODE=enforce` in Vercel Production. Roll back by setting it back (no code change, redeploy picks it up).
+The policy is enforced from the first production deploy (the e2e suite has run against `enforce` since P1.7 with zero violations). Still, after the first deploy open the site in a real browser with the console open, in both languages and a couple of interactions: a violation shows as `Refused to …`.
+
+- **Rollback** (a real page is blocked and you need time): set `CSP_MODE=report-only` in Vercel Production and redeploy. Violations are then only logged in the browser console. Remove the variable afterwards. There is no `off` in production.
+- There is no collector. If you want reports centrally, set `CSP_REPORT_URI` to a collector you control (and list it in the privacy notice), or add a small report route handler later (Zod-validated, rate-limited, no request bodies in logs).
 
 ## 5. Fixed headers
 
@@ -92,6 +93,12 @@ On every page response (and redirect) through `proxy.ts`:
 
 Scope: the proxy matcher is unchanged, so static files (`/_next/static`, `/favicon.ico`, `robots.txt`, `.well-known`) do not get these headers from the app; on Vercel the edge adds HSTS. If a scanner flags `nosniff` on assets, add `headers()` in `next.config.ts` for those paths.
 
+`X-Powered-By` is switched off (`poweredByHeader: false` in `next.config.ts`).
+
+**`/.well-known/security.txt`** (RFC 9116, P4.4) is a route handler (`src/app/.well-known/security.txt/route.ts`, builder in `src/lib/security/security-txt.ts`), not a static file, because `Expires` is required and must be under a year away: a typed-in date would silently go stale. It is the last second of the month six months ahead, so it changes once a month. Fields: `Contact` (a `mailto:` for `SECURITY_CONTACT` when set, always the contact page), `Expires`, `Preferred-Languages`, `Canonical`. No `Policy` or `Encryption` yet (no disclosure policy page and no PGP key exist; add them if you create either). Served as `text/plain; charset=utf-8`; it is outside the proxy matcher, so it gets `nosniff` from the handler only.
+
+**Bad input never reaches the framework's 500.** A path with a broken percent-escape (`/it/%E0%A4%A`) is answered `400`, no body, by the proxy; before P4.4 Next answered `500`. Under `/api/*` (outside the proxy) Next still answers a broken escape with a plain `500 Internal Server Error` (no detail, no stack); the matcher is not widened for it because the API routes need none of the page headers.
+
 **HSTS preload is a commitment.** `includeSubDomains; preload` is the BLUEPRINT value, but it only means something on your own domain (B6 is undecided) and, if you later submit the domain to the preload list, every subdomain must stay on HTTPS. Do not submit before the domain is final.
 
 ## 6. What is tested
@@ -105,6 +112,14 @@ Scope: the proxy matcher is unchanged, so static files (`/_next/static`, `/favic
 | CSP content per option, nonce quality, headers | `src/lib/security/csp.test.ts` |
 | The proxy applies them, nonce reaches the app, hostile headers are overwritten, redirects keep them | `src/proxy.test.ts` |
 | Real browser, enforced: headers, nonce on every script, fresh per request, zero violations, blocks injection, 404 stays 404 | `e2e/security.spec.ts` |
+| Enforced by default in production, `off` ignored there, broken escapes answered 400 | `src/lib/security/csp.test.ts`, `src/proxy.test.ts` |
+| `security.txt` valid (Contact, Expires future and < 1 year for every day of a year, Canonical) | `src/lib/security/security-txt.test.ts`, `e2e/security.spec.ts` |
+| Errors leak nothing: API errors and 404s carry no stack, path, digest or connection string; no `X-Powered-By`; the detector is checked against known leaks | `e2e/security.spec.ts`, `src/app/global-error.test.tsx`, `src/app/[locale]/error.test.tsx` |
+| Rate limits: sliding window per hashed client | `rate-limit*.test.ts`, `src/lib/consent/receipt.test.ts` |
+
+**Error pages.** `app/[locale]/error.tsx` (segment errors) and `app/global-error.tsx` (a failing root layout, which replaces `<html>`) receive no error object and print nothing about it; `not-found.tsx` is static copy. In production Next itself replaces a server error's message with a generic one and an opaque digest, and the digest is not rendered. `global-error.tsx` cannot use the message catalogue (no provider exists when it renders), so its text is a fixed Italian/English pair with inline styles.
+
+**Rate limits (P4.4 review).** Inquiry form 5 per 10 min (Upstash when configured, in-process otherwise); consent receipts 10 per 10 min and demo events 30 per minute, both **in-process**, so on Vercel the limit is per serverless instance, not global. For consent receipts that is a known gap (the endpoint writes a row); moving it to Upstash would send a hashed client key to Upstash for every visitor who answers the banner, whereas the registry and the privacy notice name Upstash for the contact form only, so it waits for your decision (P4.4 task report). The thresholds are proposals from reasoning, not from traffic: a shared office or mobile carrier NAT looks like one client, so five inquiries in ten minutes is generous for a person and tight for a script. Re-tune after real traffic (the `ratelimit.*` log events say how often it fires). Fail-open on a Redis timeout is deliberate for the form (Turnstile and the honeypot still stop bots) and logged.
 
 Not covered: a `securityheaders.com` / Mozilla Observatory grade (needs a deployed preview: the ROADMAP's "grade A" criterion is still to check by you); CSP behaviour in Firefox and Safari; the Plausible and Turnstile origins in a real page (nothing loads them yet).
 

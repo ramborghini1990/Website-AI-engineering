@@ -108,8 +108,19 @@ const privateShape = {
   VERCEL_PROJECT_PRODUCTION_URL: optional(host),
 
   // Content Security Policy (src/lib/security/csp.ts)
-  /** `report-only` observes, `enforce` blocks, `off` sends no CSP. Start with report-only. */
-  CSP_MODE: z.enum(["report-only", "enforce", "off"]).default("report-only"),
+  /**
+   * `report-only` observes, `enforce` blocks, `off` sends no CSP. Unset means
+   * `enforce` in production and `report-only` in development, and production
+   * ignores `off` (`resolveCspMode` in src/lib/security/csp.ts).
+   */
+  CSP_MODE: optional(z.enum(["report-only", "enforce", "off"])),
+  /**
+   * Where to report a vulnerability: an email address, published in
+   * `/.well-known/security.txt` (RFC 9116). Unset = the file points to the
+   * contact page only. Public by design, but not a `NEXT_PUBLIC_` value: it is
+   * read on the server, by one route.
+   */
+  SECURITY_CONTACT: optional(z.email()),
   /** Optional collector for violation reports. A third party if it is not ours: list it in the privacy notice. */
   CSP_REPORT_URI: optional(httpsUrl),
 
