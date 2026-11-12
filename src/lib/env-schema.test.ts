@@ -164,6 +164,14 @@ describe("server variables", () => {
     ["DATABASE_URL", "not a url"],
     ["UPSTASH_REDIS_REST_URL", "http://eu-example.upstash.io"], // https only
     ["RATE_LIMIT_IP_SALT", "too-short"],
+    ["CRON_SECRET", "too-short"],
+    ["INQUIRY_RETENTION_DAYS", "0"], // a typo must not purge everything
+    ["INQUIRY_RETENTION_DAYS", "1"],
+    ["INQUIRY_RETENTION_DAYS", "29"],
+    ["INQUIRY_RETENTION_DAYS", "3651"],
+    ["INQUIRY_RETENTION_DAYS", "-730"],
+    ["INQUIRY_RETENTION_DAYS", "730.5"],
+    ["INQUIRY_RETENTION_DAYS", "two years"],
     ["EMAIL_FROM", "not-an-email"],
     ["INQUIRY_NOTIFY_TO", "nope"],
     ["CSP_MODE", "enforcing"],
@@ -223,6 +231,47 @@ describe("server variables", () => {
       "report-only" | "enforce" | "off"
     >();
     expectTypeOf<ServerEnv["DATABASE_URL"]>().toEqualTypeOf<
+      string | undefined
+    >();
+  });
+});
+
+describe("retention and the scheduled job (P4.3)", () => {
+  it("INQUIRY_RETENTION_DAYS defaults to 730 days (24 months) when unset or blank", () => {
+    expect(parseServerEnv({}).INQUIRY_RETENTION_DAYS).toBe(730);
+    expect(
+      parseServerEnv({ INQUIRY_RETENTION_DAYS: "" }).INQUIRY_RETENTION_DAYS,
+    ).toBe(730);
+    expect(
+      parseServerEnv({ INQUIRY_RETENTION_DAYS: "  " }).INQUIRY_RETENTION_DAYS,
+    ).toBe(730);
+  });
+
+  it("accepts a number inside the bounds, as a string from the environment", () => {
+    for (const [value, days] of [
+      ["30", 30],
+      ["365", 365],
+      ["3650", 3650],
+    ] as const) {
+      expect(
+        parseServerEnv({ INQUIRY_RETENTION_DAYS: value })
+          .INQUIRY_RETENTION_DAYS,
+        value,
+      ).toBe(days);
+    }
+  });
+
+  it("CRON_SECRET is optional, and 32 characters are enough", () => {
+    expect(parseServerEnv({}).CRON_SECRET).toBeUndefined();
+    expect(parseServerEnv({ CRON_SECRET: "" }).CRON_SECRET).toBeUndefined();
+    expect(parseServerEnv({ CRON_SECRET: "x".repeat(32) }).CRON_SECRET).toBe(
+      "x".repeat(32),
+    );
+  });
+
+  it("types: the period is a number, the secret an optional string", () => {
+    expectTypeOf<ServerEnv["INQUIRY_RETENTION_DAYS"]>().toEqualTypeOf<number>();
+    expectTypeOf<ServerEnv["CRON_SECRET"]>().toEqualTypeOf<
       string | undefined
     >();
   });

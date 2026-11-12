@@ -129,6 +129,10 @@ const NOT_A_SERVICE: Record<string, string> = {
   CSP_REPORT_URI:
     "optional report collector, unset: if it is ever set it receives violation reports and needs a processors entry",
   RATE_LIMIT_IP_SALT: "a secret key used to hash IPs before the limiter",
+  CRON_SECRET:
+    "the shared secret that lets the platform's scheduler call the site's own purge route (no third party receives data)",
+  INQUIRY_RETENTION_DAYS:
+    "how many days the site keeps an inquiry: a number, the 24 months of the privacy notice",
   NEXT_PUBLIC_SITE_URL: "the site's own address",
   NEXT_PUBLIC_PLAUSIBLE_ORIGIN:
     "declared for the CSP, but no code loads it (docs/ANALYTICS.md): the demos count on our own server",

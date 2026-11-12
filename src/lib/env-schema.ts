@@ -1,6 +1,12 @@
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import { z } from "zod";
 
+import {
+  DEFAULT_RETENTION_DAYS,
+  MAX_RETENTION_DAYS,
+  MIN_RETENTION_DAYS,
+} from "@/lib/privacy/retention";
+
 /**
  * The environment contract, as pure functions and schemas. No `process.env`
  * here and no `server-only`: the two modules that read the real environment
@@ -114,6 +120,26 @@ const privateShape = {
   TURNSTILE_SECRET_KEY: optional(z.string().min(1)),
   /** Salt for hashing client IPs before rate limiting; long enough to be unguessable. */
   RATE_LIMIT_IP_SALT: optional(z.string().min(32)),
+  /**
+   * Shared secret of the scheduled jobs (P4.3): Vercel Cron sends it as
+   * `Authorization: Bearer <value>` when a variable of this exact name exists.
+   * Unset = the purge route answers 503 and deletes nothing.
+   */
+  CRON_SECRET: optional(z.string().min(32)),
+  /**
+   * Days an inquiry is kept before the purge job deletes it (P4.3). Default 730
+   * = 24 months, the period in the privacy notice. Bounded so a typo cannot
+   * wipe the table.
+   */
+  INQUIRY_RETENTION_DAYS: z.preprocess(
+    blankToUndefined,
+    z.coerce
+      .number()
+      .int()
+      .min(MIN_RETENTION_DAYS)
+      .max(MAX_RETENTION_DAYS)
+      .default(DEFAULT_RETENTION_DAYS),
+  ),
   EMAIL_API_KEY: optional(z.string().min(1)),
   EMAIL_FROM: optional(z.email()),
   INQUIRY_NOTIFY_TO: optional(z.email()),
@@ -145,7 +171,7 @@ export type PublicEnv = z.infer<typeof publicSchema>;
 // cross-field rules
 // ---------------------------------------------------------------------------
 
-type Value = string | boolean | undefined;
+type Value = string | number | boolean | undefined;
 type Rule = (
   env: Record<string, Value>,
 ) => Array<{ name: string; message: string }>;

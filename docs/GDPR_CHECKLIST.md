@@ -10,7 +10,7 @@ Legend: ☐ todo · ☑ done · **[P2.5]** = roadmap task that implements it.
 
 ## 1. Governance documents
 
-- ☐ **Record of processing activities** (Art. 30) in `docs/ROPA.md`: one row per processing purpose (inquiries, booking, analytics, demos live mode, security logs), with data categories, legal basis, retention, processors, transfers. Art. 30(5)'s small-company exemption rarely applies when processing is not occasional, so keep it anyway. **[P4.3]**
+- ◐ **Record of processing activities** (Art. 30) in `docs/ROPA.md` (written in P4.3; every TO CONFIRM in it still needs the owner or B4): one row per processing purpose (inquiries, booking, analytics, demos live mode, security logs), with data categories, legal basis, retention, processors, transfers. Art. 30(5)'s small-company exemption rarely applies when processing is not occasional, so keep it anyway. **[P4.3]**
 - ☐ **Processor list with DPAs** signed/accepted: hosting (Vercel), DB (Neon/Supabase), Redis (Upstash), email (Resend/Brevo), bot protection (Cloudflare Turnstile), booking (Cal.com), analytics (Plausible, if not self-hosted), AI (Anthropic), error tracking (if used). For each: region, transfer mechanism (EU-only, or EU–US Data Privacy Framework certification + SCCs), sub-processor list link. **[P0.6, P4.2]**
 - ☐ **Transfer assessment** for every US-headquartered processor, even when data is hosted in the EU (pin EU regions everywhere they're offered). **[P4.2]**
 - ☐ **Data breach procedure**: who decides, how to notify the Garante within 72 h (online form), breach log template in `docs/INCIDENTS.md`. **[P4.7]**
@@ -61,7 +61,7 @@ Architecture: custom, first-party consent manager (no third-party CMP script nee
 - ☐ **Server-side validation** (Zod), length limits, strip control characters; reject attachments in v1.
 - ☐ **Storage**: EU Postgres, encryption at rest (provider default) + TLS in transit; access limited to you; DB credentials only in server env.
 - ☐ **Email notifications** via EU-region provider, sent to your inbox, minimal content (or a link to an admin view); SPF/DKIM/DMARC configured. **[P4.7]**
-- ☐ **Retention**: inquiries deleted after a stated period (proposal: 24 months from last contact, unless a contract follows; contract data then falls under Italian tax retention of 10 years). Automated purge job (Vercel Cron). **[P4.3]**
+- ◐ **Retention** (P4.3: purge built and tested; live once `CRON_SECRET` and the database exist, B13): inquiries deleted after a stated period (proposal: 24 months from last contact, unless a contract follows; contract data then falls under Italian tax retention of 10 years). Automated purge job (Vercel Cron). **[P4.3]**
 - ☐ **Demo funnel prefill** passes the demo scenario id, never personal data, in the URL.
 
 ## 6. Logging, monitoring & zero-PII policy
@@ -75,8 +75,8 @@ Architecture: custom, first-party consent manager (no third-party CMP script nee
 
 ## 7. Data subject rights
 
-- ☐ Documented procedure in `docs/DSR.md`: requests to the privacy address, identity check proportionate to risk (reply from the same email), answer within **1 month** (Art. 12(3)).
-- ☐ Scripts: `pnpm dsr:export <email>` (JSON of all rows for that email) and `pnpm dsr:delete <email>` (deletes inquiry rows, keeps a `data_events` tombstone with hashed ref). Tested. **[P4.3]**
+- ◐ Documented procedure in `docs/DSR.md` (written in P4.3; privacy address B3 and legal review B4 pending): requests to the privacy address, identity check proportionate to risk (reply from the same email), answer within **1 month** (Art. 12(3)).
+- ◐ Scripts (P4.3, tested; not run against a real Postgres yet; no `data_events` tombstone: see DSR.md §7): `pnpm dsr:export <email>` (JSON of all rows for that email) and `pnpm dsr:delete <email>` (deletes inquiry rows, keeps a `data_events` tombstone with hashed ref). Tested. **[P4.3]**
 - ☐ Unsubscribe link in every marketing email; one click.
 
 ## 8. AI demos (GDPR + EU AI Act)

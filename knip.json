@@ -1,4 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/lib/env.client.ts", "scripts/hooks/*.mjs"]
+  "entry": [
+    "src/lib/env.client.ts",
+    "scripts/hooks/*.mjs",
+    "scripts/privacy/*.mjs"
+  ]
 }

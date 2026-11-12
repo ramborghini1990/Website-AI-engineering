@@ -23,6 +23,8 @@
     "agent:e2e": "node scripts/agent/gate.mjs e2e",
     "agent:gate": "node scripts/agent/gate.mjs full",
     "agent:mutate": "node scripts/agent/mutate.mjs",
+    "dsr:export": "node scripts/privacy/dsr.mjs export",
+    "dsr:delete": "node scripts/privacy/dsr.mjs delete",
     "state:check": "node scripts/hooks/state-size.mjs"
   },
   "dependencies": {

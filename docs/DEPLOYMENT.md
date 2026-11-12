@@ -59,6 +59,8 @@ Rules:
 | `DATABASE_URL` | local or dev EU Postgres | dedicated EU Postgres **branch** for previews | production EU Postgres |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | dev database (EU) | separate preview database (EU) | production database (EU) |
 | `RATE_LIMIT_IP_SALT` | random | random, different from prod | random, rotated regularly |
+| `CRON_SECRET` | unset (no scheduler locally) | unset (Vercel runs crons on Production only) | random, 32+ characters; Vercel Cron sends it as `Authorization: Bearer …` (P4.3) |
+| `INQUIRY_RETENTION_DAYS` | unset (730) | unset (730) | unset (730 = 24 months, as the privacy notice says); 30–3650 allowed. Change the notice with it |
 | `EMAIL_API_KEY` | provider sandbox | provider sandbox, no real sends | production key |
 | `EMAIL_FROM` | example address | example address | verified sender domain (SPF/DKIM/DMARC, P4.7) |
 | `INQUIRY_NOTIFY_TO` | your own inbox | your own inbox, never a client mailbox | real inbox |
@@ -102,6 +104,15 @@ psql "$DATABASE_URL" -f src/lib/db/migrations/0003_create_consent_receipts.sql  
 Until `0002` is applied (or without `DATABASE_URL`), a deployed site answers the demo-event endpoint with 503 and drops the events; the demos are unaffected.
 
 Until `0003` is applied (or without `DATABASE_URL`), a deployed site answers `/api/consent` with 503: the visitor's cookie choice still works in their browser, but **no proof of it is kept**, which art. 7(1) requires. Treat `0003` as required before launch, not optional. It also needs `RATE_LIMIT_IP_SALT` (else 503); no other variable. Receipts made on a laptop or in CI live in process memory only.
+
+### Scheduled purge of expired inquiries (P4.3)
+
+`vercel.json` has one cron: `GET /api/cron/purge-expired` daily at 03:17 UTC. Before launch:
+
+1. Set `CRON_SECRET` (Production, Sensitive, 32+ random characters). Vercel sends it as `Authorization: Bearer <value>` on its own; no header to configure.
+2. Without it the route answers 503 and deletes nothing (it logs `cron.purge.unconfigured`); with a wrong or missing header it answers 401. A deployed site without `DATABASE_URL` answers 503.
+3. Vercel runs crons on **Production deployments only**, and the Hobby plan limits them to once a day with hourly precision (B5: Pro plan). Check the first run in the dashboard (Settings → Cron Jobs) and the log line `cron.purge.done` (a count, no data); a `401`/`503` there means step 1 or the database is missing.
+4. It deletes `inquiries` rows created more than `INQUIRY_RETENTION_DAYS` (730) days ago and nothing else; **consent receipts are never purged**. Process: [DSR.md](DSR.md) §6.
 
 Email goes through Resend's REST API (`EMAIL_API_KEY`); `EMAIL_FROM` must be on a domain verified with the provider (SPF/DKIM, P4.7). Use the Cloudflare **test** keys in Development and Preview (they are in `.env.example`); only Production gets real ones.
 

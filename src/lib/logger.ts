@@ -27,6 +27,8 @@ export const ALLOWED_FIELDS = [
   "errorClass",
   "step",
   "attempts",
+  /** A number of rows or items (e.g. how many inquiries a purge deleted). */
+  "count",
   "retryAfterSec",
   "provider",
   "mode",
