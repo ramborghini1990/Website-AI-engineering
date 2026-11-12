@@ -69,6 +69,32 @@
     "pending": "Not yet available",
     "rights": "© {year} {owner}. All rights reserved."
   },
+  "consent": {
+    "title": "Cookies and third-party content",
+    "body": "This site only uses technical tools, needed to make it work and to remember your choices. Third-party content, such as the calendar for booking a call, loads only if you allow it. We do not use profiling cookies.",
+    "closeHint": "Closing this notice with the X counts as rejecting.",
+    "policyLink": "Read the cookie policy",
+    "rejectAll": "Reject all",
+    "acceptAll": "Accept all",
+    "customize": "Customise",
+    "save": "Save my choices",
+    "close": "Close and reject non-essential cookies",
+    "closeKeep": "Close without changing my choices",
+    "preferencesTitle": "Your preferences",
+    "categories": {
+      "necessary": {
+        "label": "Necessary",
+        "description": "Always on. They make the site work and remember what you choose: these preferences, the light or dark theme and the changes you make in the business demo. They stay in your browser."
+      },
+      "booking": {
+        "label": "Booking calendar",
+        "description": "Loads the Cal.com calendar (EU instance) straight away, without asking you each time. Cal.com receives your IP address and your browser details."
+      }
+    },
+    "receipt": "Your choice code: {id}",
+    "saved": "Preferences saved.",
+    "reopen": "Cookie preferences"
+  },
   "toaster": {
     "viewport": "Notifications ({hotkey})",
     "close": "Dismiss notification"

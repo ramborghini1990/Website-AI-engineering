@@ -96,9 +96,12 @@ Create the table once per database, before the first inquiry (no migration tool 
 ```bash
 psql "$DATABASE_URL" -f src/lib/db/migrations/0001_create_inquiries.sql
 psql "$DATABASE_URL" -f src/lib/db/migrations/0002_create_demo_event_counts.sql   # demo analytics counters (P3.5, docs/ANALYTICS.md)
+psql "$DATABASE_URL" -f src/lib/db/migrations/0003_create_consent_receipts.sql    # cookie-choice receipts (P4.1, art. 7(1))
 ```
 
 Until `0002` is applied (or without `DATABASE_URL`), a deployed site answers the demo-event endpoint with 503 and drops the events; the demos are unaffected.
+
+Until `0003` is applied (or without `DATABASE_URL`), a deployed site answers `/api/consent` with 503: the visitor's cookie choice still works in their browser, but **no proof of it is kept**, which art. 7(1) requires. Treat `0003` as required before launch, not optional. It also needs `RATE_LIMIT_IP_SALT` (else 503); no other variable. Receipts made on a laptop or in CI live in process memory only.
 
 Email goes through Resend's REST API (`EMAIL_API_KEY`); `EMAIL_FROM` must be on a domain verified with the provider (SPF/DKIM, P4.7). Use the Cloudflare **test** keys in Development and Preview (they are in `.env.example`); only Production gets real ones.
 

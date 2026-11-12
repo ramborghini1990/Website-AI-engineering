@@ -63,3 +63,25 @@ export const demoEventCounts = pgTable(
 );
 
 export type DemoEventCountRow = typeof demoEventCounts.$inferInsert;
+
+/**
+ * Consent receipts (P4.1, GDPR art. 7(1): the controller must be able to show
+ * that the person consented). One immutable row per decision: a random id (the
+ * visitor holds it in their consent cookie), when, which wording version was on
+ * screen, how it was given and what was allowed. NO ip, user agent, account or
+ * any other identifier: a receipt cannot be traced back to a person, only matched
+ * by the code the person shows. Retention is set in P4.3.
+ */
+export const consentReceipts = pgTable("consent_receipts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  policyVersion: text("policy_version").notNull(),
+  /** accept_all | reject_all | custom | close (the "X", which rejects). */
+  method: text("method").notNull(),
+  /** The embeds category: Cal.com booking calendar. */
+  booking: boolean("booking").notNull(),
+});
+
+export type ConsentReceiptRow = typeof consentReceipts.$inferInsert;

@@ -3,7 +3,11 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { consentCategories, thirdParties } from "@/lib/consent/registry";
+import {
+  consentCategories,
+  storedKeys,
+  thirdParties,
+} from "@/lib/consent/registry";
 
 /**
  * CLAUDE.md §10 as a gate: third-party scripts and embeds load only through
@@ -72,10 +76,71 @@ describe("third parties are gated and registered", () => {
     }
   });
 
-  it("the gate keeps the choice nowhere: no cookie, localStorage or sessionStorage", () => {
+  it("the gate itself writes nothing: no cookie, localStorage or sessionStorage (the choice lives in lib/consent/client.ts)", () => {
     expect(code("src/components/consent/consent-gate.tsx")).not.toMatch(
       /localStorage|sessionStorage|document\.cookie|indexedDB/,
     );
+  });
+
+  it("only the consent client touches document.cookie, and browser storage is used only by the theme and the business demo: nothing is stored that the cookie policy would not list", () => {
+    const cookieUsers = production
+      .filter((file) => /document\.cookie/.test(code(file)))
+      .map(norm);
+    expect(cookieUsers).toEqual(["src/lib/consent/client.ts"]);
+
+    const storageUsers = production
+      .filter(
+        (file) =>
+          // the registry only NAMES the kind of key it lists
+          norm(file) !== "src/lib/consent/registry.ts" &&
+          /\b(?:localStorage|sessionStorage|indexedDB)\b/.test(code(file)),
+      )
+      .map(norm)
+      .sort();
+    // 'only the theme' above is now: the theme and the business demo's own database
+    expect(storageUsers).toEqual([
+      "src/lib/demos/business/storage.ts",
+      "src/lib/theme.ts",
+    ]);
+
+    // every key the registry lists names a file that really is the one using it
+    for (const key of storedKeys) {
+      expect(production.map(norm), key.name).toContain(key.owner);
+    }
+    expect(storedKeys.map((key) => key.name).sort()).toEqual([
+      "consent",
+      "demo-business-suite",
+      "theme",
+    ]);
+  });
+
+  it("the banner has no scroll, wheel or global click handler: scrolling is never consent", () => {
+    for (const file of production.filter((name) =>
+      norm(name).startsWith("src/components/consent/"),
+    )) {
+      expect(code(file), file).not.toMatch(
+        /["'](?:scroll|wheel|touchmove|beforeunload|visibilitychange)["']|onScroll|IntersectionObserver/,
+      );
+    }
+    expect(code("src/lib/consent/client.ts")).not.toMatch(
+      /["'](?:scroll|wheel|touchmove|click)["']/,
+    );
+  });
+
+  it("every registered category has its text in the banner, in both languages", () => {
+    for (const locale of ["it", "en"]) {
+      const messages = JSON.parse(
+        readFileSync(path.join(root, `messages/${locale}.json`), "utf8"),
+      ) as {
+        consent: { categories: Partial<Record<string, { label: string }>> };
+      };
+      for (const category of consentCategories) {
+        expect(
+          messages.consent.categories[category]?.label,
+          `${locale}: ${category}`,
+        ).toBeTruthy();
+      }
+    }
   });
 
   it("every category used with a gate is registered, and every registered third party uses a known category", () => {
@@ -97,10 +162,10 @@ describe("third parties are gated and registered", () => {
     );
   });
 
-  it("every registered third party loads on the visitor's click and names its CSP rule and what it receives", () => {
+  it("every registered third party loads only on the visitor's act (a click, or a stored yes) and names its CSP rule and what it receives", () => {
     expect(thirdParties.length).toBeGreaterThan(0);
     for (const party of thirdParties) {
-      expect(party.trigger).toBe("visitor-click");
+      expect(["visitor-click", "stored-consent"]).toContain(party.trigger);
       expect(party.dataSent.length).toBeGreaterThan(0);
       expect(party.csp.directive).toBe("frame-src");
     }

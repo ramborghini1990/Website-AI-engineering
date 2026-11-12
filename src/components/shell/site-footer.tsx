@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
+import { CookiePreferencesButton } from "@/components/consent/cookie-preferences-button";
 import { business as defaultBusiness, type Business } from "@/lib/business";
 import { CONTACT_ANCHOR } from "@/lib/navigation";
 
@@ -103,9 +104,12 @@ export function SiteFooter({
       </div>
 
       <div className="border-t border-border-subtle">
-        <p className="mx-auto w-full max-w-page px-gutter py-6 text-sm text-text-muted">
-          {t("rights", { year, owner: business.owner.name })}
-        </p>
+        <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-x-6 gap-y-2 px-gutter py-4">
+          <p className="text-sm text-text-muted">
+            {t("rights", { year, owner: business.owner.name })}
+          </p>
+          <CookiePreferencesButton />
+        </div>
       </div>
     </footer>
   );

@@ -3,14 +3,17 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { allows, useConsent } from "@/lib/consent/client";
 import type { ConsentCategory } from "@/lib/consent/registry";
 
 /**
- * Click-to-load wrapper for a third-party embed (CLAUDE.md §10). Until the
- * visitor presses the button, `children` are NOT RENDERED: no iframe, no script,
- * no image, no preconnect, so the browser makes no request to the provider
- * (ROADMAP P2.7). The choice is not remembered (no cookie, no storage): every
- * visit starts blocked, which keeps the site's own footprint empty.
+ * Wrapper for a third-party embed (CLAUDE.md §10). `children` are NOT RENDERED
+ * until the visitor allows them: no iframe, no script, no image, no preconnect,
+ * so the browser makes no request to the provider (ROADMAP P2.7). Two ways in:
+ * the visitor presses the button (for this page view only), or has said yes to
+ * this category in the cookie banner (P4.1), which the cookie remembers. Every
+ * new cookie decision (reject, withdraw) closes the gate again. This component
+ * itself writes nothing: the choice lives in `lib/consent/client.ts`.
  *
  * It says who the third party is and what it will receive, before the click, and
  * always offers a plain link as an alternative that needs no embed and no
@@ -42,12 +45,22 @@ export function ConsentGate({
   newTabLabel: string;
   children: ReactNode;
 }) {
-  const [loaded, setLoaded] = useState(false);
+  const consent = useConsent();
+  // The revision of the choice at the moment of the click; `null` = not clicked.
+  const [clickedAt, setClickedAt] = useState<number | null>(null);
   const region = useRef<HTMLDivElement>(null);
 
+  // Open for a stored "yes" to this category, or for the visitor's own click.
+  // A click holds only until the next decision about cookies: rejecting or
+  // withdrawing unloads the embed, as easy as accepting loaded it.
+  const allowed = allows(consent, category);
+  const clicked = clickedAt !== null && clickedAt === consent.revision;
+  const loaded = allowed || clicked;
+
   useEffect(() => {
-    if (loaded) region.current?.focus();
-  }, [loaded]);
+    // Only the visitor's click moves focus; an embed opened by a stored "yes" must not steal it.
+    if (clicked && !allowed) region.current?.focus();
+  }, [clicked, allowed]);
 
   return (
     <div
@@ -76,7 +89,7 @@ export function ConsentGate({
               size="lg"
               className="[@media(scripting:none)]:hidden"
               onClick={() => {
-                setLoaded(true);
+                setClickedAt(consent.revision);
               }}
             >
               {loadLabel}

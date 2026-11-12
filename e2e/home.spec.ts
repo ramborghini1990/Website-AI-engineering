@@ -519,8 +519,11 @@ test.describe("accessibility (axe, WCAG 2.0-2.2 A/AA)", () => {
   }) => {
     await open(page, "en");
 
+    // A first visit has the cookie banner (P4.1) right after the skip link: its
+    // four stops (the X, Reject all, Accept all, Customise) come before the header.
+    const BANNER_STOPS = 4;
     const order: string[] = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 14 + BANNER_STOPS; i++) {
       await page.keyboard.press("Tab");
       order.push(
         await page.evaluate(() => {
@@ -533,6 +536,12 @@ test.describe("accessibility (axe, WCAG 2.0-2.2 A/AA)", () => {
     }
     // skip link, brand, nav, theme (one radio group stop), language, header CTA, then the hero
     expect(order[0]).toContain("Skip to main content");
+    expect(order.slice(1, 1 + BANNER_STOPS)).toEqual([
+      "BUTTON:",
+      "BUTTON:Reject all",
+      "BUTTON:Accept all",
+      "BUTTON:Customise",
+    ]);
     expect(order.some((entry) => entry.includes("Get in touch"))).toBe(true);
     expect(order.some((entry) => entry.includes("See the services"))).toBe(
       true,

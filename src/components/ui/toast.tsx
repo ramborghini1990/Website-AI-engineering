@@ -18,7 +18,10 @@ function ToastViewport({
   return (
     <ToastPrimitive.Viewport
       className={cn(
-        "pointer-events-none fixed right-0 bottom-0 z-(--z-toast) flex max-h-dvh w-full flex-col-reverse gap-2 p-4 sm:max-w-sm",
+        // `--consent-offset` is the cookie banner's height while it is on screen (set by
+        // ConsentBanner, 0 otherwise), so a toast never sits on the banner's buttons.
+        // Arbitrary value: a token cannot express a runtime height with a fallback.
+        "pointer-events-none fixed right-0 bottom-[min(var(--consent-offset,0px),50dvh)] z-(--z-toast) flex max-h-dvh w-full flex-col-reverse gap-2 p-4 sm:max-w-sm",
         className,
       )}
       {...props}

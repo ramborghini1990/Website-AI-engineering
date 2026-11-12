@@ -69,6 +69,32 @@
     "pending": "Non ancora disponibile",
     "rights": "© {year} {owner}. Tutti i diritti riservati."
   },
+  "consent": {
+    "title": "Cookie e contenuti di terze parti",
+    "body": "Questo sito usa solo strumenti tecnici, necessari a farlo funzionare e a ricordare le tue scelte. I contenuti di terze parti, come il calendario per fissare una chiamata, si caricano soltanto se lo consenti. Non usiamo cookie di profilazione.",
+    "closeHint": "Chiudere questo avviso con la X equivale a rifiutare.",
+    "policyLink": "Leggi l'informativa sui cookie",
+    "rejectAll": "Rifiuta tutti",
+    "acceptAll": "Accetta tutti",
+    "customize": "Personalizza",
+    "save": "Salva le mie scelte",
+    "close": "Chiudi e rifiuta i cookie non necessari",
+    "closeKeep": "Chiudi senza modificare le scelte",
+    "preferencesTitle": "Le tue preferenze",
+    "categories": {
+      "necessary": {
+        "label": "Necessari",
+        "description": "Sempre attivi. Servono al funzionamento del sito e a ricordare ciò che scegli tu: queste preferenze, il tema chiaro o scuro e le modifiche che fai nella demo gestionale. Restano nel tuo browser."
+      },
+      "booking": {
+        "label": "Calendario per le prenotazioni",
+        "description": "Carica subito il calendario di Cal.com (istanza UE), senza chiederti conferma ogni volta. Cal.com riceve il tuo indirizzo IP e i dati del tuo browser."
+      }
+    },
+    "receipt": "Codice della tua scelta: {id}",
+    "saved": "Preferenze salvate.",
+    "reopen": "Preferenze cookie"
+  },
   "toaster": {
     "viewport": "Notifiche ({hotkey})",
     "close": "Chiudi notifica"

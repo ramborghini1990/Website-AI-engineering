@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
+import { ConsentBanner } from "@/components/consent/consent-banner";
 import { SiteFooter } from "@/components/shell/site-footer";
 import { SiteHeader } from "@/components/shell/site-header";
 import { MAIN_CONTENT_ID, SkipLink } from "@/components/shell/skip-link";
@@ -95,6 +96,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider
           locale={locale}
           messages={{
+            consent: messages.consent,
             languageSwitcher: messages.languageSwitcher,
             nav: messages.nav,
             theme: messages.theme,
@@ -104,6 +106,8 @@ export default async function LocaleLayout({
             <LenisProvider>
               <ThemeSync />
               <SkipLink />
+              {/* After the skip link, before the page: a keyboard user meets the cookie choice first, until it is made. */}
+              <ConsentBanner />
               <SiteHeader />
               <main
                 id={MAIN_CONTENT_ID}

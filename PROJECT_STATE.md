@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-11 · branch `main` (P3.4 committed as `41dbff1`)_
+_Last updated: 2026-11-12 · branch `main` (P3.5 committed as `4299fcd`; P4.1 uncommitted)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 3 — Agent showcases & funnels (5/7; P3.0 skipped in order, see `docs/state/tasks/P3.1.md`) |
-| Active task | `P3.5` Demo analytics, cookieless first-party aggregate counters (D37, `docs/ANALYTICS.md`) |
-| Status | Built and verified, **awaiting review and commit**. No Plausible script (D37); funnel read with SQL. Not run against a real Postgres |
-| Next task | `P3.0` (demo framework, incl. generic shell texts) or `P3.6` (only if needed, ADR first): user's call, do not start unprompted |
+| Phase | 4 — GDPR, CI/CD, hardening (1/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
+| Active task | `P4.1` Consent management: banner, `consent` cookie, receipts, gate (D38, `docs/state/tasks/P4.1.md`) |
+| Status | Built and verified, **awaiting review and commit**. Receipts only against the in-process stand-in (migration 0003 never run). Last full gate: 686/687 e2e, the 1 failure a dev-server flake candidate that passes alone (details in the task report) |
+| Next task | `P4.2` Legal pages (also supplies the cookie-policy link the banner lacks): do not start unprompted |
 | Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | Decisions in `docs/state/tasks/P3.5.md` → "Decisions for you" (no Plausible, what "completed" means per demo, DNT/GPC); apply migration 0002 when the DB exists (B13); then review and commit |
+| Needs the user | Decisions in `P4.1.md` → "Decisions for you" (classing `theme` and the business demo's IndexedDB as necessary; no policy link until P4.2; GPC not pre-answering). Legal review of the banner wording (B4). Apply migration 0003 with the DB (B13). Review and commit |
 
 ## 2. Phase progress
 
@@ -27,8 +27,8 @@ _Last updated: 2026-11-11 · branch `main` (P3.4 committed as `41dbff1`)_
 | 0 Setup & governance | ✔ | 7/7 | carry-overs in `docs/state/tasks/general.md` |
 | 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
-| 3 Agent showcases & funnels | ◐ | 5/7 | P3.5 awaiting commit |
-| 4 GDPR, CI/CD, hardening | ☐ | 0/7 | |
+| 3 Agent showcases & funnels | ✔ | 6/7 | P3.0 deferred, P3.6 not needed (`docs/state/tasks/P3.1.md`) |
+| 4 GDPR, CI/CD, hardening | ◐ | 1/7 | P4.1 awaiting commit |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
 
@@ -44,7 +44,7 @@ _Last updated: 2026-11-11 · branch `main` (P3.4 committed as `41dbff1`)_
 | B9 | About biography; technologies per service (`docs/CONTENT.md` §7) | About page |
 | B11 | Header at 360 px: move nav into a Sheet below `md` | before Process/About |
 | B12 | `/privacy` page must exist before the form goes live (Art. 13) | form live |
-| B13 | EU Postgres, Upstash, Turnstile keys, email provider (see `docs/DEPLOYMENT.md` §3) | form live |
+| B13 | EU Postgres, Upstash, Turnstile keys, email provider (see `docs/DEPLOYMENT.md` §3); also migrations 0002 and **0003** (no consent proof is kept without it) | form live |
 | B14 | Cal.com EU account, host and `NEXT_PUBLIC_CAL_URL` | calendar live |
 
 ## 4. Environment & services
@@ -54,10 +54,11 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (P3.5) → PASS 2026-11-11 (1st run)
-  typecheck, lint, unit (91 files / 1557 tests), knip, format, build → pass
-  e2e 651/651 (chromium + chromium-dev, enforced CSP)
-  NOT done: Lighthouse; Firefox/WebKit; real Postgres upsert; screen reader; mutation sweep
+pnpm agent:gate (P4.1) → NOT a clean pass, 2026-11-12 (3rd full run)
+  typecheck, lint, unit (95 files / 1622 tests), knip, format, build → pass
+  e2e 686/687: motion.spec:277 (click under `next dev`, URL unchanged) failed; passes alone 4/4,
+  and all 104 dev-project tests pass together. Not looped further.
+  NOT done: Lighthouse; Firefox/WebKit; real Postgres insert; screen reader; mutation sweep
 ```
 
 ## 6. Rules for updating this file

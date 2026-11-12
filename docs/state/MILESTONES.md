@@ -30,5 +30,7 @@ Moved out of PROJECT_STATE.md (which keeps only the last 3).
 | 2026-11-11 | P3.2 | LinkedIn outreach simulation at `/work/linkedin-assisted-outreach`: rule-based fit rating, drafts, per-prospect approval gate enforced by the reducer, compliance rules as structure tests | `8677097` |
 | 2026-11-11 | P3.3 | Document intelligence simulation at `/work/document-intelligence-demo`: three bundled sample documents, fields with evidence, doubtful values flagged for a person, answers citing page and section; no upload surface | `93c06f4` |
 | 2026-11-11 | P3.4 | Back-office suite simulation at `/work/business-management-app`: till, cash-flow charts and purchase orders on an invented shop, one IndexedDB database in the visitor's browser (D36) | `41dbff1` |
+| 2026-11-11 | P3.5 | Cookieless first-party demo analytics: aggregate daily counters, no script, funnel read with SQL (D37) | `4299fcd` |
+| 2026-11-12 | P4.1 | Cookie banner to the Garante guidelines (equal Accept/Reject, X rejects, granular, no scroll consent, 6-month re-prompt), `consent` cookie, insert-only consent receipts with no IP (D38), `ConsentGate` opens on a stored yes, footer "Cookie preferences" | |
 
 ---
