@@ -95,6 +95,144 @@
     "saved": "Preferenze salvate.",
     "reopen": "Preferenze cookie"
   },
+  "legal": {
+    "footerNav": "Documenti legali",
+    "otherDocuments": "Altri documenti legali",
+    "versionLine": "Versione {version}",
+    "updatedLine": "aggiornata il {date}",
+    "authoritative": "Questo testo in italiano è quello che fa fede. La versione inglese è una traduzione di cortesia.",
+    "draft": {
+      "title": "Bozza in attesa di revisione legale",
+      "body": "Questo testo è stato redatto con cura ma non è ancora stato rivisto da un professionista abilitato. Può cambiare prima della pubblicazione definitiva del sito."
+    },
+    "titles": {
+      "privacy": "Informativa privacy",
+      "cookie-policy": "Informativa sui cookie",
+      "legal": "Note legali",
+      "terms": "Termini d'uso delle demo"
+    },
+    "tables": {
+      "storage": {
+        "caption": "Cookie e dati salvati nel tuo browser da questo sito",
+        "columns": {
+          "name": "Nome",
+          "kind": "Tipo",
+          "provider": "Chi lo imposta",
+          "category": "Categoria",
+          "purpose": "A cosa serve",
+          "duration": "Durata"
+        },
+        "firstParty": "Questo sito (prima parte)",
+        "kinds": {
+          "cookie": "Cookie",
+          "localStorage": "Archivio locale (localStorage)",
+          "indexedDB": "Database del browser (IndexedDB)"
+        },
+        "categories": {
+          "necessary": "Tecnico, necessario"
+        }
+      },
+      "thirdParties": {
+        "caption": "Contenuti di terze parti che puoi consentire nel banner",
+        "columns": {
+          "provider": "Fornitore",
+          "category": "Scelta nel banner",
+          "purpose": "A cosa serve",
+          "loads": "Quando si carica",
+          "data": "Che cosa riceve il fornitore"
+        },
+        "categories": {
+          "booking": "Calendario di prenotazione"
+        },
+        "triggers": {
+          "visitor-click": "Solo dopo un tuo clic sul contenuto",
+          "stored-consent": "Dopo il tuo consenso: con un clic sul contenuto, oppure subito se lo hai già dato nel banner"
+        }
+      },
+      "processors": {
+        "caption": "Fornitori che possono ricevere dati di chi visita il sito",
+        "columns": {
+          "name": "Fornitore",
+          "role": "Ruolo",
+          "when": "Quando",
+          "data": "Dati che può ricevere",
+          "location": "Dove e con quali garanzie"
+        },
+        "roles": {
+          "hosting": "Hosting",
+          "database": "Database",
+          "rate-limit": "Limite di richieste",
+          "bot-protection": "Protezione dai programmi automatici",
+          "email": "Invio di email",
+          "booking": "Prenotazione",
+          "ai": "Intelligenza artificiale"
+        },
+        "whens": {
+          "every-visit": "A ogni visita",
+          "contact-form": "Quando usi il modulo di contatto",
+          "booking-consent": "Solo se consenti il calendario",
+          "live-demos": "Solo con la modalità live delle demo, oggi spenta"
+        }
+      }
+    },
+    "storage": {
+      "consent": {
+        "purpose": "Ricorda la tua scelta sui cookie: le categorie consentite, la versione del testo del banner, la data e il codice della ricevuta.",
+        "duration": "6 mesi"
+      },
+      "theme": {
+        "purpose": "Ricorda il tema chiaro o scuro che hai scelto. Viene salvato solo se scegli chiaro o scuro, non con il tema automatico.",
+        "duration": "Finché non scegli il tema automatico o non cancelli i dati del sito"
+      },
+      "demo-business-suite": {
+        "purpose": "Conserva nel tuo browser le modifiche che fai nella demo del gestionale. Viene creato quando apri la demo e scritto solo se cambi qualcosa. Non viene mai inviato a nessuno.",
+        "duration": "Finché non azzeri la demo o non cancelli i dati del sito"
+      }
+    },
+    "thirdParties": {
+      "cal-booking": {
+        "purpose": "Scegliere un orario per una prima conversazione.",
+        "data": "Indirizzo IP, informazioni su browser e dispositivo e quello che scrivi nella pagina di prenotazione. Cal.com può usare propri cookie, secondo la sua informativa."
+      }
+    },
+    "processors": {
+      "vercel": {
+        "purpose": "Pubblica il sito: server, rete di distribuzione e registri tecnici delle richieste.",
+        "data": "Indirizzo IP, browser, pagina richiesta, data e ora, nei registri tecnici.",
+        "location": "Funzioni di calcolo a Francoforte (UE); la rete di distribuzione è globale. Società statunitense: per i trasferimenti fuori dallo Spazio economico europeo valgono la decisione di adeguatezza (EU-US Data Privacy Framework) o le clausole contrattuali tipo, come indicato nell'accordo sul trattamento dei dati."
+      },
+      "postgres": {
+        "purpose": "Conserva le richieste inviate con il modulo di contatto, le ricevute delle scelte sui cookie e i conteggi aggregati delle demo.",
+        "data": "Quello che scrivi nel modulo (nome, email, azienda, descrizione, fascia di budget, tempi); il codice e le scelte della ricevuta dei cookie, senza indirizzo IP; conteggi giornalieri delle demo, senza alcun identificativo.",
+        "location": "Database PostgreSQL in una regione dell'Unione europea. Il nome del fornitore sarà indicato qui appena scelto."
+      },
+      "upstash": {
+        "purpose": "Limita le richieste ripetute al modulo, contro gli abusi.",
+        "data": "Un codice ricavato dal tuo indirizzo IP con una chiave segreta (non l'indirizzo IP) e il numero di richieste di quel codice. Il contatore si azzera da solo dopo pochi minuti.",
+        "location": "Database in una regione dell'Unione europea. Società statunitense: per eventuali trasferimenti valgono le garanzie indicate nell'accordo sul trattamento dei dati."
+      },
+      "cloudflare-turnstile": {
+        "purpose": "Verifica che il modulo sia compilato da una persona e non da un programma automatico. È una misura di sicurezza del modulo.",
+        "data": "Solo se arrivi all'ultimo passo del modulo, il tuo browser carica uno script da Cloudflare, che riceve il tuo indirizzo IP e informazioni tecniche sul browser; l'esito della verifica arriva al nostro server. Nelle altre pagine non viene contattato.",
+        "location": "Rete globale di Cloudflare, società statunitense: per i trasferimenti valgono le garanzie indicate nell'accordo sul trattamento dei dati."
+      },
+      "resend": {
+        "purpose": "Invia al titolare l'email che avvisa di una richiesta ricevuta.",
+        "data": "Il contenuto della richiesta (nome, email, azienda, descrizione, budget, tempi) e l'indirizzo del titolare.",
+        "location": "Società statunitense: per i trasferimenti fuori dallo Spazio economico europeo valgono le garanzie indicate nell'accordo sul trattamento dei dati."
+      },
+      "cal-com": {
+        "purpose": "Calendario per fissare una chiamata. Si carica solo con il tuo consenso (clic sul contenuto o scelta nel banner).",
+        "data": "Indirizzo IP, informazioni su browser e dispositivo e quello che scrivi nella pagina di prenotazione.",
+        "location": "Istanza europea di Cal.com. Il fornitore è titolare o responsabile del trattamento per la prenotazione secondo la propria informativa."
+      },
+      "anthropic": {
+        "purpose": "Fornirebbe le risposte dei modelli di intelligenza artificiale nelle demo in modalità live. La modalità live è spenta.",
+        "data": "Oggi nessuno: alle demo non è collegato alcun servizio esterno. Se la modalità live sarà attivata, il testo che scrivi nella demo, dopo un avviso e un tuo consenso.",
+        "location": "Società statunitense: per i trasferimenti fuori dallo Spazio economico europeo valgono le garanzie indicate nell'accordo sul trattamento dei dati."
+      }
+    }
+  },
   "toaster": {
     "viewport": "Notifiche ({hotkey})",
     "close": "Chiudi notifica"
@@ -371,7 +509,7 @@
         "marketing": "Voglio ricevere ogni tanto novità e approfondimenti (facoltativo)",
         "marketingHint": "Puoi lasciarlo vuoto: ti rispondo comunque. Puoi cambiare idea in qualsiasi momento."
       },
-      "privacy": "Uso questi dati solo per rispondere alla tua richiesta (art. 6, par. 1, lett. b, GDPR). Leggi l'<link>informativa privacy</link>.",
+      "privacy": "Uso questi dati solo per rispondere alla tua richiesta (art. 6, par. 1, lett. b, GDPR). Leggi l’<link>informativa privacy</link>.",
       "turnstile": "Il modulo è protetto contro lo spam da Cloudflare Turnstile: il tuo browser contatta Cloudflare solo quando arrivi a questo passo.",
       "buttons": {
         "next": "Avanti",

@@ -81,8 +81,11 @@ describe("resolveInternalPath: content never links to a page that does not exist
     });
   });
 
-  it("shows the privacy notice as plain text until its page exists (P4.2): no dead link", () => {
-    expect(resolveInternalPath("/privacy")).toEqual({ kind: "none" });
+  it("links to the privacy notice now that its page exists (P4.2)", () => {
+    expect(resolveInternalPath("/privacy")).toEqual({
+      kind: "page",
+      href: "/privacy",
+    });
   });
 
   it("links to the work pages now that they exist (P2.4)", () => {

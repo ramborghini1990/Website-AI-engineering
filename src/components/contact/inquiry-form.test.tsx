@@ -377,14 +377,15 @@ describe.each(["it", "en"] as const)("InquiryForm (%s)", (locale) => {
     expect((action.mock.calls[0]?.[1] as FormData).get("website")).toBe("");
   });
 
-  it("shows the privacy sentence with its legal basis; the notice is plain text until its page exists (no dead link)", () => {
+  it("shows the privacy sentence with its legal basis and links to the privacy notice (its page exists since P4.2)", () => {
     renderForm(locale);
     toContactStep(locale);
 
     const text = locale === "it" ? "informativa privacy" : "privacy notice";
-    expect(screen.getByText(new RegExp(text))).toBeInTheDocument();
     expect(screen.getByText(/art\. 6/)).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: new RegExp(text) })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: new RegExp(text) }),
+    ).toHaveAttribute("href", expect.stringMatching(/\/privacy$/));
   });
 
   it("only the details step shows the privacy sentence", () => {

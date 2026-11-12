@@ -162,11 +162,10 @@ describe("third parties are gated and registered", () => {
     );
   });
 
-  it("every registered third party loads only on the visitor's act (a click, or a stored yes) and names its CSP rule and what it receives", () => {
+  it("every registered third party loads only on the visitor's act (a click, or a stored yes) and names its CSP rule; what it receives is stated in both languages in the cookie policy (legal-structure.test.ts)", () => {
     expect(thirdParties.length).toBeGreaterThan(0);
     for (const party of thirdParties) {
       expect(["visitor-click", "stored-consent"]).toContain(party.trigger);
-      expect(party.dataSent.length).toBeGreaterThan(0);
       expect(party.csp.directive).toBe("frame-src");
     }
   });

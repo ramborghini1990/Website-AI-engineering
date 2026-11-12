@@ -281,7 +281,7 @@ for (const locale of LOCALES) {
       await context.close();
     });
 
-    test("the privacy sentence is on the details step, and is not a link to a page that does not exist yet", async ({
+    test("the privacy sentence is on the details step and links to the privacy notice (P4.2), with no literal tag in the text", async ({
       browser,
     }, info) => {
       const { context, page } = await visitor(browser, info);
@@ -289,7 +289,11 @@ for (const locale of LOCALES) {
       await toContactStep(page, locale);
 
       await expect(page.getByText(/art\. 6/)).toBeVisible();
-      await expect(page.locator("form a[href*='privacy']")).toHaveCount(0);
+      await expect(page.locator("form a[href*='privacy']")).toHaveAttribute(
+        "href",
+        `/${locale}/privacy`,
+      );
+      await expect(page.locator("form")).not.toContainText("<link>");
       await context.close();
     });
 

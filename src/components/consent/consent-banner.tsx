@@ -139,17 +139,6 @@ export function ConsentBanner() {
               {reopened ? null : (
                 <span data-consent-hint>{t("closeHint")}</span>
               )}
-              {COOKIE_POLICY_PATH === null ? null : (
-                <>
-                  {" "}
-                  <Link
-                    href={COOKIE_POLICY_PATH}
-                    className="text-accent underline decoration-accent underline-offset-4 hover:text-accent-hover"
-                  >
-                    {t("policyLink")}
-                  </Link>
-                </>
-              )}
             </p>
 
             {showPrefs ? (
@@ -222,7 +211,15 @@ export function ConsentBanner() {
               </fieldset>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {/* In the row of actions, not in the paragraph and not on a row of its own: a longer paragraph became the page's largest contentful paint instead of the hero (home.spec), and a taller banner covered content the FX spec points at. No prefetch: the banner is on screen at every first visit, and the policy is a dynamic page (a server render per visitor, competing with the receipt). */}
+              <Link
+                href={COOKIE_POLICY_PATH}
+                prefetch={false}
+                className="inline-flex min-h-11 items-center text-base text-accent underline decoration-accent underline-offset-4 hover:text-accent-hover"
+              >
+                {t("policyLink")}
+              </Link>
               {/* Same component, same variant, same size: equal prominence. */}
               <Button
                 type="button"

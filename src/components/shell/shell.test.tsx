@@ -314,6 +314,37 @@ describe("SiteFooter", () => {
     );
   });
 
+  it("links to the four legal documents on every page, in both languages, next to the cookie preferences (P4.2)", () => {
+    renderIn("en", <SiteFooter />);
+    const nav = screen.getByRole("navigation", { name: "Legal documents" });
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((link) => [link.textContent, link.getAttribute("href")]),
+    ).toEqual([
+      ["Privacy notice", "/it/privacy"],
+      ["Cookie policy", "/it/cookie-policy"],
+      ["Legal notice", "/it/legal"],
+      ["Terms for the demos", "/it/terms"],
+    ]);
+    expect(
+      within(nav).getByRole("button", { name: "Cookie preferences" }),
+    ).toBeInTheDocument();
+
+    cleanup();
+    renderIn("it", <SiteFooter />);
+    expect(
+      within(screen.getByRole("navigation", { name: "Documenti legali" }))
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual([
+      "Informativa privacy",
+      "Informativa sui cookie",
+      "Note legali",
+      "Termini d'uso delle demo",
+    ]);
+  });
+
   it("the location is an <address>", () => {
     renderIn("en", <SiteFooter />);
 

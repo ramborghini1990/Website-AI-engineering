@@ -58,10 +58,22 @@ describe("every public page declares its SEO metadata through pageMetadata", () 
     );
   });
 
-  it("each page either calls pageMetadata or is a listed exception", () => {
+  it("each page either calls pageMetadata (or legalMetadata, the legal pages' twin without a share image) or is a listed exception", () => {
     for (const page of all) {
       if (Object.keys(EXEMPT).includes(page.name)) continue;
-      expect(page.code, page.name).toContain("pageMetadata(");
+      expect(page.code, page.name).toMatch(/\b(?:page|legal)Metadata\(/);
+    }
+  });
+
+  it("legalMetadata gives the legal pages canonical + hreflang through localeAlternates, and the four legal routes use it", () => {
+    const shared = readFileSync(
+      path.join(process.cwd(), "src/lib/legal/page.tsx"),
+      "utf8",
+    );
+    expect(shared).toContain("localeAlternates(");
+    for (const route of ["privacy", "cookie-policy", "legal", "terms"]) {
+      const page = all.find((entry) => entry.name === `${route}/page.tsx`);
+      expect(page?.code, route).toContain("legalMetadata(");
     }
   });
 

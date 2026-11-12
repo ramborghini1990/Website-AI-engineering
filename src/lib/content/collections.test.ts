@@ -411,7 +411,8 @@ describe("source files", () => {
       );
     const files = walk(ROOT).filter((f) => f.endsWith(".mdx"));
 
-    expect(files.length).toBe(18);
+    // 4 services + 4 work + 1 page, in 2 languages (18), plus the 4 legal documents in 2 languages (P4.2)
+    expect(files.length).toBe(18 + 8);
     for (const file of files) {
       const raw = readFileSync(file, "utf8");
       expect(raw.startsWith("---"), file).toBe(true);

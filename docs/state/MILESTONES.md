@@ -31,6 +31,7 @@ Moved out of PROJECT_STATE.md (which keeps only the last 3).
 | 2026-11-11 | P3.3 | Document intelligence simulation at `/work/document-intelligence-demo`: three bundled sample documents, fields with evidence, doubtful values flagged for a person, answers citing page and section; no upload surface | `93c06f4` |
 | 2026-11-11 | P3.4 | Back-office suite simulation at `/work/business-management-app`: till, cash-flow charts and purchase orders on an invented shop, one IndexedDB database in the visitor's browser (D36) | `41dbff1` |
 | 2026-11-11 | P3.5 | Cookieless first-party demo analytics: aggregate daily counters, no script, funnel read with SQL (D37) | `4299fcd` |
-| 2026-11-12 | P4.1 | Cookie banner to the Garante guidelines (equal Accept/Reject, X rejects, granular, no scroll consent, 6-month re-prompt), `consent` cookie, insert-only consent receipts with no IP (D38), `ConsentGate` opens on a stored yes, footer "Cookie preferences" | |
+| 2026-11-12 | P4.1 | Cookie banner to the Garante guidelines (equal Accept/Reject, X rejects, granular, no scroll consent, 6-month re-prompt), `consent` cookie, insert-only consent receipts with no IP (D38), `ConsentGate` opens on a stored yes, footer "Cookie preferences" | `ed9d9f6` |
+| 2026-11-12 | P4.2 | Privacy notice, cookie policy, legal notice and demo terms in IT/EN (draft, versioned); tables printed from the consent registry (storage keys, third parties, processors); footer and banner links; structure tests tie code to registry to text (D39) | |
 
 ---

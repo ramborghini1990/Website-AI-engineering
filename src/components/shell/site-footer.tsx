@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 import { CookiePreferencesButton } from "@/components/consent/cookie-preferences-button";
 import { business as defaultBusiness, type Business } from "@/lib/business";
+import { Link } from "@/i18n/navigation";
+import { legalKeys, legalPaths } from "@/lib/legal/documents";
 import { CONTACT_ANCHOR } from "@/lib/navigation";
 
 /** A detail whose value is not known yet: a neutral line, never an invented value. */
@@ -38,6 +40,7 @@ export function SiteFooter({
   year?: number;
 }) {
   const t = useTranslations("footer");
+  const legal = useTranslations("legal");
   const pending = <Pending label={t("pending")} />;
 
   return (
@@ -104,11 +107,29 @@ export function SiteFooter({
       </div>
 
       <div className="border-t border-border-subtle">
-        <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-x-6 gap-y-2 px-gutter py-4">
+        <div className="mx-auto grid w-full max-w-page gap-x-6 gap-y-2 px-gutter py-4">
+          <nav aria-label={legal("footerNav")}>
+            <ul className="flex flex-wrap items-center gap-x-6 gap-y-1">
+              {legalKeys.map((key) => (
+                <li key={key}>
+                  {/* No prefetch: four dynamic pages on every page view for links most visitors never use. */}
+                  <Link
+                    href={legalPaths[key]}
+                    prefetch={false}
+                    className="inline-flex min-h-11 items-center text-sm text-text-secondary underline decoration-border-strong underline-offset-4 hover:text-text"
+                  >
+                    {legal(`titles.${key}`)}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <CookiePreferencesButton />
+              </li>
+            </ul>
+          </nav>
           <p className="text-sm text-text-muted">
             {t("rights", { year, owner: business.owner.name })}
           </p>
-          <CookiePreferencesButton />
         </div>
       </div>
     </footer>

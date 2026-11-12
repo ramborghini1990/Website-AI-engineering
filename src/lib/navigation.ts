@@ -31,13 +31,13 @@ export function isPageAvailable(key: NavItem["key"]): boolean {
 }
 
 /**
- * Whether pages outside the main navigation exist. `contact` shipped in P2.5.
- * `privacy` (the privacy notice) arrives in P4.2: until then a link to it is
- * shown as plain text, never as a dead link. Flip it when the page ships.
+ * Whether pages outside the main navigation exist. `contact` shipped in P2.5
+ * and `privacy` (the privacy notice) in P4.2. A page that is switched off
+ * is shown as plain text, never as a dead link.
  */
 const pageExists: Record<"contact" | "privacy", boolean> = {
   contact: true,
-  privacy: false,
+  privacy: true,
 };
 
 /**

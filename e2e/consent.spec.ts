@@ -367,8 +367,18 @@ for (const locale of LOCALES) {
     }, info) => {
       const { context, page } = await visitor(browser, info);
       await open(page, locale, "/contact");
+      // The receipt answers after the choice is applied and writes its code into
+      // the cookie: wait for it, or `before` is read half-way through that update.
+      const sent = receipt(page);
       await action(page, "accept_all").click();
+      await sent;
       await expect(page.locator("iframe")).toHaveCount(1);
+      await expect
+        .poll(async () => {
+          const value = (await consentCookie(context))?.value;
+          return value === undefined ? undefined : decoded(value).i;
+        })
+        .toBeTruthy();
       const before = (await consentCookie(context))?.value;
       const requests: string[] = [];
       page.on("request", (request) => {
@@ -498,8 +508,15 @@ test.describe("when the banner asks again, and when it does not", () => {
     browser,
   }, info) => {
     const { context, page } = await withCookie(browser, info, null);
+    // Wait for the receipt: its answer rewrites the cookie, so clearing before it
+    // arrives would be undone by the page itself.
+    const sent = receipt(page);
     await action(page, "accept_all").click();
     await expect(banner(page)).toHaveCount(0);
+    await sent;
+    await expect
+      .poll(async () => (await consentCookie(context))?.value ?? "")
+      .toContain("%22i%22");
 
     await context.clearCookies();
     await page.reload();

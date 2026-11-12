@@ -95,6 +95,144 @@
     "saved": "Preferences saved.",
     "reopen": "Cookie preferences"
   },
+  "legal": {
+    "footerNav": "Legal documents",
+    "otherDocuments": "Other legal documents",
+    "versionLine": "Version {version}",
+    "updatedLine": "updated {date}",
+    "authoritative": "The Italian text is the authoritative one. This English version is a courtesy translation.",
+    "draft": {
+      "title": "Draft awaiting legal review",
+      "body": "This text was written with care but has not yet been reviewed by a qualified professional. It may change before the site is finally published."
+    },
+    "titles": {
+      "privacy": "Privacy notice",
+      "cookie-policy": "Cookie policy",
+      "legal": "Legal notice",
+      "terms": "Terms for the demos"
+    },
+    "tables": {
+      "storage": {
+        "caption": "Cookies and data this site saves in your browser",
+        "columns": {
+          "name": "Name",
+          "kind": "Type",
+          "provider": "Set by",
+          "category": "Category",
+          "purpose": "What it is for",
+          "duration": "Duration"
+        },
+        "firstParty": "This site (first party)",
+        "kinds": {
+          "cookie": "Cookie",
+          "localStorage": "Local storage (localStorage)",
+          "indexedDB": "Browser database (IndexedDB)"
+        },
+        "categories": {
+          "necessary": "Technical, necessary"
+        }
+      },
+      "thirdParties": {
+        "caption": "Third-party content you can allow in the banner",
+        "columns": {
+          "provider": "Provider",
+          "category": "Choice in the banner",
+          "purpose": "What it is for",
+          "loads": "When it loads",
+          "data": "What the provider receives"
+        },
+        "categories": {
+          "booking": "Booking calendar"
+        },
+        "triggers": {
+          "visitor-click": "Only after you click the content",
+          "stored-consent": "After your consent: when you click the content, or straight away if you already gave it in the banner"
+        }
+      },
+      "processors": {
+        "caption": "Providers that can receive data from people who visit the site",
+        "columns": {
+          "name": "Provider",
+          "role": "Role",
+          "when": "When",
+          "data": "Data it can receive",
+          "location": "Where, and with what safeguards"
+        },
+        "roles": {
+          "hosting": "Hosting",
+          "database": "Database",
+          "rate-limit": "Request limit",
+          "bot-protection": "Bot protection",
+          "email": "Email delivery",
+          "booking": "Booking",
+          "ai": "Artificial intelligence"
+        },
+        "whens": {
+          "every-visit": "On every visit",
+          "contact-form": "When you use the contact form",
+          "booking-consent": "Only if you allow the calendar",
+          "live-demos": "Only in the demos' live mode, which is off today"
+        }
+      }
+    },
+    "storage": {
+      "consent": {
+        "purpose": "Remembers your cookie choice: the categories allowed, the version of the banner text, the date and the receipt code.",
+        "duration": "6 months"
+      },
+      "theme": {
+        "purpose": "Remembers the light or dark theme you chose. It is saved only if you pick light or dark, not with the automatic theme.",
+        "duration": "Until you pick the automatic theme or clear the site's data"
+      },
+      "demo-business-suite": {
+        "purpose": "Keeps in your browser the changes you make in the business-suite demo. It is created when you open the demo and written only if you change something. It is never sent to anyone.",
+        "duration": "Until you reset the demo or clear the site's data"
+      }
+    },
+    "thirdParties": {
+      "cal-booking": {
+        "purpose": "Choosing a time for a first conversation.",
+        "data": "IP address, browser and device information, and whatever you type into the booking page. Cal.com may use its own cookies, as described in its notice."
+      }
+    },
+    "processors": {
+      "vercel": {
+        "purpose": "Serves the site: servers, content delivery network and technical request logs.",
+        "data": "IP address, browser, the page requested, date and time, in technical logs.",
+        "location": "Compute functions in Frankfurt (EU); the delivery network is global. A US company: transfers outside the European Economic Area rely on the adequacy decision (EU-US Data Privacy Framework) or standard contractual clauses, as stated in the data processing agreement."
+      },
+      "postgres": {
+        "purpose": "Stores the requests sent with the contact form, the receipts of cookie choices and the demos' aggregate counts.",
+        "data": "What you type into the form (name, email, company, description, budget band, timeline); the code and choices of the cookie receipt, with no IP address; daily demo counts, with no identifier at all.",
+        "location": "PostgreSQL database in a European Union region. The provider's name will be given here as soon as it is chosen."
+      },
+      "upstash": {
+        "purpose": "Limits repeated requests to the form, against abuse.",
+        "data": "A code derived from your IP address with a secret key (not the IP address itself) and the number of requests under that code. The counter resets by itself after a few minutes.",
+        "location": "Database in a European Union region. A US company: any transfer relies on the safeguards stated in the data processing agreement."
+      },
+      "cloudflare-turnstile": {
+        "purpose": "Checks that the form is filled in by a person and not by an automated program. It is a security measure of the form.",
+        "data": "Only if you reach the last step of the form, your browser loads a script from Cloudflare, which receives your IP address and technical browser information; the result of the check reaches our server. On other pages it is not contacted.",
+        "location": "Cloudflare's global network, a US company: transfers rely on the safeguards stated in the data processing agreement."
+      },
+      "resend": {
+        "purpose": "Sends the owner the email that announces a request received.",
+        "data": "The content of the request (name, email, company, description, budget, timeline) and the owner's address.",
+        "location": "A US company: transfers outside the European Economic Area rely on the safeguards stated in the data processing agreement."
+      },
+      "cal-com": {
+        "purpose": "Calendar for booking a call. It loads only with your consent (a click on the content or a choice in the banner).",
+        "data": "IP address, browser and device information, and whatever you type into the booking page.",
+        "location": "The EU instance of Cal.com. For the booking the provider acts as controller or processor according to its own notice."
+      },
+      "anthropic": {
+        "purpose": "Would provide the AI models' answers in the demos' live mode. Live mode is off.",
+        "data": "None today: no external service is connected to the demos. If live mode is ever switched on, the text you type into the demo, after a notice and your consent.",
+        "location": "A US company: transfers outside the European Economic Area rely on the safeguards stated in the data processing agreement."
+      }
+    }
+  },
   "toaster": {
     "viewport": "Notifications ({hotkey})",
     "close": "Dismiss notification"

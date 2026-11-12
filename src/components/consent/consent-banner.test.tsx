@@ -14,7 +14,10 @@ import { ConsentBanner } from "@/components/consent/consent-banner";
 import { ConsentGate } from "@/components/consent/consent-gate";
 import { CookiePreferencesButton } from "@/components/consent/cookie-preferences-button";
 import { resetConsentForTests } from "@/lib/consent/client";
-import { CONSENT_POLICY_VERSION } from "@/lib/consent/registry";
+import {
+  CONSENT_POLICY_VERSION,
+  COOKIE_POLICY_PATH,
+} from "@/lib/consent/registry";
 import { CONSENT_COOKIE, parseDecision } from "@/lib/consent/state";
 
 import en from "../../../messages/en.json";
@@ -161,10 +164,17 @@ describe("the first banner", () => {
     expect(banner()?.getAttribute("role")).not.toBe("dialog");
   });
 
-  it("links to the cookie policy only when that page exists (P4.2), never to a dead end", () => {
+  it("links to the cookie policy (P4.2), in both languages, and the link is part of the notice's own text", () => {
     page();
+    expect(
+      screen.getByRole("link", { name: "Read the cookie policy" }),
+    ).toHaveAttribute("href", expect.stringContaining(COOKIE_POLICY_PATH));
+    cleanup();
 
-    expect(screen.queryByRole("link", { name: /cookie policy/i })).toBeNull();
+    page("it");
+    expect(
+      screen.getByRole("link", { name: /informativa sui cookie/i }),
+    ).toHaveAttribute("href", expect.stringContaining(COOKIE_POLICY_PATH));
   });
 });
 
