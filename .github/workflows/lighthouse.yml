@@ -62,7 +62,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Starts `next start` itself, audits every URL in lighthouserc.json three
+      # Starts `next start` itself, audits every URL in lighthouserc.json five
       # times and asserts the median run. A missed budget exits non-zero.
       - name: Lighthouse CI
         run: CHROME_PATH="$(node -p "require('@playwright/test').chromium.executablePath()")" pnpm lighthouse

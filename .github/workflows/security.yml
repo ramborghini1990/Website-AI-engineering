@@ -55,7 +55,7 @@ jobs:
       # Scans every commit reachable from the checked-out ref. --redact keeps
       # matched values out of the CI log. A finding exits non-zero and fails the check.
       - name: Scan git history for secrets
-        run: gitleaks git --redact --no-banner --verbose .
+        run: gitleaks git --redact --no-banner --verbose --config .gitleaks.toml .
 
   # Known vulnerabilities in what ships to visitors (P4.4). Production
   # dependencies only: the dev-tooling advisories (lint, test) never reach a

@@ -10,10 +10,10 @@ import { SiteFooter } from "@/components/shell/site-footer";
 import { SiteHeader } from "@/components/shell/site-header";
 import { MAIN_CONTENT_ID, SkipLink } from "@/components/shell/skip-link";
 import { ThemeSync } from "@/components/shell/theme-sync";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { LazyToaster } from "@/components/ui/lazy-toaster";
 import { routing } from "@/i18n/routing";
 import { business } from "@/lib/business";
+import { hasNoValidConsent } from "@/lib/consent/server";
 import { siteUrl } from "@/lib/env";
 import { LenisProvider } from "@/lib/motion/lenis-provider";
 import { themeInitScript } from "@/lib/theme";
@@ -74,6 +74,9 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const toaster = await getTranslations("toaster");
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  // The banner is in the HTML for a visitor who has yet to choose, so it paints
+  // with the first frame instead of after hydration (it was the page's LCP).
+  const consentUndecided = await hasNoValidConsent();
 
   return (
     // suppressHydrationWarning: the theme script below adds a class to <html>
@@ -89,6 +92,15 @@ export default async function LocaleLayout({
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
+        {/* The banner's buttons need JavaScript. Without it the server-rendered banner would be an inert panel over the page, so hide it (nothing non-essential loads without JavaScript either). */}
+        <noscript>
+          <style
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: "[data-consent-banner]{display:none}",
+            }}
+          />
+        </noscript>
       </head>
       {/* min-h-dvh, not h-full: Lenis adds a `lenis` class to <html> and must not be able to change the document height (layout shift). */}
       <body className="flex min-h-dvh flex-col">
@@ -102,24 +114,23 @@ export default async function LocaleLayout({
             theme: messages.theme,
           }}
         >
-          <TooltipProvider>
-            <LenisProvider>
-              <ThemeSync />
-              <SkipLink />
-              {/* After the skip link, before the page: a keyboard user meets the cookie choice first, until it is made. */}
-              <ConsentBanner />
-              <SiteHeader />
-              <main
-                id={MAIN_CONTENT_ID}
-                tabIndex={-1}
-                className="flex flex-1 flex-col outline-none"
-              >
-                {children}
-              </main>
-              <SiteFooter />
-            </LenisProvider>
-          </TooltipProvider>
-          <Toaster
+          {/* No TooltipProvider here: no production page uses a tooltip, and the provider loads Radix Tooltip and floating-ui on every page. Wrap the subtree that needs one. */}
+          <LenisProvider>
+            <ThemeSync />
+            <SkipLink />
+            {/* After the skip link, before the page: a keyboard user meets the cookie choice first, until it is made. */}
+            <ConsentBanner initiallyUndecided={consentUndecided} />
+            <SiteHeader />
+            <main
+              id={MAIN_CONTENT_ID}
+              tabIndex={-1}
+              className="flex flex-1 flex-col outline-none"
+            >
+              {children}
+            </main>
+            <SiteFooter />
+          </LenisProvider>
+          <LazyToaster
             // The hotkey placeholder belongs to Radix and is filled in at runtime: pass it through untouched.
             viewportLabel={toaster("viewport", { hotkey: "{hotkey}" })}
             closeLabel={toaster("close")}

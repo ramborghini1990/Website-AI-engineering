@@ -31,12 +31,19 @@ import { COOKIE_POLICY_PATH } from "@/lib/consent/registry";
  *   is as easy as giving.
  *
  * It is a non-modal region fixed to the bottom: the page stays readable and
- * usable behind it, focus is not trapped, and with JavaScript off it does not
- * exist (nothing non-essential can load without JavaScript anyway).
+ * usable behind it, focus is not trapped. For a visitor with no valid decision
+ * the server renders it in the HTML (it paints with the first frame); with
+ * JavaScript off the layout hides it with a <noscript> rule, since its buttons
+ * need JavaScript (nothing non-essential can load without JavaScript anyway).
  */
-export function ConsentBanner() {
+export function ConsentBanner({
+  initiallyUndecided = false,
+}: {
+  /** The server saw no valid decision: render the banner in the HTML, not after hydration. */
+  initiallyUndecided?: boolean;
+}) {
   const t = useTranslations("consent");
-  const consent = useConsent();
+  const consent = useConsent(initiallyUndecided);
   const prefsId = useId();
   const titleId = useId();
   const [customizing, setCustomizing] = useState(false);

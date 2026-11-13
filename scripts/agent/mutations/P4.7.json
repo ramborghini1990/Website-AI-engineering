@@ -1,0 +1,86 @@
+[
+  {
+    "id": "gitleaks-config-flag-dropped",
+    "file": ".github/workflows/security.yml",
+    "find": "--verbose --config .gitleaks.toml .",
+    "replace": "--verbose .",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "gitleaks-allowlist-or-instead-of-and",
+    "file": ".gitleaks.toml",
+    "find": "condition = \"AND\"\ntargetRules = [\"jwt\"]",
+    "replace": "condition = \"OR\"\ntargetRules = [\"jwt\"]",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "gitleaks-allowlist-path-widened",
+    "file": ".gitleaks.toml",
+    "find": "targetRules = [\"jwt\"]\npaths = ['''^src/lib/logger\\.test\\.ts$''']",
+    "replace": "targetRules = [\"jwt\"]\npaths = ['''^src/.*$''']",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lighthouse-runs-reduced",
+    "file": "lighthouserc.json",
+    "find": "\"numberOfRuns\": 5,",
+    "replace": "\"numberOfRuns\": 1,",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "consent-server-inverted",
+    "file": "src/lib/consent/server.ts",
+    "find": "CONSENT_COOKIE), now) === null;",
+    "replace": "CONSENT_COOKIE), now) !== null;",
+    "check": "pnpm exec vitest run src/lib/consent/server.test.ts"
+  },
+  {
+    "id": "banner-server-snapshot-ignored",
+    "file": "src/lib/consent/client.ts",
+    "find": "    serverUndecided ? UNDECIDED_SNAPSHOT : SERVER_SNAPSHOT,",
+    "replace": "    SERVER_SNAPSHOT,",
+    "check": "pnpm exec vitest run src/components/consent/consent-banner.server.test.tsx"
+  },
+  {
+    "id": "layout-banner-not-wired",
+    "file": "src/app/[locale]/layout.tsx",
+    "find": "initiallyUndecided={consentUndecided}",
+    "replace": "initiallyUndecided={false}",
+    "check": "pnpm exec vitest run src/app/[locale]/layout.imports.test.ts"
+  },
+  {
+    "id": "layout-eager-toaster",
+    "file": "src/app/[locale]/layout.tsx",
+    "find": "import { LazyToaster } from \"@/components/ui/lazy-toaster\";",
+    "replace": "import { Toaster as LazyToaster } from \"@/components/ui/toaster\";",
+    "check": "pnpm exec vitest run src/app/[locale]/layout.imports.test.ts"
+  },
+  {
+    "id": "layout-tooltip-provider-back",
+    "file": "src/app/[locale]/layout.tsx",
+    "find": "import { LazyToaster } from \"@/components/ui/lazy-toaster\";",
+    "replace": "import { LazyToaster } from \"@/components/ui/lazy-toaster\";\nimport { TooltipProvider } from \"@/components/ui/tooltip\";",
+    "check": "pnpm exec vitest run src/app/[locale]/layout.imports.test.ts"
+  },
+  {
+    "id": "toaster-always-mounted",
+    "file": "src/components/ui/lazy-toaster.tsx",
+    "find": "return wanted ? <Toaster {...props} /> : null;",
+    "replace": "return <Toaster {...props} />;",
+    "check": "pnpm exec vitest run src/components/ui/lazy-toaster.test.tsx"
+  },
+  {
+    "id": "placeholders-inherited-name",
+    "file": "src/lib/i18n/placeholders.ts",
+    "find": "Object.hasOwn(values, name) ? String(values[name]) : whole",
+    "replace": "name in values ? String(values[name]) : whole",
+    "check": "pnpm exec vitest run src/lib/i18n/placeholders.test.ts"
+  },
+  {
+    "id": "noscript-rule-shows-banner",
+    "file": "src/app/[locale]/layout.tsx",
+    "find": "[data-consent-banner]{display:none}",
+    "replace": "[data-consent-banner]{display:block}",
+    "check": "pnpm agent:e2e e2e/consent.spec.ts -g \"without JavaScript|carries the rule\""
+  }
+]

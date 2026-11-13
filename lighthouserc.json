@@ -11,7 +11,7 @@
         "http://localhost:3300/it/work/instagram-lead-agent",
         "http://localhost:3300/it/contact"
       ],
-      "numberOfRuns": 3,
+      "numberOfRuns": 5,
       "settings": {
         "chromeFlags": "--no-sandbox --headless=new --disable-gpu"
       }

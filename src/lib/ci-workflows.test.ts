@@ -221,6 +221,45 @@ describe("gitleaks is the free pinned binary (P4.6)", () => {
   it("scans the full history", () => {
     expect(security).toMatch(/fetch-depth:\s*0/);
   });
+
+  it("passes the repository config explicitly", () => {
+    expect(security).toMatch(/gitleaks git [^\n]*--config \.gitleaks\.toml/);
+  });
+});
+
+describe(".gitleaks.toml keeps the default rules and only narrow exceptions", () => {
+  const toml = read(".gitleaks.toml");
+  // Blocks between `[[allowlists]]` headers; comments stripped.
+  const code = lines(toml)
+    .filter((l) => !/^\s*#/.test(l))
+    .join("\n");
+  const blocks = code.split("[[allowlists]]").slice(1);
+
+  it("extends the default rule set", () => {
+    expect(code).toMatch(/\[extend\]\s*\n\s*useDefault\s*=\s*true/);
+  });
+
+  it("has no global allowlist and no disabled rules", () => {
+    expect(code).not.toMatch(/^\[allowlist\]/m);
+    expect(code).not.toMatch(/disabledRules|^\[\[rules\]\]/m);
+  });
+
+  it("scopes every exception to a rule, a path and an exact value, all required", () => {
+    expect(blocks.length).toBeGreaterThan(0);
+    for (const b of blocks) {
+      expect(b).toMatch(/condition\s*=\s*"AND"/);
+      expect(b).toMatch(/targetRules\s*=\s*\["[a-z-]+"\]/);
+      expect(b).toMatch(/paths\s*=\s*\['''\^[^']+\$'''\]/);
+      expect(b).toMatch(/regexes\s*=\s*\['''\^[^']+\$'''\]/);
+    }
+  });
+
+  it("only exempts the logger redaction test", () => {
+    const paths = [...code.matchAll(/paths\s*=\s*\['''([^']+)'''\]/g)].map(
+      (m) => m[1],
+    );
+    expect(new Set(paths)).toEqual(new Set(["^src/lib/logger\\.test\\.ts$"]));
+  });
 });
 
 describe("Lighthouse CI budgets (P4.6)", () => {
@@ -279,8 +318,11 @@ describe("Lighthouse CI budgets (P4.6)", () => {
     }
   });
 
-  it("asserts the median of several runs, not the best one", () => {
-    expect(rc.ci.collect.numberOfRuns).toBeGreaterThanOrEqual(3);
+  it("asserts the median of five runs, not the best one", () => {
+    // Five, not three: Lighthouse's simulated LCP occasionally jumps for one run
+    // on localhost (a script ran before the first paint in the observed trace),
+    // and a median of three let two such runs fail the gate (P4.7).
+    expect(rc.ci.collect.numberOfRuns).toBeGreaterThanOrEqual(5);
     expect(rc.ci.assert.aggregationMethod).toBe("median-run");
   });
 

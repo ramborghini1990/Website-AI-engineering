@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import {
   expect,
   test,
+  type APIRequestContext,
   type Browser,
   type BrowserContext,
   type Page,
@@ -442,6 +443,81 @@ for (const locale of LOCALES) {
   });
 }
 
+// P4.7: the banner was the page's Largest Contentful Paint because it appeared
+// only after hydration. The server now renders it for exactly the visitors the
+// browser would show it to, so it paints with the first frame.
+test.describe("the server renders the banner only for a visitor who must choose", () => {
+  const cookie = (over: Record<string, unknown> = {}) =>
+    encodeURIComponent(
+      JSON.stringify({
+        v: "2026-11-v1",
+        t: Date.now() - 10 * DAY,
+        c: [0],
+        ...over,
+      }),
+    );
+  const html = async (request: APIRequestContext, value?: string) =>
+    (
+      await request.get("/it", {
+        headers: value === undefined ? {} : { cookie: `consent=${value}` },
+      })
+    ).text();
+
+  test("no cookie: the banner, with its buttons and the text, is in the HTML", async ({
+    request,
+  }) => {
+    const out = await html(request);
+    expect(out).toContain('data-consent-banner="first"');
+    expect(out).toContain('data-consent-action="reject_all"');
+    expect(out).toContain('data-consent-action="accept_all"');
+    expect(out).toContain(it.consent.title);
+  });
+
+  test("a valid decision (accept or reject): no banner in the HTML", async ({
+    request,
+  }) => {
+    expect(await html(request, cookie())).not.toContain(
+      'data-consent-banner="',
+    );
+    expect(await html(request, cookie({ c: [1] }))).not.toContain(
+      'data-consent-banner="',
+    );
+  });
+
+  test("a decision the browser would ignore is ignored by the server too (negative)", async ({
+    request,
+  }) => {
+    for (const stale of [
+      cookie({ t: Date.now() - 200 * DAY }), // older than six months
+      cookie({ v: "1999-01-v0" }), // another wording
+      cookie({ t: Date.now() + 5 * DAY }), // dated in the future
+      cookie({ extra: 1 }), // a key we do not write
+      "not-json",
+      "a".repeat(500),
+    ]) {
+      expect(await html(request, stale), stale.slice(0, 30)).toContain(
+        'data-consent-banner="first"',
+      );
+    }
+  });
+
+  test("carries the rule that hides it without JavaScript, with the page's nonce", async ({
+    request,
+  }) => {
+    expect(await html(request)).toMatch(
+      /<noscript><style nonce="[^"]+">\[data-consent-banner\]\{display:none\}<\/style><\/noscript>/,
+    );
+  });
+
+  test("the server-rendered banner does not load a third party (negative)", async ({
+    request,
+  }) => {
+    const out = await (await request.get("/it/contact")).text();
+    expect(out).toContain('data-consent-banner="first"');
+    expect(out).not.toContain("<iframe");
+  });
+});
+
 test.describe("when the banner asks again, and when it does not", () => {
   const cookieValue = (over: Record<string, unknown>) =>
     encodeURIComponent(
@@ -664,14 +740,19 @@ test.describe("accessibility and layout", () => {
     await context.close();
   });
 
-  test("without JavaScript there is no banner, no button that does nothing, and the booking link still works", async ({
+  test("without JavaScript there is no visible banner, no button that does nothing, and the booking link still works", async ({
     browser,
   }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/en/contact");
 
-    await expect(banner(page)).toHaveCount(0);
+    // P4.7: the server puts the banner in the HTML for a visitor who has not
+    // chosen, and a <noscript> rule hides it. Hidden means not seen, not in the
+    // accessibility tree and not focusable, so it is as good as absent: no
+    // panel over the page and no button that cannot work.
+    await expect(banner(page)).toBeHidden();
+    await expect(banner(page).getByRole("button")).toHaveCount(0);
     expect(await page.locator("iframe").count()).toBe(0);
     await expect(
       page.getByRole("button", { name: en.consent.reopen }),

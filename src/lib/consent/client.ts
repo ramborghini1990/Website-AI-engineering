@@ -22,8 +22,10 @@ import {
  * (art. 7(1)) is sent afterwards, to this site only, and its failure never
  * undoes or blocks the choice.
  *
- * Before hydration (and on the server) the state is "unknown": the banner is not
- * shown and every gate stays blocked, so nothing flashes and nothing loads.
+ * Before hydration (and on the server) the state is "unknown": every gate stays
+ * blocked, so nothing loads. The one exception is the banner of a request the
+ * server saw without a valid decision (`useConsent(true)`): it is rendered as
+ * "undecided", which is what the browser reads too, so nothing flashes.
  */
 
 export type ConsentSnapshot =
@@ -42,6 +44,18 @@ export type ConsentSnapshot =
 
 const SERVER_SNAPSHOT: ConsentSnapshot = {
   status: "unknown",
+  revision: 0,
+  panelOpen: false,
+};
+
+/**
+ * What a browser that has not decided yet reads before any interaction. One
+ * shared object, so a banner the server rendered as "undecided" (see
+ * `useConsent`) finds the identical snapshot in the browser and is not
+ * re-rendered after hydration.
+ */
+const UNDECIDED_SNAPSHOT: ConsentSnapshot = {
+  status: "undecided",
   revision: 0,
   panelOpen: false,
 };
@@ -99,7 +113,9 @@ function getSnapshot(): ConsentSnapshot {
   const decision = current();
   const value: ConsentSnapshot =
     decision === null
-      ? { status: "undecided", revision, panelOpen }
+      ? revision === 0 && !panelOpen
+        ? UNDECIDED_SNAPSHOT
+        : { status: "undecided", revision, panelOpen }
       : { status: "decided", revision, panelOpen, decision };
   cached = { key, value };
   return value;
@@ -115,8 +131,17 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-export function useConsent(): ConsentSnapshot {
-  return useSyncExternalStore(subscribe, getSnapshot, () => SERVER_SNAPSHOT);
+/**
+ * `serverUndecided`: the server already saw that this request has no valid
+ * decision (`hasNoValidConsent`), so it renders and hydrates as "undecided"
+ * instead of "unknown". Only the banner passes it. Every other reader (the
+ * gates) keeps "unknown" on the server, so nothing third-party can load before
+ * the browser has read the cookie.
+ */
+export function useConsent(serverUndecided = false): ConsentSnapshot {
+  return useSyncExternalStore(subscribe, getSnapshot, () =>
+    serverUndecided ? UNDECIDED_SNAPSHOT : SERVER_SNAPSHOT,
+  );
 }
 
 export function allows(

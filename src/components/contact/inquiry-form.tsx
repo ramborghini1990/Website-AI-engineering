@@ -36,6 +36,7 @@ import {
   type RawInquiry,
   type StepId,
 } from "@/lib/inquiry/schema";
+import { fillPlaceholders } from "@/lib/i18n/placeholders";
 import { resolveInternalPath } from "@/lib/navigation";
 
 type FormState = SubmitResult | { status: "idle" };
@@ -267,7 +268,11 @@ export function InquiryForm({
 
       <div className="grid gap-6">
         <p className="text-sm text-text-muted">
-          {t("progress", { current: index + 1, total: stepIds.length })}
+          {/* fillPlaceholders, not t("progress", values): that loads the ICU engine on first render (P4.7, src/lib/i18n/placeholders.ts). */}
+          {fillPlaceholders(t.raw("progress") as string, {
+            current: index + 1,
+            total: stepIds.length,
+          })}
         </p>
         <h3
           ref={heading}

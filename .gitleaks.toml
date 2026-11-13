@@ -1,0 +1,31 @@
+# gitleaks configuration (P4.7). Used by .github/workflows/security.yml via --config.
+#
+# Start from the full default rule set. The only exceptions are two synthetic
+# strings in the logger redaction tests: they exist to prove the logger removes
+# secret-shaped text, so they must look like secrets. They are already in the
+# git history (commit 0de0289), so rewording the test would not clear a
+# history scan.
+#
+# Each exception must match ALL of: this file path, one of the two named
+# rules, and the exact fixture value. Any other secret-shaped string, even in
+# the same file, is still reported. Do not add a path-only or rule-only
+# allowlist: ci-workflows.test.ts rejects it.
+
+title = "Website AI engineering"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Synthetic JWT fixture in the logger redaction test (decodes to alg HS256, sub anna)"
+condition = "AND"
+targetRules = ["jwt"]
+paths = ['''^src/lib/logger\.test\.ts$''']
+regexes = ['''^eyJhbGciOiJIUzI1NiJ9\.eyJzdWIiOiJhbm5hIn0\.c2lnbmF0dXJl$''']
+
+[[allowlists]]
+description = "Synthetic api_key=... fixture in the logger redaction test"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''^src/lib/logger\.test\.ts$''']
+regexes = ['''^abc123def456$''']

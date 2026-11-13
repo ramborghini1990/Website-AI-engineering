@@ -556,17 +556,22 @@ test.describe("theme switch", () => {
 });
 
 test.describe("providers", () => {
-  test("the toast region is mounted once, in the layout, with a translated label", async ({
+  // P4.7: the Toaster (Radix Toast) is lazy-loaded with the first toast, because
+  // no page raises one and the eager Toaster cost start-up time on every page
+  // (Lighthouse TBT). So the region is NOT in a page that has raised no toast;
+  // gallery.spec.ts ("toast: announces, ...") covers it appearing, labelled in
+  // the page's language, once a toast is raised.
+  test("the toast region is not part of the start-up work: no region until a toast is raised", async ({
     page,
   }) => {
     await open(page, "/it");
-
-    const region = page.getByRole("region", { name: /Notifiche/ });
-    await expect(region).toHaveCount(1);
+    await expect(page.getByRole("region", { name: /Notifiche/ })).toHaveCount(
+      0,
+    );
     await open(page, "/en");
     await expect(
       page.getByRole("region", { name: /Notifications/ }),
-    ).toHaveCount(1);
+    ).toHaveCount(0);
   });
 });
 

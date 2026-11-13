@@ -324,7 +324,7 @@ for (const theme of ["dark", "light"] as const) {
       await page.getByRole("button", { name: "Error toast (stays)" }).click();
       // Toasts are list items in the labelled "Notifications" region; Radix
       // announces them through separate, short-lived live regions.
-      // The Toaster now lives in the root layout, so its labels are localized (this page is /it).
+      // The Toaster is mounted by the root layout's LazyToaster on the first toast, so its labels are localized (this page is /it).
       const region = page.getByRole("region", { name: "Notifiche (F8)" });
       const success = region
         .getByRole("listitem")
