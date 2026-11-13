@@ -98,6 +98,7 @@ function topLevelPermissions(workflow: string): string[] | undefined {
 const workflows = {
   "ci.yml": read(".github/workflows/ci.yml"),
   "security.yml": read(".github/workflows/security.yml"),
+  "lighthouse.yml": read(".github/workflows/lighthouse.yml"),
 };
 
 describe.each(Object.entries(workflows))("%s", (file, text) => {
@@ -199,6 +200,118 @@ describe("required status checks (docs/DEPLOYMENT.md §4b)", () => {
     expect(start).toBeGreaterThan(-1);
     const section = doc.slice(start, doc.indexOf("\n## 5.", start));
     for (const name of required) expect(section).toContain(`\`${name}\``);
+  });
+});
+
+describe("gitleaks is the free pinned binary (P4.6)", () => {
+  const security = workflows["security.yml"];
+
+  it("never uses the licensed action or asks for a licence key", () => {
+    expect(security).not.toMatch(/gitleaks\/gitleaks-action/);
+    expect(security).not.toMatch(/GITLEAKS_LICENSE/);
+  });
+
+  it("downloads a pinned release and verifies its SHA-256 before running it", () => {
+    expect(security).toMatch(/GITLEAKS_VERSION:\s*"\d+\.\d+\.\d+"/);
+    expect(security).toMatch(/GITLEAKS_SHA256:\s*"[0-9a-f]{64}"/);
+    expect(security).toContain("sha256sum --check --strict");
+    expect(security).toMatch(/gitleaks git --redact/);
+  });
+
+  it("scans the full history", () => {
+    expect(security).toMatch(/fetch-depth:\s*0/);
+  });
+});
+
+describe("Lighthouse CI budgets (P4.6)", () => {
+  interface Rc {
+    ci: {
+      collect: {
+        url: string[];
+        numberOfRuns: number;
+        startServerCommand: string;
+      };
+      assert: {
+        aggregationMethod: string;
+        assertions: Record<
+          string,
+          [string, Record<string, number>] | undefined
+        >;
+      };
+      upload: { target: string };
+    };
+  }
+  const rc = JSON.parse(read("lighthouserc.json")) as Rc;
+  const a = rc.ci.assert.assertions;
+  const lighthouse = workflows["lighthouse.yml"];
+
+  it("audits the key routes: home, services, work, a demo and contact", () => {
+    const paths = rc.ci.collect.url.map((u) => new URL(u).pathname);
+    expect(paths).toEqual([
+      "/it",
+      "/it/services",
+      "/it/work",
+      "/it/work/instagram-lead-agent",
+      "/it/contact",
+    ]);
+  });
+
+  it("requires performance >= 90 and accessibility >= 95, as errors", () => {
+    expect(a["categories:performance"]?.[0]).toBe("error");
+    expect(a["categories:performance"]?.[1].minScore).toBeGreaterThanOrEqual(
+      0.9,
+    );
+    expect(a["categories:accessibility"]?.[0]).toBe("error");
+    expect(a["categories:accessibility"]?.[1].minScore).toBeGreaterThanOrEqual(
+      0.95,
+    );
+  });
+
+  it("caps LCP, CLS, TBT and script weight, as errors", () => {
+    const max = (id: string) => a[id]?.[1].maxNumericValue;
+    expect(a["largest-contentful-paint"]?.[0]).toBe("error");
+    expect(max("largest-contentful-paint")).toBeLessThanOrEqual(2500);
+    expect(max("cumulative-layout-shift")).toBeLessThanOrEqual(0.1);
+    expect(max("total-blocking-time")).toBeLessThanOrEqual(200);
+    expect(max("resource-summary:script:size")).toBeLessThanOrEqual(300_000);
+    for (const [id, rule] of Object.entries(a)) {
+      expect(rule?.[0], `${id} must fail the build, not warn`).toBe("error");
+    }
+  });
+
+  it("asserts the median of several runs, not the best one", () => {
+    expect(rc.ci.collect.numberOfRuns).toBeGreaterThanOrEqual(3);
+    expect(rc.ci.assert.aggregationMethod).toBe("median-run");
+  });
+
+  it("keeps reports on the runner (no public upload)", () => {
+    expect(rc.ci.upload.target).toBe("filesystem");
+  });
+
+  it("starts the production server on the port the workflow expects", () => {
+    expect(rc.ci.collect.startServerCommand).toBe("pnpm start --port 3300");
+    expect(
+      rc.ci.collect.url.every((u) => u.startsWith("http://localhost:3300/")),
+    ).toBe(true);
+    expect(lighthouse).toContain("NEXT_PUBLIC_SITE_URL: http://localhost:3300");
+  });
+
+  it("builds before auditing, and runs the pnpm script", () => {
+    const build = lighthouse.indexOf("run: pnpm build");
+    const audit = lighthouse.indexOf("pnpm lighthouse");
+    expect(build).toBeGreaterThan(-1);
+    expect(audit).toBeGreaterThan(build);
+    const pkg = JSON.parse(read("package.json")) as {
+      scripts: Record<string, string>;
+    };
+    expect(pkg.scripts.lighthouse).toBe("lhci autorun");
+  });
+
+  it("is documented as a check that is not (yet) required", () => {
+    const doc = read("docs/DEPLOYMENT.md");
+    const start = doc.indexOf("## 4b.");
+    const section = doc.slice(start, doc.indexOf("\n## 5.", start));
+    expect(section).toContain("`lighthouse`");
   });
 });
 

@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-13 · branch `main` (P4.5 committed as `0de0289`; CI hardening uncommitted)_
+_Last updated: 2026-11-13 · branch `main` (CI hardening committed as `9997544`; Lighthouse CI uncommitted)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 4 — GDPR, CI/CD, hardening (4/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
-| Active task | CI/CD audit + branch protection runbook, named `P4.6` by the user (D43, `docs/state/tasks/P4.6.md`). **Name clash:** roadmap P4.6 is the Lighthouse-CI performance budget and is still open |
-| Status | Built and gate-green, **awaiting review and commit**. Workflows hardened (runner pin, cancel only on PRs), guard test `ci-workflows.test.ts`, `DEPLOYMENT.md` §4b. Not met: the GitHub ruleset is **not applied** and the workflows have **not run on GitHub** since the edit |
-| Next task | Roadmap `P4.6` Lighthouse-CI performance budget, or rename (see Needs the user): do not start unprompted |
+| Phase | 4 — GDPR, CI/CD, hardening (6/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
+| Active task | `P4.6` Lighthouse CI (D44, `docs/state/tasks/P4.6.md`; part 1, the CI audit, is committed as `9997544`, D43). gitleaks was already the free pinned binary: no change, now test-pinned |
+| Status | Built and gate-green except one flake, **awaiting review and commit**. Budget is enforced and proven to fail (14 mutations killed), but **the site misses it**: performance 0.73–0.86 on all 5 routes (bar 0.9), LCP 3.6–3.9 s, TBT 237–655 ms, demo script 317 KB; accessibility and CLS pass. `lighthouse.yml` has **never run on GitHub**, so it is not a required check. Ruleset (§4b) still not applied |
+| Next task | `P4.7` Launch checklist; or a performance task to bring the site under the Lighthouse budget (see Needs the user): do not start unprompted |
 | Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | **Apply the ruleset** (`DEPLOYMENT.md` §4b, then its 4 verification steps; needs a plan that allows it on a private repo; it blocks direct pushes to `main`). Decide the P4.6 naming. Open from P4.5: Sentry yes/no (legal first, B4), uptime monitor, Vercel budget, Anthropic workspace at P3.0. From P4.4: `SECURITY_CONTACT` in Vercel Production, consent limiter on Upstash, `minimatch` override. From P4.3: notice wording, receipt retention, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4). Review and commit |
+| Needs the user | **Decide on performance**: fix it (LCP on home, TBT, demo bundle; first diagnose the LCP element) or ratchet the budgets to current numbers in DECISIONS. After a green `main` run, make `lighthouse` required. **Apply the ruleset** (`DEPLOYMENT.md` §4b, then its 4 verification steps; needs a plan that allows it on a private repo; it blocks direct pushes to `main`). Open from P4.5: Sentry yes/no (legal first, B4), uptime monitor, Vercel budget, Anthropic workspace at P3.0. From P4.4: `SECURITY_CONTACT` in Vercel Production, consent limiter on Upstash, `minimatch` override. From P4.3: notice wording, receipt retention, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4). Review and commit |
 
 ## 2. Phase progress
 
@@ -28,7 +28,7 @@ _Last updated: 2026-11-13 · branch `main` (P4.5 committed as `0de0289`; CI hard
 | 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
 | 3 Agent showcases & funnels | ✔ | 6/7 | P3.0 deferred, P3.6 not needed (`docs/state/tasks/P3.1.md`) |
-| 4 GDPR, CI/CD, hardening | ◐ | 5/7 | P4.5 committed; CI hardening awaiting commit (not counted: roadmap P4.6 is Lighthouse CI) |
+| 4 GDPR, CI/CD, hardening | ◐ | 6/7 | P4.6 awaiting commit: budget enforced, not yet met by the site; P4.7 open |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
 
@@ -53,10 +53,12 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (CI hardening, "P4.6") → FULL PASS, 2026-11-13 (first run)
-  typecheck, lint, unit (112 files / 1845 tests), knip, format, build → pass
-  e2e: 744 passed, 0 failed, 0 flaky
-  Mutations (scripts/agent/mutations/P4.6.json): 7/7 killed
+pnpm agent:gate (Lighthouse CI, P4.6) → e2e FAIL on one test, 2026-11-13
+  typecheck, lint, unit (112 files / 1863 tests), knip, format, build → pass
+  e2e: 743 passed, 1 failed: [chromium-dev] work-gallery.spec.ts:84 (URL after filter click).
+  Re-run alone: pass; whole spec: 23/23 pass → flake, full suite not re-run (CLAUDE.md §4b)
+  Mutations (scripts/agent/mutations/P4.6.json): 14/14 killed
+  Lighthouse (local, median of 3): perf 0.73–0.86 (bar 0.9) FAIL, a11y/CLS pass
   NOT done: workflows run on GitHub; ruleset applied; live Sentry/monitor/budget accounts; onRequestError at runtime; Observatory, ZAP, HSTS preload (no deployed URL); Firefox/WebKit; real Postgres/Cron (P4.3)
 ```
 

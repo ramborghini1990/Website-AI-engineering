@@ -1,0 +1,77 @@
+name: Lighthouse
+
+# Performance and accessibility budgets (P4.6) against the production build.
+# Budgets live in lighthouserc.json. Reports stay on the runner and are kept
+# as a workflow artifact: the upload target is "filesystem", never Google's
+# public temporary storage (a report contains page URLs and DOM snippets).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Only superseded PR runs are cancelled; every commit on `main` keeps its result.
+concurrency:
+  group: lighthouse-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lighthouse:
+    name: lighthouse
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      # Baked into the build (canonical and hreflang URLs) and read by the
+      # server; lighthouserc.json starts it on this port.
+      NEXT_PUBLIC_SITE_URL: http://localhost:3300
+      # Measure what visitors get: the enforced policy, not report-only.
+      CSP_MODE: enforce
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Lighthouse drives the same Chromium that Playwright pins in the
+      # lockfile, so a score change is never a browser-version change.
+      - name: Cache Playwright browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      # Starts `next start` itself, audits every URL in lighthouserc.json three
+      # times and asserts the median run. A missed budget exits non-zero.
+      - name: Lighthouse CI
+        run: CHROME_PATH="$(node -p "require('@playwright/test').chromium.executablePath()")" pnpm lighthouse
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 7
+          if-no-files-found: ignore

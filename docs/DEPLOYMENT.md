@@ -160,8 +160,26 @@ What CI runs, and what you must switch on in GitHub for it to bind. Nothing here
 | `e2e` | `ci.yml` | `pnpm test:e2e`: Playwright on a production build and on dev (axe, i18n, security headers, flows). Retries 2, `forbidOnly`; a retried pass is reported as flaky | **Yes** |
 | `gitleaks` | `security.yml` | pinned, checksum-verified binary; scans full history, `--redact` | **Yes** |
 | `pnpm audit (production)` | `security.yml` | `pnpm audit --prod --audit-level moderate`; also weekly | **No** (see below) |
+| `lighthouse` | `lighthouse.yml` | Lighthouse CI on the production build, budgets below | **Not yet** (see below) |
 
 `pnpm audit` is deliberately not required: a new advisory against an unchanged lockfile would block every unrelated PR. It still runs on each PR and every Monday, a red result is a to-do (fix, `pnpm.overrides`, or a documented exception), and Dependabot opens the upgrade. The Vercel check may be added as required once the project is linked (§1); it is not needed for the gates above.
+
+### Performance budget (Lighthouse CI)
+
+`lighthouse.yml` builds the site, starts `next start` on port 3300 with the CSP **enforced**, and audits five routes three times each (mobile emulation, simulated slow 4G, Playwright's pinned Chromium): `/it`, `/it/services`, `/it/work`, `/it/work/instagram-lead-agent` (the demo), `/it/contact`. The **median** run must meet every budget in `lighthouserc.json`, or the job fails:
+
+| Budget (each route) | Limit |
+|---|---|
+| Performance score | ≥ 90 |
+| Accessibility score | ≥ 95 |
+| Largest Contentful Paint | ≤ 2500 ms |
+| Cumulative Layout Shift | ≤ 0.1 |
+| Total Blocking Time | ≤ 200 ms (lab proxy for INP) |
+| JavaScript transferred | ≤ 300 000 bytes |
+
+Reports (`.lighthouseci/`) are kept as the `lighthouse-reports` workflow artifact for 7 days and are **not** uploaded to Google's temporary public storage. Run it locally with `pnpm build` then `pnpm lighthouse` (set `CHROME_PATH` to a Chromium; `node -p "require('@playwright/test').chromium.executablePath()"` prints Playwright's). The English routes are not audited: same components, one locale is enough for a score.
+
+**Baseline on 2026-11-13 (local, Windows, median of 3): the budget is NOT met.** Accessibility ≥ 95 and CLS pass on all five routes; performance is 0.73–0.86, LCP 3.6–3.9 s, TBT 237–655 ms, and the demo ships 317 KB of script. Scores on a GitHub runner will differ and have not been measured. So the job is **not** in the required list: it would block every PR until a performance task brings the site under budget. After one green run on `main`, add `lighthouse` to the required checks (same procedure as above). Do not loosen `lighthouserc.json` to get green without a decision recorded in `docs/state/DECISIONS.md`; `ci-workflows.test.ts` pins the floor (90, 95, 2500, 0.1, 200, 300 000).
 
 ### Ruleset for `main` (Settings → Rules → Rulesets → New branch ruleset)
 

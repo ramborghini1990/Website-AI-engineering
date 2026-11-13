@@ -47,5 +47,54 @@
     "find": "          fetch-depth: 0\n          persist-credentials: false",
     "replace": "          fetch-depth: 0",
     "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "gitleaks-licensed-action",
+    "file": ".github/workflows/security.yml",
+    "find": "        run: gitleaks git --redact --no-banner --verbose .",
+    "replace": "        uses: gitleaks/gitleaks-action@v2",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "gitleaks-checksum-skipped",
+    "file": ".github/workflows/security.yml",
+    "find": "sha256sum --check --strict",
+    "replace": "sha256sum",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lighthouse-perf-bar-lowered",
+    "file": "lighthouserc.json",
+    "find": "\"categories:performance\": [\"error\", { \"minScore\": 0.9 }]",
+    "replace": "\"categories:performance\": [\"error\", { \"minScore\": 0.5 }]",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lighthouse-a11y-demoted-to-warn",
+    "file": "lighthouserc.json",
+    "find": "\"categories:accessibility\": [\"error\", { \"minScore\": 0.95 }]",
+    "replace": "\"categories:accessibility\": [\"warn\", { \"minScore\": 0.95 }]",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lighthouse-route-dropped",
+    "file": "lighthouserc.json",
+    "find": "\"http://localhost:3300/it/work/instagram-lead-agent\"",
+    "replace": "\"http://localhost:3300/it/work\"",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lighthouse-public-upload",
+    "file": "lighthouserc.json",
+    "find": "\"target\": \"filesystem\"",
+    "replace": "\"target\": \"temporary-public-storage\"",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lighthouse-best-run-only",
+    "file": "lighthouserc.json",
+    "find": "\"aggregationMethod\": \"median-run\"",
+    "replace": "\"aggregationMethod\": \"optimistic\"",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
   }
 ]
