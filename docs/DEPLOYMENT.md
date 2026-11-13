@@ -144,7 +144,69 @@ To do in Vercel (you):
 - [ ] First deployment: build log shows the intended pnpm and Node versions (§5)
 - [ ] Open a PR: it gets a Preview URL behind Vercel Authentication
 - [ ] Merge to `main`: Production deploys and serves the scaffold
-- [ ] GitHub branch protection requires `verify`, `e2e`, `gitleaks` (and optionally the Vercel check)
+- [ ] GitHub ruleset for `main` applied as in §4b (requires `verify`, `e2e`, `gitleaks`)
+
+## 4b. GitHub: branch protection and required checks (P4.6)
+
+What CI runs, and what you must switch on in GitHub for it to bind. Nothing here can be applied from the repo: it is repository settings (Owner/Admin). Written from the GitHub docs as known on 2026-11-13; labels move, so check each against the UI. A repository ruleset is preferred over classic branch protection; the settings are the same.
+
+**Prerequisite.** Rulesets and branch protection on a **private** repository need a paid plan (Pro/Team); on a public one they are free. If the plan does not allow it, the settings below cannot be enforced and CI only advises.
+
+### The checks (names are the job names; a test keeps them in sync)
+
+| Check (exact name) | Workflow | Runs | Required |
+|---|---|---|---|
+| `verify` | `ci.yml` | `pnpm verify` (typecheck, ESLint with `--max-warnings=0`, Vitest, `next build`), then `pnpm knip`, then `pnpm format:check` | **Yes** |
+| `e2e` | `ci.yml` | `pnpm test:e2e`: Playwright on a production build and on dev (axe, i18n, security headers, flows). Retries 2, `forbidOnly`; a retried pass is reported as flaky | **Yes** |
+| `gitleaks` | `security.yml` | pinned, checksum-verified binary; scans full history, `--redact` | **Yes** |
+| `pnpm audit (production)` | `security.yml` | `pnpm audit --prod --audit-level moderate`; also weekly | **No** (see below) |
+
+`pnpm audit` is deliberately not required: a new advisory against an unchanged lockfile would block every unrelated PR. It still runs on each PR and every Monday, a red result is a to-do (fix, `pnpm.overrides`, or a documented exception), and Dependabot opens the upgrade. The Vercel check may be added as required once the project is linked (§1); it is not needed for the gates above.
+
+### Ruleset for `main` (Settings → Rules → Rulesets → New branch ruleset)
+
+| Setting | Value |
+|---|---|
+| Enforcement status | **Active** |
+| Target branches | Include default branch (`main`) |
+| Bypass list | **Empty.** If you need an escape hatch, add *Repository admin* with mode **For pull requests only**, never "Always" |
+| Restrict deletions | On |
+| Block force pushes | On |
+| Require linear history | On (merge by squash or rebase) |
+| Require a pull request before merging | On. Required approvals: **0** while you are the only maintainer (GitHub does not let you approve your own PR); raise to 1 with a second maintainer. Dismiss stale approvals: On. Require conversation resolution: On |
+| Require status checks to pass | On. Add `verify`, `e2e`, `gitleaks`, each with source **GitHub Actions** (not "any source", so no other app can report a green check under that name) |
+| Require branches to be up to date before merging | On (a PR is re-tested against the current `main`; costs one e2e run per rebase) |
+| Require signed commits | Optional; only if every contributor has signing set up |
+| Require deployments to succeed | Off |
+
+A check can only be picked in the UI after it has run once in the last 7 days: open a PR first, then add the checks. If you ever enable a **merge queue**, add `merge_group:` to the `on:` list of both workflows, or the required checks never report and the queue stalls.
+
+Consequence for the workflow of this repo: with the ruleset on, `git push origin main` is rejected; work goes on a branch and merges through a PR. Dependabot PRs go through the same checks.
+
+### Repository settings that complete it
+
+| Where | Setting |
+|---|---|
+| Settings → Actions → General → Workflow permissions | **Read repository contents and packages permissions**; "Allow GitHub Actions to create and approve pull requests": **off** |
+| Settings → Actions → General → Actions permissions | Allow GitHub-owned actions only (the workflows use `actions/*` only); turn on **Require actions to be pinned to a full-length commit SHA** if the option is shown |
+| Settings → Actions → General → Fork pull request workflows | Require approval for all outside collaborators |
+| Settings → Code security | Dependabot alerts and security updates **on**; secret scanning and push protection **on** where the plan offers them (public repos, or GitHub Secret Protection) |
+
+### Verify it (30 minutes, once; record the date below)
+
+1. Open a PR that changes nothing risky: the three required checks appear and must pass; merging is blocked until they do.
+2. Break one on purpose on a throwaway branch (a lint warning, an unformatted file): the matching check goes red and the merge button stays disabled. Delete the branch.
+3. `gitleaks`: on a throwaway branch commit a **freshly invented** high-entropy string in a well-known token format (never a real credential); the check must fail with the value redacted in the log. Close the PR and delete the branch; the string stays in that branch's history only, so use nothing that resembles a live secret.
+4. `git push origin main` from your machine is rejected ("protected branch").
+
+**Status:** none of steps 1–4 is done and the ruleset is not applied (needs your GitHub account). Date applied: ______. Plan: ______.
+
+### Maintaining the pins
+
+- Every `uses:` is `owner/repo@<40-hex SHA> # vX.Y.Z`; Dependabot (`github-actions`, Mondays 06:00 Europe/Rome) bumps both. Before merging such a PR, read the release notes of the action; an action runs with the job's token and your checked-out code.
+- The gitleaks binary version and SHA-256 are set together in `security.yml` (`GITLEAKS_VERSION`, `GITLEAKS_SHA256`); Dependabot does not see them. Check the releases page when the weekly scan reports an outdated-rules problem or quarterly.
+- Runners are pinned to `ubuntu-24.04`, not `ubuntu-latest`: update on purpose when GitHub announces the image's end of life.
+- Workflows request `contents: read` at the top level and nothing per job. A job that needs more declares it itself with a comment saying why; `src/lib/ci-workflows.test.ts` fails on any write scope, privileged trigger, unpinned action, job without a timeout, or a PR-controlled value interpolated into a script, so such a change must edit that test in the same PR, in view of the reviewer.
 
 ## 5. First-deployment checks
 

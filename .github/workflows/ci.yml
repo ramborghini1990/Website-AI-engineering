@@ -9,15 +9,16 @@ on:
 permissions:
   contents: read
 
-# A newer push to the same ref makes the older run obsolete.
+# A newer push to a PR makes the older run obsolete. Runs on `main` are never
+# cancelled: every commit there keeps its own result.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
     name: verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -57,7 +58,7 @@ jobs:
 
   e2e:
     name: e2e
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout

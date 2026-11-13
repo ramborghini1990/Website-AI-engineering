@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-12 · branch `main` (P4.4 committed as `e250eb5`; P4.5 uncommitted)_
+_Last updated: 2026-11-13 · branch `main` (P4.5 committed as `0de0289`; CI hardening uncommitted)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
 | Phase | 4 — GDPR, CI/CD, hardening (4/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
-| Active task | `P4.5` Observability: `/api/health`, PII-scrubbed `onRequestError` + optional EU Sentry sink, logger redaction hardening, telemetry-off guards, spend-alert runbook (D42, `docs/state/tasks/P4.5.md`) |
-| Status | Built and gate-green, **awaiting review and commit**. Not met: "alerts fire on a test threshold" and "test error appears in tracker" (no Sentry/monitor/budget accounts; runbook in `DEPLOYMENT.md` §8). `onRequestError` not triggered at runtime |
-| Next task | `P4.6` Performance budget in CI: do not start unprompted |
+| Active task | CI/CD audit + branch protection runbook, named `P4.6` by the user (D43, `docs/state/tasks/P4.6.md`). **Name clash:** roadmap P4.6 is the Lighthouse-CI performance budget and is still open |
+| Status | Built and gate-green, **awaiting review and commit**. Workflows hardened (runner pin, cancel only on PRs), guard test `ci-workflows.test.ts`, `DEPLOYMENT.md` §4b. Not met: the GitHub ruleset is **not applied** and the workflows have **not run on GitHub** since the edit |
+| Next task | Roadmap `P4.6` Lighthouse-CI performance budget, or rename (see Needs the user): do not start unprompted |
 | Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | `P4.5.md` → "Decisions for you": Sentry yes/no (legal steps first, B4), uptime monitor, Vercel budget, Anthropic workspace at P3.0. Still open from P4.4: `SECURITY_CONTACT` in Vercel Production, consent limiter on Upstash, `minimatch` override. From P4.3: notice wording, receipt retention, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4). Review and commit |
+| Needs the user | **Apply the ruleset** (`DEPLOYMENT.md` §4b, then its 4 verification steps; needs a plan that allows it on a private repo; it blocks direct pushes to `main`). Decide the P4.6 naming. Open from P4.5: Sentry yes/no (legal first, B4), uptime monitor, Vercel budget, Anthropic workspace at P3.0. From P4.4: `SECURITY_CONTACT` in Vercel Production, consent limiter on Upstash, `minimatch` override. From P4.3: notice wording, receipt retention, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4). Review and commit |
 
 ## 2. Phase progress
 
@@ -28,7 +28,7 @@ _Last updated: 2026-11-12 · branch `main` (P4.4 committed as `e250eb5`; P4.5 un
 | 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
 | 3 Agent showcases & funnels | ✔ | 6/7 | P3.0 deferred, P3.6 not needed (`docs/state/tasks/P3.1.md`) |
-| 4 GDPR, CI/CD, hardening | ◐ | 5/7 | P4.5 awaiting commit |
+| 4 GDPR, CI/CD, hardening | ◐ | 5/7 | P4.5 committed; CI hardening awaiting commit (not counted: roadmap P4.6 is Lighthouse CI) |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
 
@@ -53,10 +53,11 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (P4.5) → FULL PASS, 2026-11-12 (second run; the first stopped at knip + format, fixed)
-  typecheck, lint, unit (111 files / 1818 tests), knip, format, build → pass
+pnpm agent:gate (CI hardening, "P4.6") → FULL PASS, 2026-11-13 (first run)
+  typecheck, lint, unit (112 files / 1845 tests), knip, format, build → pass
   e2e: 744 passed, 0 failed, 0 flaky
-  NOT done: live Sentry/monitor/budget accounts; onRequestError at runtime; Observatory, ZAP, HSTS preload (no deployed URL); Firefox/WebKit; mutation sweep; real Postgres/Cron (P4.3)
+  Mutations (scripts/agent/mutations/P4.6.json): 7/7 killed
+  NOT done: workflows run on GitHub; ruleset applied; live Sentry/monitor/budget accounts; onRequestError at runtime; Observatory, ZAP, HSTS preload (no deployed URL); Firefox/WebKit; real Postgres/Cron (P4.3)
 ```
 
 ## 6. Rules for updating this file

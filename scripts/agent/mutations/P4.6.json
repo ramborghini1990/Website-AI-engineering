@@ -1,0 +1,51 @@
+[
+  {
+    "id": "action-unpinned",
+    "file": ".github/workflows/ci.yml",
+    "find": "uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0\n        with:\n          node-version-file: .nvmrc\n          cache: pnpm\n\n      - name: Install dependencies\n        run: pnpm install --frozen-lockfile\n\n      # typecheck",
+    "replace": "uses: actions/setup-node@v7\n        with:\n          node-version-file: .nvmrc\n          cache: pnpm\n\n      - name: Install dependencies\n        run: pnpm install --frozen-lockfile\n\n      # typecheck",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "permissions-widened",
+    "file": ".github/workflows/security.yml",
+    "find": "permissions:\n  contents: read\n\n# Only",
+    "replace": "permissions:\n  contents: write\n\n# Only",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "job-timeout-removed",
+    "file": ".github/workflows/security.yml",
+    "find": "    name: gitleaks\n    runs-on: ubuntu-24.04\n    timeout-minutes: 10\n",
+    "replace": "    name: gitleaks\n    runs-on: ubuntu-24.04\n",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "e2e-step-dropped",
+    "file": ".github/workflows/ci.yml",
+    "find": "        run: pnpm test:e2e",
+    "replace": "        run: echo skipped",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "required-check-renamed",
+    "file": ".github/workflows/ci.yml",
+    "find": "    name: e2e\n",
+    "replace": "    name: end-to-end\n",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "lint-warnings-allowed",
+    "file": "package.json",
+    "find": "\"lint\": \"eslint . --max-warnings=0\"",
+    "replace": "\"lint\": \"eslint .\"",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "checkout-token-persisted",
+    "file": ".github/workflows/security.yml",
+    "find": "          fetch-depth: 0\n          persist-credentials: false",
+    "replace": "          fetch-depth: 0",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  }
+]

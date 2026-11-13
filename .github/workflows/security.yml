@@ -15,9 +15,11 @@ on:
 permissions:
   contents: read
 
+# Only superseded PR runs are cancelled; a push to `main` must not cancel the
+# scheduled scan or the previous commit's secret scan.
 concurrency:
-  group: security-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: security-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   # Update both together: version and the sha256 of its linux_x64 archive from
@@ -28,7 +30,7 @@ env:
 jobs:
   gitleaks:
     name: gitleaks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout (full history)
@@ -61,7 +63,7 @@ jobs:
   # new advisory against an unchanged lockfile still turns this red.
   audit:
     name: pnpm audit (production)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
