@@ -254,11 +254,43 @@ describe(".gitleaks.toml keeps the default rules and only narrow exceptions", ()
     }
   });
 
-  it("only exempts the logger redaction test", () => {
+  it("only exempts the logger redaction test and one historical task report", () => {
     const paths = [...code.matchAll(/paths\s*=\s*\['''([^']+)'''\]/g)].map(
       (m) => m[1],
     );
-    expect(new Set(paths)).toEqual(new Set(["^src/lib/logger\\.test\\.ts$"]));
+    expect(new Set(paths)).toEqual(
+      new Set([
+        "^src/lib/logger\\.test\\.ts$",
+        "^docs/state/tasks/P4\\.7\\.md$",
+      ]),
+    );
+  });
+
+  it("pins every exception outside the logger test to one full commit hash", () => {
+    // The logger test is exempt in every commit because it must keep looking
+    // like a secret. A document is never exempt "everywhere": only the one
+    // pushed commit that quoted the fixture, so any other commit, or a later
+    // version of the file, that quotes it again is still reported.
+    for (const b of blocks) {
+      const isLoggerTest = /logger\\\.test\\\.ts/.test(b);
+      const commits = [...b.matchAll(/commits\s*=\s*\[([^\]]*)\]/g)];
+      if (isLoggerTest) {
+        expect(commits, "the logger test block needs no commit pin").toEqual(
+          [],
+        );
+      } else {
+        expect(commits).toHaveLength(1);
+        expect(commits[0]?.[1]?.trim()).toMatch(/^"[0-9a-f]{40}"$/);
+      }
+    }
+  });
+
+  it("is a real commit pin: the pinned commit is a full SHA, not a range or a prefix", () => {
+    for (const m of code.matchAll(/commits\s*=\s*\[([^\]]*)\]/g)) {
+      const entries = m[1].split(",").map((s) => s.trim());
+      expect(entries).toHaveLength(1);
+      expect(entries[0]).toMatch(/^"[0-9a-f]{40}"$/);
+    }
   });
 });
 

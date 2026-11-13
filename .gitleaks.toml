@@ -6,10 +6,14 @@
 # git history (commit 0de0289), so rewording the test would not clear a
 # history scan.
 #
-# Each exception must match ALL of: this file path, one of the two named
-# rules, and the exact fixture value. Any other secret-shaped string, even in
-# the same file, is still reported. Do not add a path-only or rule-only
-# allowlist: ci-workflows.test.ts rejects it.
+# Each exception must match ALL of: a file path, one named rule, and the exact
+# fixture value. Any other secret-shaped string, even in the same file, is still
+# reported. Do not add a path-only or rule-only allowlist: ci-workflows.test.ts
+# rejects it.
+#
+# A third exception exists only for history (see its comment below) and is
+# pinned to one full commit hash. Never exempt a document in general: write the
+# document so it does not repeat the fixture next to its key name.
 
 title = "Website AI engineering"
 
@@ -28,4 +32,17 @@ description = "Synthetic api_key=... fixture in the logger redaction test"
 condition = "AND"
 targetRules = ["generic-api-key"]
 paths = ['''^src/lib/logger\.test\.ts$''']
+regexes = ['''^abc123def456$''']
+
+# History only. The P4.7 task report, as first committed, quoted the fixture
+# above next to "api_key=". It was reworded afterwards, but that commit is
+# pushed, so the history scan still sees it. The exception is pinned to that one
+# commit (plus file, rule and exact value): the same text in any other commit,
+# or in any later version of the report, is still reported.
+[[allowlists]]
+description = "Task report P4.7 as committed in d8f9ffe quoted the synthetic api_key fixture"
+condition = "AND"
+targetRules = ["generic-api-key"]
+commits = ["d8f9ffe92ba2d4e105e7758d470e1ac6db83f8ea"]
+paths = ['''^docs/state/tasks/P4\.7\.md$''']
 regexes = ['''^abc123def456$''']

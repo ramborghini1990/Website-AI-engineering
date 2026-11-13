@@ -82,5 +82,26 @@
     "find": "[data-consent-banner]{display:none}",
     "replace": "[data-consent-banner]{display:block}",
     "check": "pnpm agent:e2e e2e/consent.spec.ts -g \"without JavaScript|carries the rule\""
+  },
+  {
+    "id": "gitleaks-report-exemption-unpinned",
+    "file": ".gitleaks.toml",
+    "find": "commits = [\"d8f9ffe92ba2d4e105e7758d470e1ac6db83f8ea\"]\n",
+    "replace": "",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "gitleaks-commit-pin-shortened",
+    "file": ".gitleaks.toml",
+    "find": "\"d8f9ffe92ba2d4e105e7758d470e1ac6db83f8ea\"",
+    "replace": "\"d8f9ffe\"",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
+  },
+  {
+    "id": "gitleaks-report-path-widened",
+    "file": ".gitleaks.toml",
+    "find": "paths = ['''^docs/state/tasks/P4\\.7\\.md$''']",
+    "replace": "paths = ['''^docs/.*$''']",
+    "check": "pnpm exec vitest run src/lib/ci-workflows.test.ts"
   }
 ]
