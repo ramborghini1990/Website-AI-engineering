@@ -1,0 +1,79 @@
+[
+  {
+    "id": "count-hard-coded-in-facts",
+    "file": "src/lib/demos/facts.ts",
+    "find": "[{ key: \"messages\", count: inboxMessages.length }]",
+    "replace": "[{ key: \"messages\", count: 12 }]",
+    "check": "pnpm exec vitest run src/lib/demos/facts.test.ts"
+  },
+  {
+    "id": "count-off-by-one",
+    "file": "src/lib/demos/facts.ts",
+    "find": "{ key: \"prospects\", count: prospects.length }",
+    "replace": "{ key: \"prospects\", count: prospects.length + 1 }",
+    "check": "pnpm exec vitest run src/lib/demos/facts.test.ts"
+  },
+  {
+    "id": "project-entry-gets-a-preview",
+    "file": "src/components/work/work-card.tsx",
+    "find": "const showcase = data.kind === \"demo\" && isInteractiveDemo(slug);",
+    "replace": "const showcase = isInteractiveDemo(slug);",
+    "check": "pnpm exec vitest run src/components/work/work-card.test.tsx"
+  },
+  {
+    "id": "third-series-colour-in-the-business-preview",
+    "file": "src/components/diagrams/previews/business-preview.tsx",
+    "find": "<path d={barsPath(SERIES_2, 10)} className=\"fill-trace\" />",
+    "replace": "<path d={barsPath(SERIES_2, 10)} className=\"fill-trace\" /><path d={barsPath(SERIES_2, 4)} className=\"fill-success\" />",
+    "check": "pnpm exec vitest run src/components/diagrams/previews/previews.test.tsx"
+  },
+  {
+    "id": "second-accent-in-a-preview",
+    "file": "src/components/diagrams/previews/instagram-preview.tsx",
+    "find": "<circle cx={30} cy={rowY(HANDED) + 16} r={5} className={ACCENT} />",
+    "replace": "<circle cx={30} cy={rowY(HANDED) + 16} r={5} className={ACCENT} /><circle cx={30} cy={40} r={5} className={ACCENT} />",
+    "check": "pnpm exec vitest run src/components/diagrams/previews/previews.test.tsx"
+  },
+  {
+    "id": "plural-branch-removed-from-italian",
+    "file": "messages/it.json",
+    "find": "\"{count, plural, one {# messaggio di prova} other {# messaggi di prova} }\"",
+    "replace": "\"{count, plural, other {# messaggi di prova} }\"",
+    "check": "pnpm exec vitest run src/lib/demos/facts.test.ts"
+  },
+  {
+    "id": "italian-count-message-deleted",
+    "file": "messages/it.json",
+    "find": "        \"suppliers\": \"{count, plural, one {# fornitore} other {# fornitori} }\",\n",
+    "replace": "",
+    "check": "pnpm exec vitest run src/lib/diagrams/i18n.test.ts src/lib/demos/facts.test.ts"
+  },
+  {
+    "id": "demo-diagram-label-too-long",
+    "file": "messages/en.json",
+    "find": "\"classify\": \"Classification\",",
+    "replace": "\"classify\": \"Message classification\",",
+    "check": "pnpm exec vitest run src/lib/diagrams/i18n.test.ts"
+  },
+  {
+    "id": "demo-diagram-entry-deleted",
+    "file": "src/lib/diagrams/demos.ts",
+    "find": "  \"linkedin-assisted-outreach\": linkedin,\n",
+    "replace": "",
+    "check": "pnpm exec vitest run src/lib/diagrams/demos.test.ts"
+  },
+  {
+    "id": "preview-exposed-to-assistive-technology",
+    "file": "src/components/diagrams/previews/frame.tsx",
+    "find": "aria-hidden=\"true\"",
+    "replace": "",
+    "check": "pnpm exec vitest run src/components/diagrams/previews/previews.test.tsx"
+  },
+  {
+    "id": "facts-badge-without-text",
+    "file": "src/components/work/demo-facts.tsx",
+    "find": "      {t(`qualities.${item}`)}",
+    "replace": "",
+    "check": "pnpm exec vitest run src/components/work/work-card.test.tsx"
+  }
+]

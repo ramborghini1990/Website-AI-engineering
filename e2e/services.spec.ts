@@ -727,6 +727,35 @@ test.describe("service architecture diagrams", () => {
     await expect(page).toHaveURL(/#service-ai-agents$/);
   });
 
+  // V3: a service with a published demo shows a preview card; one without shows none.
+  for (const locale of LOCALES) {
+    for (const { slug, data } of readServices(locale)) {
+      test(`/${locale}/services/${slug}: ${data.demo === null ? "no demo card" : "the demo as a preview card"}`, async ({
+        page,
+      }) => {
+        await open(page, `/${locale}/services/${slug}`);
+
+        const card = page.locator("[data-demo-card]");
+        if (data.demo === null) {
+          await expect(card).toHaveCount(0);
+          await expect(page.locator("svg[data-preview]")).toHaveCount(0);
+          return;
+        }
+        await expect(card).toHaveAttribute("data-demo-card", data.demo);
+        await expect(card.locator("svg[data-preview]")).toBeVisible();
+        await expect(card.getByRole("link")).toHaveAttribute(
+          "href",
+          `/${locale}/work/${data.demo}`,
+        );
+        const badges = await card
+          .locator(`ul[aria-label="${messages[locale].work.facts.title}"] > li`)
+          .count();
+        expect(badges).toBeGreaterThanOrEqual(1);
+        expect(badges).toBeLessThanOrEqual(2);
+      });
+    }
+  }
+
   test("each card on the index has a visible glyph", async ({ page }) => {
     await open(page, "/it/services");
     const cards = page.locator("li[id^='service-']");

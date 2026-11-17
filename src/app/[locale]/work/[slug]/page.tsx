@@ -111,6 +111,7 @@ export default async function WorkEntryPage({
 
   return (
     <WorkDetail
+      slug={entry.slug}
       work={entry.data}
       body={entry.body}
       demo={demo}

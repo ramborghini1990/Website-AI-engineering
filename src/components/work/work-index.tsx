@@ -61,9 +61,10 @@ export function WorkIndex({
             </p>
             {shown.length > 0 ? (
               <ul className="grid gap-px border border-border-subtle bg-border-subtle md:grid-cols-2">
-                {shown.map(({ slug, data }) => (
+                {shown.map(({ slug, data }, position) => (
                   <WorkCard
                     key={slug}
+                    index={position + 1}
                     slug={slug}
                     data={data}
                     href={entryHref(slug)}

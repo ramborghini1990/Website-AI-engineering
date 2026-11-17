@@ -352,3 +352,188 @@ test.describe("layout, stability and security", () => {
     });
   });
 });
+
+/**
+ * V3: wireframe previews and fact badges on the cards, the facts rail and the
+ * "how this demo works" figure on the detail pages. Every expectation is
+ * derived from the published entries and the messages.
+ */
+test.describe("demo previews, facts and case-study layout (V3)", () => {
+  for (const locale of LOCALES) {
+    const copy = messages[locale].work;
+    const demos = readWork(locale).filter(
+      ({ data }) => !data.draft && data.kind === "demo",
+    );
+
+    test(`/${locale}/work: one card per demo, each with a preview and two or three facts`, async ({
+      page,
+    }) => {
+      await open(page, `/${locale}/work`);
+
+      const cards = page.locator("main li.group");
+      await expect(cards).toHaveCount(demos.length);
+      expect(demos.length).toBe(4);
+      for (const { slug } of demos) {
+        const card = page.locator("main li.group", {
+          has: page.locator(`svg[data-preview="${slug}"]`),
+        });
+        await expect(card.locator("svg[data-preview]")).toBeVisible();
+        const badges = card.locator(
+          `ul[aria-label="${copy.facts.title}"] > li`,
+        );
+        const count = await badges.count();
+        expect(count, slug).toBeGreaterThanOrEqual(2);
+        expect(count, slug).toBeLessThanOrEqual(3);
+      }
+    });
+
+    test(`/${locale}/work: filters keep the previews`, async ({ page }) => {
+      await open(page, `/${locale}/work?kind=demo`);
+      await expect(page.locator("main li.group svg[data-preview]")).toHaveCount(
+        demos.length,
+      );
+
+      await open(page, `/${locale}/work?stack=React`);
+      await expect(page.locator("main li.group")).toHaveCount(1);
+      await expect(
+        page.locator(
+          'main li.group svg[data-preview="business-management-app"]',
+        ),
+      ).toBeVisible();
+    });
+
+    for (const { slug } of demos) {
+      test(`/${locale}/work/${slug}: the facts rail beside the title at 1280 px, the how-it-works figure after the demo`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await open(page, `/${locale}/work/${slug}`);
+
+        const title = await page
+          .getByRole("heading", { level: 1 })
+          .boundingBox();
+        const rail = page.locator('[data-rail="facts"]');
+        const railBox = await rail.boundingBox();
+        expect(railBox?.x ?? 0).toBeGreaterThanOrEqual(
+          (title?.x ?? 0) + (title?.width ?? 0),
+        );
+        expect(railBox?.y ?? 0).toBeLessThan((title?.y ?? 0) + 200);
+        await expect(
+          rail.locator(`ul[aria-label="${copy.facts.title}"] > li`).first(),
+        ).toBeVisible();
+
+        const figure = page.locator(`figure[data-diagram="${slug}"]`);
+        await expect(figure).toBeVisible();
+        await expect(
+          page.getByRole("heading", { level: 2, name: copy.labels.howItWorks }),
+        ).toBeVisible();
+        const steps = Object.keys(
+          messages[locale].diagrams.demos[
+            slug as keyof typeof messages.it.diagrams.demos
+          ].steps,
+        );
+        expect(steps.length).toBeGreaterThanOrEqual(4);
+        expect(steps.length).toBeLessThanOrEqual(5);
+        await expect(figure.locator("figcaption ol > li")).toHaveCount(
+          steps.length,
+        );
+        // after the demo: below its first control
+        const control = await page
+          .getByRole("main")
+          .locator("button")
+          .first()
+          .boundingBox();
+        const figureBox = await figure.boundingBox();
+        expect(figureBox?.y ?? 0).toBeGreaterThan(control?.y ?? Infinity);
+      });
+
+      test(`/${locale}/work/${slug}: the rail follows the summary on a phone, with no overflow`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width: 360, height: 800 });
+        await open(page, `/${locale}/work/${slug}`);
+
+        const title = await page
+          .getByRole("heading", { level: 1 })
+          .boundingBox();
+        const railBox = await page.locator('[data-rail="facts"]').boundingBox();
+        expect(railBox?.y ?? 0).toBeGreaterThan(title?.y ?? Infinity);
+        expect(
+          await page.evaluate(
+            () =>
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth,
+          ),
+        ).toBeLessThanOrEqual(0);
+      });
+    }
+  }
+
+  test("no horizontal scroll at 360, 768, 1280 and 1920 px on the index and every detail page, both languages", async ({
+    page,
+  }) => {
+    for (const width of [360, 768, 1280, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const locale of LOCALES) {
+        const paths = [
+          `/${locale}/work`,
+          ...readWork(locale)
+            .filter(({ data }) => !data.draft)
+            .map(({ slug }) => `/${locale}/work/${slug}`),
+        ];
+        for (const path of paths) {
+          await open(page, path);
+          const overflow = await page.evaluate(
+            () =>
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth,
+          );
+          expect(overflow, `${path} at ${String(width)}`).toBeLessThanOrEqual(
+            0,
+          );
+        }
+      }
+    }
+  });
+
+  test("the previews and diagrams never animate, with full motion or reduced", async ({
+    page,
+  }) => {
+    for (const reduced of ["no-preference", "reduce"] as const) {
+      await page.emulateMedia({ reducedMotion: reduced });
+      for (const path of ["/it/work", "/it/work/instagram-lead-agent"]) {
+        await open(page, path);
+        const animated = await page
+          .locator("svg[data-preview], figure[data-diagram] *")
+          .evaluateAll(
+            (all) =>
+              all.filter((el) => getComputedStyle(el).animationName !== "none")
+                .length,
+          );
+        expect(animated, `${path} (${reduced})`).toBe(0);
+        if (reduced === "reduce") {
+          const running = await page.evaluate(
+            () =>
+              document
+                .getAnimations()
+                .filter((animation) => animation.playState === "running")
+                .length,
+          );
+          expect(running, path).toBe(0);
+        }
+      }
+    }
+  });
+
+  test("hovering a card lifts its preview accent from 0.6 to full opacity", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page, "/it/work");
+    const card = page.locator("main li.group").first();
+    const accent = card.locator(".preview-accent");
+    await expect(accent).toHaveCSS("opacity", "0.6");
+    await card.hover();
+    await expect(accent).toHaveCSS("opacity", "1");
+  });
+});

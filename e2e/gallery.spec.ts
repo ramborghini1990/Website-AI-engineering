@@ -415,7 +415,7 @@ test.describe("diagram gallery (/_dev/diagrams, V1)", () => {
 
     const animated = page.locator("[data-gallery-variant='animated']");
     const still = page.locator("[data-gallery-variant='static']");
-    // the hero, the four service diagrams (V2) and the capability map (V2)
+    // the hero, the four service diagrams and the capability map (V2), the four demo diagrams (V3)
     const ids = [
       "hero",
       "ai-agents",
@@ -423,6 +423,10 @@ test.describe("diagram gallery (/_dev/diagrams, V1)", () => {
       "web-applications",
       "document-intelligence",
       "capability-map",
+      "instagram-lead-agent",
+      "linkedin-assisted-outreach",
+      "document-intelligence-demo",
+      "business-management-app",
     ];
     for (const id of ids) {
       await expect(
@@ -443,6 +447,7 @@ test.describe("diagram gallery (/_dev/diagrams, V1)", () => {
       ids.length * 2,
     );
     await expect(page.locator("svg[data-glyph]")).toHaveCount(4);
+    await expect(page.locator("svg[data-preview]")).toHaveCount(4);
   });
 
   test("is linked from the UI gallery", async ({ page }) => {

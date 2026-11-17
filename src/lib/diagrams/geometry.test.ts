@@ -64,7 +64,7 @@ describe("the hero diagram", () => {
 });
 
 describe("every registered diagram", () => {
-  it("includes the hero, the four services and the capability map", () => {
+  it("includes the hero, the four services, the capability map and the four demos", () => {
     expect(diagramRegistry.map((entry) => entry.diagram.id)).toEqual([
       "hero",
       "ai-agents",
@@ -72,6 +72,10 @@ describe("every registered diagram", () => {
       "web-applications",
       "document-intelligence",
       "capability-map",
+      "instagram-lead-agent",
+      "linkedin-assisted-outreach",
+      "document-intelligence-demo",
+      "business-management-app",
     ]);
   });
 

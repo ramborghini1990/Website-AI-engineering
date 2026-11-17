@@ -364,6 +364,87 @@
         "web-applications": "Web app: prodotti e strumenti interni, dall'MVP alla produzione.",
         "document-intelligence": "Documenti: estrazione e ricerca, con revisione umana dei casi incerti."
       }
+    },
+    "demos": {
+      "instagram-lead-agent": {
+        "title": "Come funziona la demo",
+        "nodes": {
+          "messages": "Messaggi",
+          "classify": "Classificazione",
+          "score": "Punteggio",
+          "draft": "Bozza",
+          "review": "Revisione",
+          "person": "Persona",
+          "information": "Informazioni",
+          "interest": "Interesse",
+          "support": "Assistenza",
+          "spam": "Spam"
+        },
+        "steps": {
+          "inbox": "Arrivano i messaggi e i commenti di un profilo aziendale fittizio.",
+          "classify": "L'agente classifica ogni messaggio: richiesta di informazioni, interesse commerciale, assistenza o spam.",
+          "score": "Assegna un punteggio ai contatti.",
+          "draft": "Prepara una bozza di risposta.",
+          "review": "Una persona approva: le risposte non partono da sole e i contatti qualificati passano al passo successivo."
+        }
+      },
+      "linkedin-assisted-outreach": {
+        "title": "Come funziona la demo",
+        "nodes": {
+          "prospects": "Aziende",
+          "research": "Riepilogo",
+          "fit": "Idoneità",
+          "draft": "Bozza",
+          "approval": "Approvazione",
+          "person": "Persona",
+          "scheduled": "Programmato",
+          "afterApproval": "Dopo l'ok",
+          "skip": "Non contattare"
+        },
+        "steps": {
+          "prospects": "Un breve elenco di aziende e persone inventate.",
+          "research": "L'assistente scrive un riepilogo di ricerca per ciascuna.",
+          "fit": "Valuta quanto somiglia al cliente ideale e dice anche chi non va contattato, e perché.",
+          "draft": "Solo dove ha senso contattare, prepara la bozza di un primo messaggio.",
+          "approval": "Una persona la legge, la modifica e la approva, un contatto alla volta. Solo allora risulta programmata."
+        }
+      },
+      "document-intelligence-demo": {
+        "title": "Come funziona la demo",
+        "nodes": {
+          "docs": "Documenti",
+          "fields": "Campi",
+          "review": "Revisione",
+          "person": "Persona",
+          "question": "Domanda",
+          "answer": "Risposta",
+          "citation": "Con citazione"
+        },
+        "steps": {
+          "docs": "Tre documenti di esempio con aziende inventate: una fattura, un contratto e un documento di trasporto.",
+          "fields": "Per ciascuno estrae i dati chiave come campi strutturati e mostra le parole da cui ha letto ogni valore.",
+          "review": "I valori poco chiari sono segnalati e restano tali finché una persona non li segna come controllati.",
+          "ask": "Si sceglie una domanda e la risposta cita la frase, la pagina e la sezione; se il documento non dice nulla, lo dice."
+        }
+      },
+      "business-management-app": {
+        "title": "Come funziona la demo",
+        "nodes": {
+          "browser": "Il tuo browser",
+          "seed": "Dati di esempio",
+          "till": "Cassa",
+          "dashboard": "Cruscotto",
+          "orders": "Ordini",
+          "storage": "Archivio"
+        },
+        "steps": {
+          "seed": "Il negozio di esempio viene generato nella pagina da un seme fisso.",
+          "till": "In cassa si registra una vendita, pagata in contanti o con carta.",
+          "dashboard": "Il cruscotto mostra saldo, entrate e uscite e due grafici, con le cifre anche in tabella.",
+          "orders": "Negli ordini di acquisto si riordina ciò che sta finendo, da bozza a inviato a ricevuto.",
+          "store": "Le modifiche restano nell'archivio di questo browser e da nessun'altra parte."
+        }
+      }
     }
   },
   "toaster": {
@@ -454,7 +535,28 @@
       "outcomes": "Risultati",
       "simulation": "Simulazione con dati sintetici: nessun account reale collegato e nessun dato personale trattato.",
       "service": "Servizio",
+      "howItWorks": "Come funziona questa demo",
       "breadcrumb": "Percorso di navigazione"
+    },
+    "facts": {
+      "title": "Fatti sulla demo",
+      "counts": {
+        "messages": "{count, plural, one {# messaggio di prova} other {# messaggi di prova} }",
+        "prospects": "{count, plural, one {# azienda inventata} other {# aziende inventate} }",
+        "documents": "{count, plural, one {# documento di esempio} other {# documenti di esempio} }",
+        "fields": "{count, plural, one {# campo estratto} other {# campi estratti} }",
+        "flagged": "{count, plural, one {# valore da rivedere} other {# valori da rivedere} }",
+        "products": "{count, plural, one {# prodotto} other {# prodotti} }",
+        "suppliers": "{count, plural, one {# fornitore} other {# fornitori} }",
+        "days": "{count, plural, one {# giorno di storico} other {# giorni di storico} }"
+      },
+      "qualities": {
+        "synthetic": "Dati sintetici",
+        "humanApproval": "Persona nel ciclo",
+        "inBrowser": "Solo nel browser",
+        "noServerWrites": "Nessun salvataggio su server",
+        "noNetwork": "Nulla inviato a un server"
+      }
     },
     "filters": {
       "label": "Filtra i progetti",

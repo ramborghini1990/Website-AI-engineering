@@ -271,10 +271,42 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
     "## Fixture heading\n\nSome text with a [link](/services).\n\n- one\n- two\n";
   const service = { slug: "ai-agents", title: "The related service" };
 
+  it("an interactive demo gets the facts rail, badges and the how-it-works figure, within a small HTML budget (V3)", () => {
+    const { container } = renderIn(
+      locale,
+      <WorkDetail
+        slug="instagram-lead-agent"
+        work={demoA.data}
+        body={body}
+        service={service}
+      />,
+    );
+    const bytes = (html: string | undefined) =>
+      new TextEncoder().encode(html ?? "").length;
+    const rail = container.querySelector('[data-rail="facts"]');
+    const figure = container.querySelector(
+      'figure[data-diagram="instagram-lead-agent"]',
+    );
+    const added = bytes(rail?.outerHTML) + bytes(figure?.outerHTML);
+
+    expect(rail?.querySelectorAll("ul > li").length).toBeGreaterThanOrEqual(2);
+    expect(figure).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { level: 2, name: copy.labels.howItWorks }),
+    ).toBeInTheDocument();
+    // the markup V3 adds to /work/instagram-lead-agent: well under the 12 KB cap of one diagram
+    expect(added).toBeLessThanOrEqual(12 * 1024);
+  });
+
   it("has one h1, the type, the summary and the body from the Markdown renderer", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
@@ -291,7 +323,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("states that a demo is a simulation with synthetic data", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(screen.getByText(copy.labels.simulation)).toBeInTheDocument();
@@ -300,7 +337,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("shows the sector, the technologies and a link to the related service", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(screen.getByText("Retail")).toBeInTheDocument();
@@ -314,7 +356,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("omits the service row when the service is unknown", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={null} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={null}
+      />,
     );
 
     expect(screen.queryByText(copy.labels.service)).toBeNull();
@@ -323,7 +370,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("has a breadcrumb that ends on the current page", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={null} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={null}
+      />,
     );
 
     const nav = screen.getByRole("navigation", {
@@ -342,7 +394,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("shows the client and the results of a consenting case study, without the simulation notice", () => {
     renderIn(
       locale,
-      <WorkDetail work={consented.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={consented.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(screen.getByText("Fixture Client S.r.l.")).toBeInTheDocument();
@@ -357,7 +414,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("shows NO client and NO results without consent, even if the data holds them (negative)", () => {
     const { container } = renderIn(
       locale,
-      <WorkDetail work={unconsented} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={unconsented}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(container.textContent).not.toContain("Secret Client");
@@ -369,10 +431,11 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
     ).toBeNull();
   });
 
-  it("shows the interactive demo it is given, after the summary and before the facts", () => {
+  it("shows the interactive demo it is given, after the summary and the facts rail (V3: the facts sit in the header)", () => {
     renderIn(
       locale,
       <WorkDetail
+        slug="fixture"
         work={demoA.data}
         body={body}
         service={service}
@@ -383,7 +446,7 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
     const demo = screen.getByRole("region", { name: "the demo" });
     const facts = screen.getByText(copy.labels.sector);
     expect(
-      demo.compareDocumentPosition(facts) & Node.DOCUMENT_POSITION_FOLLOWING,
+      facts.compareDocumentPosition(demo) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
       screen.getByText(demoA.data.summary).compareDocumentPosition(demo) &
@@ -394,7 +457,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("without a demo there is nothing extra between the summary and the facts", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(screen.queryByRole("region", { name: "the demo" })).toBeNull();
@@ -403,7 +471,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("the closing call to action pre-selects the entry's service on the contact page (a topic, no personal data)", () => {
     renderIn(
       locale,
-      <WorkDetail work={demoA.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={demoA.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(screen.getByRole("link", { name: copy.cta.cta })).toHaveAttribute(
@@ -415,7 +488,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("shows no image: there is no client logo to show", () => {
     const { container } = renderIn(
       locale,
-      <WorkDetail work={consented.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={consented.data}
+        body={body}
+        service={service}
+      />,
     );
 
     expect(container.querySelector("img, svg[role='img']")).toBeNull();
@@ -424,7 +502,12 @@ describe.each(["it", "en"] as const)("WorkDetail (%s)", (locale) => {
   it("heading levels never skip (h1, then h2 only)", () => {
     renderIn(
       locale,
-      <WorkDetail work={consented.data} body={body} service={service} />,
+      <WorkDetail
+        slug="fixture"
+        work={consented.data}
+        body={body}
+        service={service}
+      />,
     );
 
     const levels = screen

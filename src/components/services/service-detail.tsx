@@ -4,9 +4,11 @@ import { useTranslations } from "next-intl";
 import { Markdown } from "@/components/content/markdown";
 import { Diagram } from "@/components/diagrams/diagram";
 import { ServicesCta } from "@/components/services/services-cta";
-import { Button } from "@/components/ui/button";
+import { DemoPreview, PREVIEW_PANEL } from "@/components/diagrams/demo-preview";
+import { DemoFacts } from "@/components/work/demo-facts";
 import { Link } from "@/i18n/navigation";
 import type { Service } from "@/lib/content/schemas";
+import { isInteractiveDemo } from "@/lib/demos/registry";
 import { isServiceSlug, serviceDiagrams } from "@/lib/diagrams/services";
 
 const listKeys = ["idealFor", "outcomes", "deliverables"] as const;
@@ -158,16 +160,26 @@ export function ServiceDetail({
             <h2 id="service-demo" className="text-3xl text-text">
               {t("labels.demo")}
             </h2>
-            <div>
-              {/* The title can be long: let it wrap instead of pushing the page wider than a phone. */}
-              <Button
-                asChild
-                variant="secondary"
-                size="lg"
-                className="h-auto max-w-full py-3 text-start whitespace-normal"
-              >
-                <Link href={`/work/${demo.slug}`}>{demo.title}</Link>
-              </Button>
+            {/* A preview card: the demo's wireframe, its title as the link and its first facts.
+                The title can be long: it wraps instead of pushing the page wider than a phone. */}
+            <div
+              data-demo-card={demo.slug}
+              className="group grid max-w-md content-start overflow-hidden rounded-xs border border-border-strong bg-bg"
+            >
+              {isInteractiveDemo(demo.slug) ? (
+                <div className={PREVIEW_PANEL}>
+                  <DemoPreview slug={demo.slug} />
+                </div>
+              ) : null}
+              <div className="grid content-start gap-3 p-6">
+                <Link
+                  href={`/work/${demo.slug}`}
+                  className="inline-flex min-h-11 items-center text-xl text-accent underline decoration-accent underline-offset-4 hover:text-accent-hover"
+                >
+                  {demo.title}
+                </Link>
+                <DemoFacts slug={demo.slug} max={2} />
+              </div>
             </div>
           </div>
         </section>

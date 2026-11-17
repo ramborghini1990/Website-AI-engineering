@@ -59,6 +59,22 @@ test.describe("index with published entries", () => {
     }
   });
 
+  test("synthetic fixtures and the project entry have no preview and no facts (V3: only real interactive demos get one)", async ({
+    page,
+  }) => {
+    await open(page);
+
+    await expect(page.locator("main li.group")).toHaveCount(3);
+    await expect(page.locator("svg[data-preview]")).toHaveCount(0);
+    await expect(
+      page.locator(`ul[aria-label="${copy.facts.title}"]`),
+    ).toHaveCount(0);
+    // the cards still carry the mono index and the stack tags
+    await expect(
+      page.locator("main li.group").first().getByText("Claude API"),
+    ).toBeVisible();
+  });
+
   test("choosing a type narrows the list through the URL, and marks the choice", async ({
     page,
   }) => {

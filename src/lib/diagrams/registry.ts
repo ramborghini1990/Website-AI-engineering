@@ -1,4 +1,6 @@
+import { interactiveDemos } from "@/lib/demos/registry";
 import { capabilityMap } from "./capability-map";
+import { demoDiagrams } from "./demos";
 import { assertValidDiagram } from "./geometry";
 import { heroDiagram } from "./hero";
 import { SERVICE_SLUGS, serviceDiagrams } from "./services";
@@ -23,6 +25,10 @@ export const diagramRegistry: readonly RegisteredDiagram[] = [
     namespace: `diagrams.services.${slug}`,
   })),
   { diagram: capabilityMap, namespace: "diagrams.capabilityMap" },
+  ...interactiveDemos.map((slug): RegisteredDiagram => ({
+    diagram: demoDiagrams[slug],
+    namespace: `diagrams.demos.${slug}`,
+  })),
 ];
 
 for (const { diagram } of diagramRegistry) assertValidDiagram(diagram);

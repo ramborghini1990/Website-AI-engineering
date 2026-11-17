@@ -92,6 +92,7 @@ export default async function WorkDevPage({
   if (entry) {
     return (
       <WorkDetail
+        slug={entry.slug}
         work={entry.data}
         body={BODY}
         service={{ slug: entry.data.service, title: "The related service" }}

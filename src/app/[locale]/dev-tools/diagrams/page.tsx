@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 
 import { Diagram } from "@/components/diagrams/diagram";
+import { DemoPreview, PREVIEW_PANEL } from "@/components/diagrams/demo-preview";
 import { ServiceGlyph } from "@/components/diagrams/service-glyph";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { interactiveDemos } from "@/lib/demos/registry";
 import { diagramRegistry } from "@/lib/diagrams/registry";
 import { SERVICE_SLUGS } from "@/lib/diagrams/services";
 
@@ -59,6 +61,25 @@ export default function DiagramsDevPage() {
           </div>
         </section>
       ))}
+
+      <section
+        aria-labelledby="gallery-previews"
+        className="grid gap-8 border-t border-border-subtle pt-12"
+      >
+        <h2 id="gallery-previews" className="font-mono text-xl text-text">
+          demo previews
+        </h2>
+        <ul className="grid gap-8 md:grid-cols-2">
+          {interactiveDemos.map((slug) => (
+            <li key={slug} className="group grid max-w-md gap-2">
+              <div className={PREVIEW_PANEL}>
+                <DemoPreview slug={slug} />
+              </div>
+              <span className="font-mono text-xs text-text-muted">{slug}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section
         aria-labelledby="gallery-glyphs"

@@ -1,9 +1,11 @@
 import { useTranslations } from "next-intl";
 
+import { DemoPreview, PREVIEW_PANEL } from "@/components/diagrams/demo-preview";
 import { SectionHeader } from "@/components/home/section-header";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Work } from "@/lib/content/schemas";
+import { isInteractiveDemo } from "@/lib/demos/registry";
 import { isPageAvailable } from "@/lib/navigation";
 
 /**
@@ -39,24 +41,33 @@ export function HomeDemos({
         <SectionHeader id="home-demos" title={t("title")} lead={t("lead")} />
         <ul className="grid gap-px border border-border-subtle bg-border-subtle md:grid-cols-2">
           {demos.map(({ slug, data }) => (
-            <li key={slug} className="grid content-start gap-3 bg-bg p-6">
-              <span className="font-mono text-xs text-text-muted uppercase">
-                {labels("demo")}
-              </span>
-              <h3 className="text-2xl text-text">
-                {linked ? (
-                  <Link
-                    href={`/work/${slug}`}
-                    className="underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-hover"
-                  >
-                    {data.title}
-                  </Link>
-                ) : (
-                  data.title
-                )}
-              </h3>
-              <p className="text-base text-text-secondary">{data.summary}</p>
-              <p className="text-sm text-text-muted">{labels("simulation")}</p>
+            <li key={slug} className="group grid content-start bg-bg">
+              {isInteractiveDemo(slug) ? (
+                <div className={PREVIEW_PANEL}>
+                  <DemoPreview slug={slug} />
+                </div>
+              ) : null}
+              <div className="grid content-start gap-3 p-6">
+                <span className="font-mono text-xs text-text-muted uppercase">
+                  {labels("demo")}
+                </span>
+                <h3 className="text-2xl text-text">
+                  {linked ? (
+                    <Link
+                      href={`/work/${slug}`}
+                      className="underline decoration-accent decoration-2 underline-offset-4 hover:text-accent-hover"
+                    >
+                      {data.title}
+                    </Link>
+                  ) : (
+                    data.title
+                  )}
+                </h3>
+                <p className="text-base text-text-secondary">{data.summary}</p>
+                <p className="text-sm text-text-muted">
+                  {labels("simulation")}
+                </p>
+              </div>
             </li>
           ))}
         </ul>

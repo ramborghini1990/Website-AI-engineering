@@ -364,6 +364,87 @@
         "web-applications": "Web apps: products and internal tools, from MVP to production.",
         "document-intelligence": "Documents: extraction and search, with human review of uncertain cases."
       }
+    },
+    "demos": {
+      "instagram-lead-agent": {
+        "title": "How the demo works",
+        "nodes": {
+          "messages": "Messages",
+          "classify": "Classification",
+          "score": "Score",
+          "draft": "Draft",
+          "review": "Review",
+          "person": "Person",
+          "information": "Information",
+          "interest": "Interest",
+          "support": "Support",
+          "spam": "Spam"
+        },
+        "steps": {
+          "inbox": "The messages and comments of a fictional business profile arrive.",
+          "classify": "The agent sorts each message: information request, sales interest, support or spam.",
+          "score": "It scores the contacts.",
+          "draft": "It drafts a reply.",
+          "review": "A person approves: replies do not go out on their own, and qualified contacts move on to the next step."
+        }
+      },
+      "linkedin-assisted-outreach": {
+        "title": "How the demo works",
+        "nodes": {
+          "prospects": "Companies",
+          "research": "Summary",
+          "fit": "Fit",
+          "draft": "Draft",
+          "approval": "Approval",
+          "person": "Person",
+          "scheduled": "Scheduled",
+          "afterApproval": "After approval",
+          "skip": "Do not contact"
+        },
+        "steps": {
+          "prospects": "A short list of invented companies and people.",
+          "research": "The assistant writes a research summary for each one.",
+          "fit": "It rates how well each fits the ideal customer and also says who should not be contacted, and why.",
+          "draft": "Only where contact makes sense, it drafts a first message.",
+          "approval": "A person reads it, edits it and approves it, one prospect at a time. Only then does it show as scheduled."
+        }
+      },
+      "document-intelligence-demo": {
+        "title": "How the demo works",
+        "nodes": {
+          "docs": "Documents",
+          "fields": "Fields",
+          "review": "Review",
+          "person": "Person",
+          "question": "Question",
+          "answer": "Answer",
+          "citation": "With citation"
+        },
+        "steps": {
+          "docs": "Three sample documents with invented companies: an invoice, a service contract and a transport document.",
+          "fields": "For each one it pulls out the key facts as structured fields and shows the words each value was read from.",
+          "review": "Unclear values are flagged and stay flagged until a person marks them as checked.",
+          "ask": "You pick a question and the answer cites the sentence, the page and the section; where the document does not say, the answer says so."
+        }
+      },
+      "business-management-app": {
+        "title": "How the demo works",
+        "nodes": {
+          "browser": "Your browser",
+          "seed": "Sample data",
+          "till": "Till",
+          "dashboard": "Dashboard",
+          "orders": "Orders",
+          "storage": "Storage"
+        },
+        "steps": {
+          "seed": "The sample shop is generated in the page from a fixed seed.",
+          "till": "At the till you ring up a sale, paid in cash or by card.",
+          "dashboard": "The dashboard shows the balance, the money in and out and two charts, with the figures also as a table.",
+          "orders": "In purchase orders you reorder what is running low, from draft to sent to received.",
+          "store": "Your changes stay in this browser's own storage and nowhere else."
+        }
+      }
     }
   },
   "toaster": {
@@ -454,7 +535,28 @@
       "outcomes": "Results",
       "simulation": "Simulation with synthetic data: no real account connected and no personal data processed.",
       "service": "Service",
+      "howItWorks": "How this demo works",
       "breadcrumb": "Breadcrumb"
+    },
+    "facts": {
+      "title": "Facts about the demo",
+      "counts": {
+        "messages": "{count, plural, one {# sample message} other {# sample messages} }",
+        "prospects": "{count, plural, one {# invented company} other {# invented companies} }",
+        "documents": "{count, plural, one {# sample document} other {# sample documents} }",
+        "fields": "{count, plural, one {# extracted field} other {# extracted fields} }",
+        "flagged": "{count, plural, one {# value to review} other {# values to review} }",
+        "products": "{count, plural, one {# product} other {# products} }",
+        "suppliers": "{count, plural, one {# supplier} other {# suppliers} }",
+        "days": "{count, plural, one {# day of history} other {# days of history} }"
+      },
+      "qualities": {
+        "synthetic": "Synthetic data",
+        "humanApproval": "Person in the loop",
+        "inBrowser": "Browser only",
+        "noServerWrites": "No server storage",
+        "noNetwork": "Nothing sent to a server"
+      }
     },
     "filters": {
       "label": "Filter projects",

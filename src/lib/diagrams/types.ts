@@ -27,11 +27,13 @@ export type Point = readonly [x: number, y: number];
 
 /**
  * A message namespace that holds one diagram's copy: `diagrams.<id>`, or
- * `diagrams.services.<slug>` for the service diagrams (messages/*.json).
+ * `diagrams.services.<slug>` for the service diagrams and `diagrams.demos.<slug>`
+ * for the "how this demo works" diagrams (messages/*.json).
  */
 export type DiagramNamespace =
-  | `diagrams.${Exclude<Extract<keyof Messages["diagrams"], string>, "services">}`
-  | `diagrams.services.${Extract<keyof Messages["diagrams"]["services"], string>}`;
+  | `diagrams.${Exclude<Extract<keyof Messages["diagrams"], string>, "services" | "demos">}`
+  | `diagrams.services.${Extract<keyof Messages["diagrams"]["services"], string>}`
+  | `diagrams.demos.${Extract<keyof Messages["diagrams"]["demos"], string>}`;
 
 export interface DiagramNode {
   id: string;

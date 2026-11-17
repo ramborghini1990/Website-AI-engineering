@@ -597,6 +597,19 @@ test.describe("layout", () => {
     expect(await columns()).toBe(1);
   });
 
+  test("the demos section shows one preview per demo, and no preview is announced to assistive technology", async ({
+    page,
+  }) => {
+    await open(page, "it");
+    const previews = page.locator("#demos svg[data-preview]");
+
+    await expect(previews).toHaveCount(4);
+    for (const preview of await previews.all()) {
+      await expect(preview).toBeVisible();
+      await expect(preview).toHaveAttribute("aria-hidden", "true");
+    }
+  });
+
   test("each service card shows a glyph, and the cards of a row keep equal heights at 768 and 1280 px", async ({
     page,
   }) => {
