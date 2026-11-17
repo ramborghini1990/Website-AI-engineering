@@ -7,6 +7,7 @@ import { readServices, readWork } from "./support/content";
 import {
   layoutShift,
   scrollThroughPage,
+  settleAnimations,
   trackLayoutShift,
   waitForHydration,
 } from "./support/motion";
@@ -51,6 +52,9 @@ async function heroSettled(page: Page) {
 }
 
 async function expectNoAxeViolations(page: Page) {
+  // The hero diagram (V1) plays for about four seconds: a half-faded node would
+  // be scanned as low-contrast text, a transient state and not a design failure.
+  await settleAnimations(page);
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(results.violations).toEqual([]);
 }
@@ -593,6 +597,36 @@ test.describe("layout", () => {
     expect(await columns()).toBe(1);
   });
 
+  test("each service card shows a glyph, and the cards of a row keep equal heights at 768 and 1280 px", async ({
+    page,
+  }) => {
+    await open(page, "it");
+    const cards = page.locator("#services [data-fx='spotlight-card']");
+    await expect(cards).toHaveCount(4);
+    for (const card of await cards.all()) {
+      await expect(card.locator("svg[data-glyph]")).toBeVisible();
+    }
+
+    for (const width of [768, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const boxes = await cards.evaluateAll((all) =>
+        all.map((card) => {
+          const { y, height } = card.getBoundingClientRect();
+          return { y: Math.round(y + window.scrollY), height };
+        }),
+      );
+      const rows = Map.groupBy(boxes, (box) => box.y);
+      expect(rows.size, `rows at ${String(width)}`).toBe(2);
+      for (const row of rows.values()) {
+        expect(row).toHaveLength(2);
+        expect(
+          Math.abs(row[0].height - row[1].height),
+          `row heights at ${String(width)}`,
+        ).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
   test("the hero headline fits a phone: at most four lines at 360 px", async ({
     page,
   }) => {
@@ -698,4 +732,305 @@ test.describe("under the enforced CSP", () => {
       expect(watcher.errors).toEqual([]);
     });
   }
+});
+
+// ---------------------------------------------------------------------------
+// Hero diagram (V1, docs/DESIGN.md §7.1): server-rendered SVG, zero client JS.
+// ---------------------------------------------------------------------------
+
+const figure = (page: Page) => page.locator("figure[data-diagram='hero']");
+
+test.describe("hero diagram: layout", () => {
+  for (const width of [360, 768, 1280, 1920]) {
+    test(`${String(width)} px: visible, no horizontal overflow, labels at 12 px or more`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await open(page, "it");
+
+      await expect(figure(page)).toBeVisible();
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+
+      const svg = await figure(page).locator("svg").boundingBox();
+      const copy = await hero(page).boundingBox();
+      const cta = await page.locator("main a[href$='#services']").boundingBox();
+      if (!svg || !copy || !cta) throw new Error("no box");
+      // 15 viewBox units are `15 * rendered width / 400` CSS px.
+      expect((15 * svg.width) / 400).toBeGreaterThanOrEqual(12);
+      if (width >= 1024) {
+        // beside the text, in the right-hand columns
+        expect(svg.x).toBeGreaterThan(copy.x + copy.width / 2);
+      } else {
+        // after the calls to action
+        expect(svg.y).toBeGreaterThan(cta.y + cta.height);
+        expect(svg.width).toBeLessThanOrEqual(448); // max-w-md
+      }
+    });
+  }
+});
+
+test.describe("hero diagram: content", () => {
+  for (const locale of LOCALES) {
+    test(`/${locale}: a titled figure with a five-step legend that is real text`, async ({
+      page,
+    }) => {
+      await open(page, locale);
+      const { steps, title } = messages[locale].diagrams.hero;
+
+      await expect(figure(page).locator("figcaption ol > li")).toHaveCount(5);
+      for (const text of Object.values(steps)) {
+        await expect(figure(page).locator("figcaption ol")).toContainText(text);
+      }
+      await expect(figure(page)).toHaveAccessibleName(title);
+      await expect(figure(page).locator("svg")).toHaveAttribute(
+        "aria-hidden",
+        "true",
+      );
+    });
+  }
+
+  test("the diagram is in the server HTML (no JavaScript needed)", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto("/it");
+
+    await expect(figure(page).locator("figcaption ol > li")).toHaveCount(5);
+    await expect(figure(page).locator("[data-node]")).toHaveCount(9);
+    await context.close();
+  });
+});
+
+test.describe("hero diagram: motion", () => {
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
+
+    test("no animation exists, and every node is fully visible at the first paint", async ({
+      page,
+    }) => {
+      await page.goto("/it", { waitUntil: "domcontentloaded" });
+
+      const state = await figure(page).evaluate((el) => ({
+        animations: el.getAnimations({ subtree: true }).length,
+        opacities: [...el.querySelectorAll("[data-node]")].map(
+          (node) => getComputedStyle(node).opacity,
+        ),
+      }));
+      expect(state.animations).toBe(0);
+      expect(state.opacities).toHaveLength(9);
+      expect([...new Set(state.opacities)]).toEqual(["1"]);
+    });
+  });
+
+  test("with full motion every animation is finite and finished within 5 s, and the packet ends on review", async ({
+    page,
+  }) => {
+    await page.setViewportSize(TALL);
+    await page.goto("/it", { waitUntil: "domcontentloaded" });
+
+    const plan = await figure(page).evaluate((el) =>
+      el.getAnimations({ subtree: true }).map((animation) => {
+        const timing = animation.effect?.getComputedTiming();
+        return {
+          end: Number(timing?.endTime),
+          iterations: timing?.iterations,
+          fill: timing?.fill,
+        };
+      }),
+    );
+    expect(plan.length).toBeGreaterThan(9); // nodes + edges + packet
+    for (const item of plan) {
+      expect(item.iterations).toBe(1);
+      expect(item.fill).toBe("backwards");
+      expect(item.end).toBeLessThan(4500);
+    }
+
+    const finishedInMs = await figure(page).evaluate(async (el) => {
+      const started = performance.now();
+      await Promise.all(
+        el
+          .getAnimations({ subtree: true })
+          .map((animation) => animation.finished),
+      );
+      return performance.now() - started;
+    });
+    expect(finishedInMs).toBeLessThan(5000);
+
+    // parked on "review": the dot sits on the top edge of that node
+    const dot = await figure(page).locator("circle.fill-text").boundingBox();
+    const review = await figure(page)
+      .locator("[data-node='review'] rect")
+      .boundingBox();
+    if (!dot || !review) throw new Error("no box");
+    const dotCentre = { x: dot.x + dot.width / 2, y: dot.y + dot.height / 2 };
+    expect(dotCentre.x).toBeGreaterThan(review.x);
+    expect(dotCentre.x).toBeLessThan(review.x + review.width);
+    expect(Math.abs(dotCentre.y - review.y)).toBeLessThan(1.5);
+    expect(
+      await figure(page).evaluate(
+        (el) => el.getAnimations({ subtree: true }).length,
+      ),
+    ).toBe(0);
+  });
+
+  test("it moves only transform and opacity: nothing in the figure animates a layout property", async ({
+    page,
+  }) => {
+    await page.setViewportSize(TALL);
+    await page.goto("/it", { waitUntil: "domcontentloaded" });
+
+    const properties = await figure(page).evaluate((el) => [
+      ...new Set(
+        el
+          .getAnimations({ subtree: true })
+          .flatMap((animation) =>
+            (animation.effect as KeyframeEffect)
+              .getKeyframes()
+              .flatMap((frame) => Object.keys(frame)),
+          ),
+      ),
+    ]);
+    const allowed = new Set([
+      "offset",
+      "computedOffset",
+      "easing",
+      "composite",
+      "opacity",
+      "transform",
+    ]);
+    expect(properties.filter((name) => !allowed.has(name))).toEqual([]);
+  });
+});
+
+test.describe("hero diagram: layout shift and LCP", () => {
+  for (const [name, viewport] of [
+    ["desktop", TALL],
+    ["phone", { width: 360, height: 800 }],
+  ] as const) {
+    test(`${name}: nothing in the hero shifts during load and the animation`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport);
+      await page.addInitScript(() => {
+        const w = window as unknown as {
+          __heroShift: { value: number; nodes: Node[] }[];
+        };
+        w.__heroShift = [];
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const shift = entry as PerformanceEntry & {
+              value: number;
+              hadRecentInput: boolean;
+              sources?: { node: Node | null }[];
+            };
+            if (shift.hadRecentInput) continue;
+            w.__heroShift.push({
+              value: shift.value,
+              nodes: (shift.sources ?? []).flatMap((s) =>
+                s.node ? [s.node] : [],
+              ),
+            });
+          }
+        }).observe({ type: "layout-shift", buffered: true });
+      });
+      await open(page, "it");
+      await page.waitForTimeout(5500); // the whole sequence, plus idle motion start-up
+
+      const inHero = await page.evaluate(() => {
+        const w = window as unknown as {
+          __heroShift: { value: number; nodes: Node[] }[];
+        };
+        const section = document.querySelector("h1")?.closest("section");
+        return w.__heroShift
+          .filter((shift) =>
+            shift.nodes.some((node) => section?.contains(node)),
+          )
+          .reduce((sum, shift) => sum + shift.value, 0);
+      });
+      expect(inHero).toBe(0);
+    });
+
+    test(`${name}: the diagram is never the largest contentful paint${name === "desktop" ? ", the headline is" : ""}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport);
+      await page.addInitScript(() => {
+        const w = window as unknown as {
+          __lcp?: { tag?: string; inFigure: boolean };
+        };
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const element = (entry as PerformanceEntry & { element?: Element })
+              .element;
+            w.__lcp = {
+              tag: element?.tagName,
+              inFigure: element?.closest("figure[data-diagram]") != null,
+            };
+          }
+        }).observe({ type: "largest-contentful-paint", buffered: true });
+      });
+      await page.goto("/it");
+      await waitForHydration(page);
+      await page.waitForTimeout(2500);
+
+      const lcp = await page.evaluate(
+        () =>
+          (
+            window as unknown as {
+              __lcp?: { tag?: string; inFigure: boolean };
+            }
+          ).__lcp,
+      );
+      expect(lcp?.inFigure).toBe(false);
+      // At 360 px the lead paragraph is a larger text block than the headline
+      // (independent of the diagram, which sits below the calls to action), so
+      // the strict check is on the desktop layout.
+      if (name === "desktop") expect(lcp?.tag).toBe("H1");
+    });
+  }
+});
+
+test.describe("hero diagram: accessibility (axe)", () => {
+  for (const scheme of ["dark", "light"] as const) {
+    for (const locale of LOCALES) {
+      test(`/${locale} (${scheme}): the figure has no violations once settled`, async ({
+        page,
+      }) => {
+        await page.emulateMedia({ colorScheme: scheme });
+        await open(page, locale);
+        await settleAnimations(page);
+
+        const results = await new AxeBuilder({ page })
+          .withTags(WCAG_TAGS)
+          .include("figure[data-diagram]")
+          .analyze();
+        expect(results.violations).toEqual([]);
+      });
+    }
+  }
+
+  test("a forced-colours user still gets painted strokes and labels", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await open(page, "it");
+    await settleAnimations(page);
+
+    const painted = await figure(page).evaluate((el) => {
+      const rect = el.querySelector("[data-node='agent'] rect");
+      const text = el.querySelector("[data-node='agent'] text");
+      return {
+        stroke: rect ? getComputedStyle(rect).stroke : "",
+        fill: text ? getComputedStyle(text).fill : "",
+      };
+    });
+    expect(painted.stroke).not.toBe("none");
+    expect(painted.fill).not.toBe("none");
+  });
 });

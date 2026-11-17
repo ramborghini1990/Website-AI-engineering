@@ -264,6 +264,36 @@ When `prefers-reduced-motion: reduce`:
 - **Hero visual (concept):** a faint hairline grid on `bg`, with a single `accent` indicator (a caret, scan line or status dot) tied to the kinetic headline. It is static under reduced motion.
 - **Logos and client names:** only with `clientConsent: true`.
 
+### 7.1 Diagrams
+
+Added by task V1. Not part of the approved design until you approve it. A diagram is data (`src/lib/diagrams/`) rendered by one Server Component (`src/components/diagrams/diagram.tsx`) as inline SVG. No client JavaScript, no image files, no external URL.
+
+**Colour roles** (token utilities only; never a raw value):
+
+| Part | Class | Why |
+|---|---|---|
+| Panel | `fill-surface-1` + `stroke-border-subtle`, `rx` 2 | decorative boundary |
+| Grid | `stroke-border-subtle`, 40-unit cells, 1 px | decorative only |
+| Node (`neutral`, `output`) | `fill-surface-2` + `stroke-border-strong` | meaningful boundary, ≥ 3:1 |
+| Node `strong` (the step the figure is about) | `fill-surface-2` + `stroke-text`, 1.5 | emphasis without a new hue |
+| Node `data` (tools, documents) | `fill-surface-2` + `stroke-trace` | information, series 2 |
+| Node `human` | as neutral + one `fill-accent` dot **and** a text label | the only accent of the figure |
+| Node `muted` (a part inside a node) | `fill-surface-1` + `stroke-border-subtle`, label `fill-text-muted` | decorative boundary, meaning is in the text |
+| Flow edge | `stroke-text-muted`, 1.5, open arrow head | order |
+| Data edge | `stroke-trace`, 1, dashed 4 4 | reads from, not control flow |
+| Done state | `fill-success` check **and** the label text | never colour alone |
+| Label | `fill-text-secondary`, index digits `fill-text-muted` | mono, uppercase |
+
+**Geometry:** viewBox at most 400 units wide, so labels of 15 units or more render at 12 px or more on a 360 px phone. Coordinates snap to an 8-unit grid; unrelated nodes keep 8 units apart; a part inside a node stays inside it. Traces are orthogonal (horizontal or vertical segments only). Node labels are at most 16 characters in both languages. `src/lib/diagrams/geometry.ts` checks all of this and the tests run it on every registered diagram. Strokes use `vector-effect="non-scaling-stroke"`.
+
+**Accessibility pattern:** `<figure aria-labelledby>` whose `<figcaption>` holds the title and an `<ol>` legend, one sentence per step. The `<svg>` is `aria-hidden="true"`, so the legend alone tells the story and works without CSS. The legend items are plain text, not controls (no hit-target issue). Hovering a legend item outlines its nodes on pointer devices only (`:has()`, `@media (hover: hover)`). Under `forced-colors` the drawing switches to system colours.
+
+**Motion:** the hero diagram only; diagrams below the fold do not animate. CSS keyframes from `--animate-node-in` and `--animate-packet`, `transform` and `opacity` only, `backwards` fill, finite. Nodes stagger by 80 ms from 600 ms; one packet walks the route request, agent, review in three chained legs (`duration-narrative` shared out by length) and stays parked on "review". The whole sequence ends before 4.5 s. Reduced motion sets both tokens to `none`: the server-rendered end state is what shows, at first paint.
+
+**Budget:** at most 12 KB of markup per diagram, one accent element per figure, no new dependency. A diagram needs both `it.json` and `en.json` entries under `diagrams.<id>`.
+
+**Layout:** in the hero the figure takes columns 8–12 from `lg` and follows the calls to action below it (`max-w-md`). A `hairline-grid` background (24 px cells, `border-subtle`, masked to fade out to the right and bottom) sits behind the section.
+
 ---
 
 ## 8. Themes

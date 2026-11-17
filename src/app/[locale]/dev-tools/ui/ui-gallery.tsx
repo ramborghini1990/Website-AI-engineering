@@ -240,6 +240,9 @@ export function UiGallery() {
             <Button asChild variant="secondary">
               <Link href="/_dev/fx">FX library</Link>
             </Button>
+            <Button asChild variant="secondary">
+              <Link href="/_dev/diagrams">Diagrams</Link>
+            </Button>
           </div>
         </header>
 

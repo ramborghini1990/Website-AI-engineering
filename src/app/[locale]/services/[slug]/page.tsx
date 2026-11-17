@@ -70,7 +70,12 @@ export default async function ServicePage({
           breadcrumb: { home: nav("home"), services: services("title") },
         })}
       />
-      <ServiceDetail service={entry.data} body={entry.body} demo={demo} />
+      <ServiceDetail
+        slug={entry.slug}
+        service={entry.data}
+        body={entry.body}
+        demo={demo}
+      />
     </>
   );
 }

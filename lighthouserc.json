@@ -7,6 +7,7 @@
       "url": [
         "http://localhost:3300/it",
         "http://localhost:3300/it/services",
+        "http://localhost:3300/it/services/ai-agents",
         "http://localhost:3300/it/work",
         "http://localhost:3300/it/work/instagram-lead-agent",
         "http://localhost:3300/it/contact"

@@ -233,6 +233,139 @@
       }
     }
   },
+  "diagrams": {
+    "hero": {
+      "title": "How an agent works",
+      "nodes": {
+        "request": "Request",
+        "agent": "Agent",
+        "model": "Model",
+        "rules": "Rules",
+        "tools": "Tools",
+        "docs": "Documents",
+        "review": "Review",
+        "person": "Person",
+        "action": "Action",
+        "done": "Done",
+        "log": "Log"
+      },
+      "steps": {
+        "request": "A request arrives: an email, a ticket or a message.",
+        "reason": "The agent assesses it with a model and clear rules.",
+        "tools": "It uses only the tools and documents it needs, with limited permissions.",
+        "review": "At critical steps the agent prepares and a person approves.",
+        "act": "The action runs and every step stays in the log."
+      }
+    },
+    "services": {
+      "ai-agents": {
+        "title": "Architecture of an agent",
+        "nodes": {
+          "request": "Request",
+          "permissions": "Permissions",
+          "agent": "Agent",
+          "tools": "Tools",
+          "data": "Data",
+          "review": "Review",
+          "person": "Person",
+          "action": "Action",
+          "done": "Done",
+          "log": "Log",
+          "tests": "Test cases",
+          "quality": "Quality/cost"
+        },
+        "steps": {
+          "request": "A request arrives: an email, a ticket or a message.",
+          "agent": "The agent works within limited permissions.",
+          "sources": "It receives only the tools and data it needs.",
+          "review": "At critical steps the agent prepares and a person approves.",
+          "act": "The action runs and every action is logged.",
+          "evaluate": "I evaluate it on test cases before release, then follow quality and costs."
+        }
+      },
+      "workflow-automation": {
+        "title": "Anatomy of an automation",
+        "nodes": {
+          "trigger": "Event",
+          "check": "Duplicates",
+          "rule": "Rule",
+          "write": "Write",
+          "retry": "Retry",
+          "exception": "Exception",
+          "person": "Person",
+          "log": "Log"
+        },
+        "steps": {
+          "trigger": "An event starts in a tool you already use: email, CRM, back-office system or spreadsheet.",
+          "check": "A check prevents duplicate operations.",
+          "rule": "When the rules are clear a traditional flow is enough: AI only where text is free-form.",
+          "write": "The data reaches the target system; if something goes wrong, the attempt is retried.",
+          "exception": "When something does not add up, the system stops and alerts a person.",
+          "log": "Every run stays in the log."
+        }
+      },
+      "web-applications": {
+        "title": "From interface to data",
+        "nodes": {
+          "user": "User",
+          "devices": "Phone · desktop",
+          "interface": "Interface",
+          "app": "Next.js",
+          "language": "TypeScript",
+          "database": "PostgreSQL",
+          "tests": "Tests",
+          "accessibility": "Accessibility",
+          "speed": "Speed",
+          "release": "Release"
+        },
+        "steps": {
+          "user": "It works well on a phone and on a computer.",
+          "interface": "The interface is part of the same application.",
+          "app": "One readable codebase, in TypeScript with Next.js.",
+          "data": "The data lives in PostgreSQL.",
+          "quality": "Automated tests, WCAG 2.2 AA accessibility checks and speed measurements are part of the work, up to release."
+        }
+      },
+      "document-intelligence": {
+        "title": "From document to data",
+        "nodes": {
+          "documents": "Documents",
+          "extract": "Extraction",
+          "check": "Check",
+          "review": "Review",
+          "person": "Person",
+          "structured": "Data",
+          "structuredSub": "Structured",
+          "question": "Question",
+          "answer": "Answer",
+          "source": "With source"
+        },
+        "steps": {
+          "documents": "Contracts, invoices, data sheets and forms.",
+          "extract": "The system reads the documents and extracts the fields you need.",
+          "check": "The data is checked against defined rules and formats.",
+          "review": "Uncertain cases go to a person through a review interface.",
+          "data": "The result is structured data, ready for your systems.",
+          "ask": "Whoever searches asks in plain language; the answer points to the passage of the document it comes from."
+        }
+      }
+    },
+    "capabilityMap": {
+      "title": "The four areas",
+      "nodes": {
+        "ai-agents": "AI agents",
+        "workflow-automation": "Automation",
+        "web-applications": "Web apps",
+        "document-intelligence": "Documents"
+      },
+      "steps": {
+        "ai-agents": "AI agents: tasks done with your tools, with a person at the critical steps.",
+        "workflow-automation": "Automation: connects your systems and removes manual work.",
+        "web-applications": "Web apps: products and internal tools, from MVP to production.",
+        "document-intelligence": "Documents: extraction and search, with human review of uncertain cases."
+      }
+    }
+  },
   "toaster": {
     "viewport": "Notifications ({hotkey})",
     "close": "Dismiss notification"

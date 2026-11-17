@@ -401,3 +401,76 @@ test.describe("gallery (reduced motion)", () => {
     expect(names).toEqual({ content: "none", overlay: "none" });
   });
 });
+
+test.describe("diagram gallery (/_dev/diagrams, V1)", () => {
+  const DIAGRAMS = "/it/_dev/diagrams";
+
+  test("renders every registered diagram twice: playing and static", async ({
+    page,
+  }) => {
+    await page.goto(DIAGRAMS);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Diagrams" }),
+    ).toBeVisible();
+
+    const animated = page.locator("[data-gallery-variant='animated']");
+    const still = page.locator("[data-gallery-variant='static']");
+    // the hero, the four service diagrams (V2) and the capability map (V2)
+    const ids = [
+      "hero",
+      "ai-agents",
+      "workflow-automation",
+      "web-applications",
+      "document-intelligence",
+      "capability-map",
+    ];
+    for (const id of ids) {
+      await expect(
+        animated.locator(`figure[data-diagram='${id}']`),
+      ).toBeVisible();
+      await expect(still.locator(`figure[data-diagram='${id}']`)).toBeVisible();
+    }
+    const running = (variant: typeof animated) =>
+      variant.evaluateAll((all) =>
+        all.map((el) => el.getAnimations({ subtree: true }).length),
+      );
+    // the static copies have no animation at all; of the other copies only the hero plays
+    expect((await running(still)).every((count) => count === 0)).toBe(true);
+    const playing = await running(animated);
+    expect(playing[0]).toBeGreaterThan(0);
+    expect(playing.slice(1).every((count) => count === 0)).toBe(true);
+    expect(await page.locator("figure[data-diagram]").count()).toBe(
+      ids.length * 2,
+    );
+    await expect(page.locator("svg[data-glyph]")).toHaveCount(4);
+  });
+
+  test("is linked from the UI gallery", async ({ page }) => {
+    await openGallery(page);
+    await page.getByRole("link", { name: "Diagrams" }).click();
+    await expect(page).toHaveURL(/\/it\/_dev\/diagrams$/);
+  });
+
+  for (const scheme of ["dark", "light"] as const) {
+    test(`axe is clean in the ${scheme} theme`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto(DIAGRAMS);
+      await expect(page.locator("figure[data-diagram]").first()).toBeVisible();
+
+      await expectNoAxeViolations(page);
+    });
+  }
+
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
+
+    test("both copies are identical and still", async ({ page }) => {
+      await page.goto(DIAGRAMS);
+      await expect(page.locator("figure[data-diagram]").first()).toBeVisible();
+
+      expect(await page.evaluate(() => document.getAnimations().length)).toBe(
+        0,
+      );
+    });
+  });
+});

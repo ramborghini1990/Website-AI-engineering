@@ -316,11 +316,12 @@ describe("Lighthouse CI budgets (P4.6)", () => {
   const a = rc.ci.assert.assertions;
   const lighthouse = workflows["lighthouse.yml"];
 
-  it("audits the key routes: home, services, work, a demo and contact", () => {
+  it("audits the key routes: home, services (index and the densest detail page), work, a demo and contact", () => {
     const paths = rc.ci.collect.url.map((u) => new URL(u).pathname);
     expect(paths).toEqual([
       "/it",
       "/it/services",
+      "/it/services/ai-agents",
       "/it/work",
       "/it/work/instagram-lead-agent",
       "/it/contact",

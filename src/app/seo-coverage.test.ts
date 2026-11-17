@@ -27,6 +27,7 @@ function pages(dir: string): string[] {
 
 const EXEMPT: Record<string, string> = {
   "[...rest]/page.tsx": "renders the 404",
+  "dev-tools/diagrams/page.tsx": "development only, 404 in production",
   "dev-tools/fx/page.tsx": "development only, 404 in production",
   "dev-tools/motion/page.tsx": "development only, 404 in production",
   "dev-tools/ui/page.tsx": "development only, 404 in production",

@@ -7,35 +7,36 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-13 · branch `main` (Lighthouse CI committed as `7e8a8c7`; P4.7 uncommitted)_
+_Last updated: 2026-11-17 · branch `main` (P4.6/P4.7 committed; V1 and V2 uncommitted)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 4 — GDPR, CI/CD, hardening (6/7). Phase 3 closed at 6/7: P3.0 deferred by choice (only needed with a live demo mode), P3.6 not needed |
-| Active task | `P4.7` Lighthouse performance fixes, gitleaks fix, launch checklist (D45, D46, `docs/state/tasks/P4.7.md`) |
-| Status | Gate-green, **awaiting review and commit**. Budget now **met locally on all 5 routes** (perf 0.99–1.0, LCP 762–915 ms, TBT 81–132 ms, script ≤ 285 kB, a11y 1.0) with budgets unchanged; **never run on GitHub**. gitleaks exit 1 reproduced locally (2 synthetic fixtures in `logger.test.ts`), fixed by `.gitleaks.toml`. CI then flagged the P4.7 report itself (it had quoted the fixture; commit `d8f9ffe`): reworded + a commit-pinned exception, **uncommitted**, confirmed on a local scan only. `docs/LAUNCH_CHECKLIST.md` written, **0 items ticked**; `docs/INCIDENTS.md` is a draft. Roadmap P4.7 acceptance ("all items checked") is **not met** |
-| Next task | None in the roadmap before launch (Phase 5 is backlog). Work now is yours: launch items, then P3.0 if live demos are wanted. Do not start unprompted |
-| Where I stopped | Nothing half-done. No test servers left running |
-| Needs the user | **Push, then watch the first GitHub runs** of `ci`, `security` (`--config`) and `lighthouse`; after a few green `lighthouse` runs on `main`, make it required. **Walk `docs/LAUNCH_CHECKLIST.md`** (§0 blockers B2–B14 first) and `GDPR_CHECKLIST.md` (60 unticked). Legal review of `INCIDENTS.md`. **Apply the ruleset** (`DEPLOYMENT.md` §4b, then its 4 verification steps; needs a plan that allows it on a private repo; it blocks direct pushes to `main`). Open from P4.5: Sentry yes/no (legal first, B4), uptime monitor, Vercel budget, Anthropic workspace at P3.0. From P4.4: `SECURITY_CONTACT` in Vercel Production, consent limiter on Upstash, `minimatch` override. From P4.3: notice wording, receipt retention, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4). Review and commit |
+| Phase | 6 — Visual storytelling (V1, V2 of V1–V5; titles of V3–V5 are provisional). Phase 4 is 6/7: P4.7 built, its acceptance (every launch item checked) waits on your accounts |
+| Active task | `V2` Service architecture diagrams, glyphs, capability map (D49–D51, `docs/state/tasks/V2.md`); V1 (D47, D48) is still uncommitted underneath it |
+| Status | Gate-green, **awaiting review and commit** (one message covering V1 + V2). Zero client JS, no dependency, CSP unchanged. `docs/DESIGN.md` §7.1 approved; hero grid is `lg:items-start`. Lighthouse not run (CI only; `/it/services/ai-agents` added to its URLs) |
+| Next task | None unprompted. V3 (work case-study diagrams); it also restyles the demo section of the service page |
+| Where I stopped | Nothing half-done. No scratch files |
+| Needs the user | Review and commit V1 + V2 (message in `.agent-logs/COMMIT_MSG.txt`). Content decision: the service texts do not mention Server Components / Server Actions / Zod or a validate/transform step, so the diagrams omit them; extend the texts first if you want them drawn. Still open from P4.7: push and watch the first GitHub runs (`ci`, `security`, `lighthouse`), walk `docs/LAUNCH_CHECKLIST.md` (§0 blockers first) and `GDPR_CHECKLIST.md`, legal review of `INCIDENTS.md`, apply the ruleset (`DEPLOYMENT.md` §4b), Sentry yes/no, uptime monitor, Vercel budget, `SECURITY_CONTACT`, consent limiter on Upstash, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4) |
 
 ## 2. Phase progress
 
 | Phase | Status | Tasks | Note |
 |---|---|---|---|
 | 0 Setup & governance | ✔ | 7/7 | carry-overs in `docs/state/tasks/general.md` |
-| 1 Core, design system, motion | ✔ | 8/8 | closed at task level; Lighthouse a11y, securityheaders grade, CI on `main` not evidenced |
-| 2 Landing & value proposition | ✔ | 7/7 | closed at task level; carry-overs in `general.md` |
+| 1 Core, design system, motion | ✔ | 8/8 | closed at task level |
+| 2 Landing & value proposition | ✔ | 7/7 | closed at task level |
 | 3 Agent showcases & funnels | ✔ | 6/7 | P3.0 deferred, P3.6 not needed (`docs/state/tasks/P3.1.md`) |
-| 4 GDPR, CI/CD, hardening | ◐ | 6/7 | P4.6 committed. P4.7 built (budget met locally, checklist written) but its acceptance, every launch item checked, waits on your accounts |
+| 4 GDPR, CI/CD, hardening | ◐ | 6/7 | P4.7 acceptance waits on your accounts |
+| 6 Visual storytelling | ◐ | 2/5 | V1 and V2 built and gate-green, uncommitted; §7.1 approved |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
 
 | # | Blocker | Needed by |
 |---|---|---|
 | B2 | Fiscal data for the footer (P.IVA, REA, PEC) in `src/lib/business.ts` | before launch |
-| B3 | Privacy contact email + final inquiry retention (730 days is the default and a proposal; DSR.md waits for the address) | launch |
+| B3 | Privacy contact email + final inquiry retention (730 days is the default and a proposal) | launch |
 | B4 | Legal review of the four legal texts, banner wording, `docs/DSR.md` and `docs/ROPA.md` (all draft) | before launch |
 | B5 | Vercel Pro plan, MFA, DPA confirmed | P4.7 |
 | B6 | Production domain (`NEXT_PUBLIC_SITE_URL`, canonicals, hreflang) | before indexing |
@@ -43,24 +44,22 @@ _Last updated: 2026-11-13 · branch `main` (Lighthouse CI committed as `7e8a8c7`
 | B8 | Final trade name + logo/brand colours | when chosen |
 | B9 | About biography; technologies per service (`docs/CONTENT.md` §7) | About page |
 | B11 | Header at 360 px: move nav into a Sheet below `md` | before Process/About |
-| B13 | EU Postgres (name the host in the processor list), Upstash, Turnstile keys, email provider (see `docs/DEPLOYMENT.md` §3); migrations 0002 and **0003** (no consent proof is kept without it) | form live |
+| B13 | EU Postgres, Upstash, Turnstile keys, email provider (`docs/DEPLOYMENT.md` §3); migrations 0002 and **0003** | form live |
 | B14 | Cal.com EU account, host and `NEXT_PUBLIC_CAL_URL` | calendar live |
 
 ## 4. Environment & services
 
-Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Turnstile). Preview/Prod: only Vercel exists (`fra1`, https://website-ai-engineering.vercel.app/); Postgres, Upstash, email, Turnstile not created (B13). Env var names: `.env.example` and `src/lib/env-schema.ts` (a test keeps them in sync). Windows: pnpm shims live in `%USERPROFILE%\.corepack-bin`.
+Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Turnstile). Preview/Prod: only Vercel exists (`fra1`, https://website-ai-engineering.vercel.app/); Postgres, Upstash, email, Turnstile not created (B13). Env var names: `.env.example` and `src/lib/env-schema.ts`. Windows: pnpm shims live in `%USERPROFILE%\.corepack-bin`. Playwright Chromium build 1254 was installed this session (the dependency bump had moved the version).
 
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (P4.7) → FULL PASS, 2026-11-13 (second run; the first stopped at a legal-structure unit test, fixed)
-  typecheck, lint, unit (117 files / 1902 tests), knip, format, build → pass
-  e2e: 749 passed, 0 failed, 0 flaky
-  Mutations (scripts/agent/mutations/P4.7.json): 15/15 killed (P4.6.json not re-run)
-  Lighthouse (local, median of 5, pnpm lighthouse): exit 0, all budgets met on 5 routes
-  gitleaks (local binary 8.30.1, 38 commits incl. d8f9ffe, --config .gitleaks.toml): no leaks
-  Follow-up after the push of d8f9ffe: CI flagged the P4.7 report (it quoted the fixture). Line reworded, exception pinned to that commit; agent:check green (52 tests in ci-workflows); full gate not re-run (docs/config/test-only change)
-  NOT done: workflows run on GitHub; ruleset applied; live Sentry/monitor/budget accounts; onRequestError at runtime; Observatory, ZAP, HSTS preload (no deployed URL); Firefox/WebKit; real Postgres/Cron (P4.3)
+pnpm agent:gate (V2, covers V1) → FULL PASS, 2026-11-17 (third run; see docs/state/tasks/V2.md)
+  typecheck, lint, unit (124 files / 2091 tests), knip, format, build → pass
+  e2e: 789 passed, 0 failed, 0 flaky
+  Mutations: V1 12/12 killed (earlier run), V2 10/10 killed (scripts/agent/mutations/V2.json)
+  Earlier runs: unit failed on ci-workflows.test.ts (Lighthouse URL list, new ai-agents URL), e2e on gallery.spec.ts (assumed hero-only gallery); both tests updated, not weakened
+  NOT done: Lighthouse (CI); Firefox/WebKit; real forced-colours and screen-reader checks; workflows on GitHub; ruleset applied
 ```
 
 ## 6. Rules for updating this file

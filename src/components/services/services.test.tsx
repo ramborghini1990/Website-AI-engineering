@@ -148,8 +148,11 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   };
 
   it("has one h1, the service title, and the summary under it", () => {
-    const { data, body } = entry();
-    renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
+    const { slug, data, body } = entry();
+    renderIn(
+      locale,
+      <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
+    );
 
     const headings = screen.getAllByRole("heading", { level: 1 });
     expect(headings).toHaveLength(1);
@@ -158,8 +161,11 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   });
 
   it("renders the body, then the three lists from the frontmatter and the technologies", () => {
-    const { data, body } = entry();
-    renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
+    const { slug, data, body } = entry();
+    renderIn(
+      locale,
+      <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
+    );
 
     const h2 = screen
       .getAllByRole("heading", { level: 2 })
@@ -179,7 +185,10 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
     ]) {
       expect(screen.getByText(item)).toBeInTheDocument();
     }
-    expect(screen.getByText(data.stack.join(" · "))).toBeInTheDocument();
+    // the technologies are tags now (one list item each; see service-detail.test.tsx)
+    for (const technology of data.stack) {
+      expect(screen.getByText(technology)).toBeInTheDocument();
+    }
     // The body headings come first, as written in the file.
     expect(h2.slice(0, 3)).toEqual(
       [...body.matchAll(/^## (.+)$/gm)].map((match) => match[1]),
@@ -187,8 +196,11 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   });
 
   it("heading levels never skip (h1, then h2 only)", () => {
-    const { data, body } = entry();
-    renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
+    const { slug, data, body } = entry();
+    renderIn(
+      locale,
+      <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
+    );
 
     const levels = screen
       .getAllByRole("heading")
@@ -198,8 +210,11 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   });
 
   it("has a breadcrumb that ends on the current page and links back to Home and Services", () => {
-    const { data, body } = entry();
-    renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
+    const { slug, data, body } = entry();
+    renderIn(
+      locale,
+      <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
+    );
 
     const nav = screen.getByRole("navigation", { name: labels.breadcrumb });
     expect(
@@ -213,8 +228,11 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   });
 
   it("ends with the call to action to the contact page, and the link in the text agrees", () => {
-    const { data, body } = entry();
-    renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
+    const { slug, data, body } = entry();
+    renderIn(
+      locale,
+      <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
+    );
 
     const cta = screen.getByRole("link", {
       name: messages[locale].services.cta.cta,
@@ -226,17 +244,21 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   });
 
   it("shows no demo section when there is no published demo", () => {
-    const { data, body } = entry();
-    renderIn(locale, <ServiceDetail service={data} body={body} demo={null} />);
+    const { slug, data, body } = entry();
+    renderIn(
+      locale,
+      <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
+    );
 
     expect(screen.queryByText(labels.demo)).toBeNull();
   });
 
   it("links the demo when the page is given a published one", () => {
-    const { data, body } = entry();
+    const { slug, data, body } = entry();
     renderIn(
       locale,
       <ServiceDetail
+        slug={slug}
         service={data}
         body={body}
         demo={{ slug: "live-demo", title: "A live demo" }}
@@ -253,10 +275,10 @@ describe.each(["it", "en"] as const)("ServiceDetail (%s)", (locale) => {
   });
 
   it("states no unverifiable claim anywhere on the rendered page", () => {
-    for (const { data, body } of getServices(locale)) {
+    for (const { slug, data, body } of getServices(locale)) {
       const { container } = renderIn(
         locale,
-        <ServiceDetail service={data} body={body} demo={null} />,
+        <ServiceDetail slug={slug} service={data} body={body} demo={null} />,
       );
       expect(claimProblems(container.textContent), data.title).toEqual([]);
       cleanup();

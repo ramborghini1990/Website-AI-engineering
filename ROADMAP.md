@@ -111,3 +111,17 @@ Goal: legally compliant, observable, resilient production launch.
 - Stripe Checkout for fixed-price packages + SDI e-invoicing integration.
 - Third locale (DE or ES) once traffic justifies it.
 - Graphify or similar code-graph tooling once the codebase passes ~50k LOC (see audit).
+
+---
+
+## Phase 6 — Visual storytelling
+
+Goal: the site shows how the work is built, not only describes it. Server-rendered SVG diagrams from the hairline grid (docs/DESIGN.md §7.1, **PROPOSED**), zero client JavaScript, CSS-only motion in the hero and none below the fold. Every diagram shows only what the service or work page already says. V2–V5 titles are provisional until V1 is approved.
+
+| ID | Task | Acceptance criteria |
+|---|---|---|
+| V1 | Diagram system + Home hero agent-architecture schematic (`src/lib/diagrams`, `src/components/diagrams`, `/_dev/diagrams` gallery). | Hero figure at 360/768/1280/1920 px without overflow; legend in IT and EN; reduced motion shows the end state at first paint; finite animation under 5 s; CLS 0 in the hero; the headline stays the LCP element; axe clean in both themes. |
+| V2 | Service page diagrams: one per service, from the page's own "how I build it" text. | Same rules as V1 minus the entrance animation (below the fold: static); labels in both languages. |
+| V3 | Work case-study diagrams (Instagram agent, LinkedIn outreach, document intelligence, business app), built only from the case study text and demo behaviour. | No invented client, metric or claim; `clientConsent` rules unchanged. |
+| V4 | Home sections: process and proof visuals on the same system. | One accent element per figure; Lighthouse budget (P4.6) still met. |
+| V5 | Visual QA and budget: contrast in both themes, forced colours, print, Lighthouse CI on every route that carries a diagram. | Budget unchanged; no new dependency; DESIGN §7.1 approved and no longer "PROPOSED". |

@@ -1,10 +1,12 @@
 import { useTranslations } from "next-intl";
 
+import { ServiceGlyph } from "@/components/diagrams/service-glyph";
 import { SectionHeader } from "@/components/home/section-header";
 import { SpotlightCard } from "@/components/fx/spotlight-card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Service } from "@/lib/content/schemas";
+import { isServiceSlug } from "@/lib/diagrams/services";
 import { isPageAvailable } from "@/lib/navigation";
 
 /**
@@ -36,12 +38,19 @@ export function HomeServices({
           {services.map(({ slug, data }) => (
             <li key={slug} className="grid">
               <SpotlightCard contentClassName="grid h-full content-start gap-3">
-                <span
-                  aria-hidden="true"
-                  className="font-mono text-xs text-text-muted"
-                >
-                  {String(data.order).padStart(2, "0")}
-                </span>
+                <div className="flex items-center justify-between gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="font-mono text-xs text-text-muted"
+                  >
+                    {String(data.order).padStart(2, "0")}
+                  </span>
+                  {isServiceSlug(slug) ? (
+                    <span className="w-20 shrink-0">
+                      <ServiceGlyph slug={slug} />
+                    </span>
+                  ) : null}
+                </div>
                 <h3 className="text-2xl text-text">{data.title}</h3>
                 <p className="text-base text-text-secondary">{data.summary}</p>
                 {data.stack.length > 0 ? (

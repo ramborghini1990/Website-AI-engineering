@@ -1,0 +1,72 @@
+[
+  {
+    "id": "service-diagram-entry-deleted",
+    "file": "src/lib/diagrams/services.ts",
+    "find": "  \"ai-agents\": aiAgents,\n",
+    "replace": "",
+    "check": "pnpm exec vitest run src/lib/diagrams/services.test.ts"
+  },
+  {
+    "id": "second-human-accent-node",
+    "file": "src/lib/diagrams/services.ts",
+    "find": "      id: \"log\",\n      labelKey: \"nodes.log\",\n      x: 16,\n      y: 272,\n      w: 176,\n      h: 40,\n      tone: \"neutral\",",
+    "replace": "      id: \"log\",\n      labelKey: \"nodes.log\",\n      x: 16,\n      y: 272,\n      w: 176,\n      h: 40,\n      tone: \"human\",",
+    "check": "pnpm exec vitest run src/lib/diagrams/services.test.ts"
+  },
+  {
+    "id": "italian-label-deleted",
+    "file": "messages/it.json",
+    "find": "\"tests\": \"Casi di prova\",\n          \"quality\": \"Qualità/costi\"",
+    "replace": "\"tests\": \"Casi di prova\"",
+    "check": "pnpm exec vitest run src/lib/diagrams/i18n.test.ts"
+  },
+  {
+    "id": "label-of-17-characters",
+    "file": "messages/en.json",
+    "find": "\"tests\": \"Test cases\",\n          \"quality\": \"Quality/cost\"",
+    "replace": "\"tests\": \"Test cases\",\n          \"quality\": \"Quality and cost!\"",
+    "check": "pnpm exec vitest run src/lib/diagrams/i18n.test.ts"
+  },
+  {
+    "id": "outside-node-moved-into-the-boundary",
+    "file": "src/lib/diagrams/services.ts",
+    "find": "      id: \"tools\",\n      labelKey: \"nodes.tools\",\n      x: 224,",
+    "replace": "      id: \"tools\",\n      labelKey: \"nodes.tools\",\n      x: 160,",
+    "check": "pnpm exec vitest run src/lib/diagrams/geometry.test.ts"
+  },
+  {
+    "id": "workflow-rule-step-removed",
+    "file": "src/lib/diagrams/services.ts",
+    "find": "      labelKey: \"nodes.rule\",",
+    "replace": "      labelKey: \"nodes.check\",",
+    "check": "pnpm exec vitest run src/lib/diagrams/services.test.ts"
+  },
+  {
+    "id": "glyph-exposed-to-assistive-technology",
+    "file": "src/components/diagrams/service-glyph.tsx",
+    "find": "aria-hidden=\"true\"",
+    "replace": "",
+    "check": "pnpm exec vitest run src/components/diagrams/service-glyph.test.tsx"
+  },
+  {
+    "id": "list-bullets-back",
+    "file": "src/components/services/service-detail.tsx",
+    "find": "<ul className=\"grid text-base text-text-secondary\">",
+    "replace": "<ul className=\"grid list-disc text-base text-text-secondary\">",
+    "check": "pnpm exec vitest run src/components/services/service-detail.test.tsx"
+  },
+  {
+    "id": "stack-back-to-one-line",
+    "file": "src/components/services/service-detail.tsx",
+    "find": "{service.stack.map((technology) => (",
+    "replace": "{[service.stack.join(\" · \")].map((technology) => (",
+    "check": "pnpm exec vitest run src/components/services/service-detail.test.tsx"
+  },
+  {
+    "id": "legend-link-without-touch-target",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "className=\"inline-flex min-h-11 items-center text-accent",
+    "replace": "className=\"inline-flex items-center text-accent",
+    "check": "pnpm exec vitest run src/components/services/service-detail.test.tsx"
+  }
+]

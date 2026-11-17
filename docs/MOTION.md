@@ -79,6 +79,13 @@ Six reusable effects, showcased at `/[locale]/_dev/fx` (dev only). Every one is 
 | `Marquee` | **no** (CSS) | wrapped static list, no loop, no switch | still loops; the pause switch still works |
 | `GradientMesh` | **no** (CSS) | blobs stand still | blobs drift (CSS) |
 
+**CSS-only diagram motion (V1, `src/components/diagrams/`, docs/DESIGN.md §7.1 PROPOSED).** Not part of the FX library: no JavaScript at all, so no wrapper/`*.motion.tsx` pair. Home hero only.
+
+| Token | Keyframes | Use | Under reduced motion |
+|---|---|---|---|
+| `--animate-node-in` | `node-in`: opacity 0 and `translateY(0.5rem)` to rest, `duration-slow`, `backwards` | nodes (stagger 80 ms from 600 ms), edges, the packet's fade-in | `none`: end state at first paint |
+| `--animate-packet` | `packet`: `translate(var(--packet-dx), var(--packet-dy))` to rest, `duration-narrative`, `backwards` | one leg of the packet; legs are nested groups whose shifts sum to the route | `none` |
+
 **How code splitting works.** A page that imports an FX component gets only a small wrapper (markup, a `ref`, `next/dynamic`). The animation code sits in `*.motion.tsx` next to it, which only the wrapper reaches through `next/dynamic(..., { ssr: false })`, and only after the browser is idle (`useFxReady`), never under reduced motion (and, for pointer effects, never on touch devices). Pages that do not import FX components get none of it: `e2e/fx-bundle.spec.ts` proves that on the production build, `fx-structure.test.ts` keeps wrappers from importing GSAP statically. `Marquee` and `GradientMesh` have no JavaScript at all.
 
 **Writing a new FX:** copy the pair `x.tsx` + `x.motion.tsx`. The wrapper renders the final-state markup with a `ref`, calls `useFxReady()` and mounts `<XMotion scope={ref} />` when ready; the motion file calls `useMotion` and returns null.

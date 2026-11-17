@@ -17,5 +17,6 @@ export const devRoutes = [
   "/it/_dev/ui",
   "/it/_dev/motion",
   "/it/_dev/fx",
+  "/it/_dev/diagrams",
   "/it/_dev/work",
 ] as const;

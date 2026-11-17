@@ -153,6 +153,14 @@
   /* Hero headline words (TextReveal when="load"): CSS only, plays from the server-rendered text. */
   --animate-word-rise: word-rise var(--duration-reveal) var(--ease-out)
     backwards;
+  /*
+   * Diagrams (docs/DESIGN.md §7.1), hero only: finite, opacity and transform,
+   * `backwards` fill so the server-rendered state is the end state. Each element
+   * sets its own animation-delay; the whole sequence stays under 4.5 s.
+   */
+  --animate-node-in: node-in var(--duration-slow) var(--ease-out) backwards;
+  --animate-packet: packet var(--duration-narrative) var(--ease-in-out)
+    backwards;
 
   @keyframes overlay-in {
     from {
@@ -251,6 +259,19 @@
       transform: translateY(1rem);
     }
   }
+  /* Diagram node, edge and packet entrance (DESIGN §7.1). */
+  @keyframes node-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  /* One leg of the packet: shifted back by --packet-dx/--packet-dy, travelling to its resting place. */
+  @keyframes packet {
+    from {
+      transform: translate(var(--packet-dx, 0), var(--packet-dy, 0));
+    }
+  }
   @keyframes mesh-a {
     to {
       transform: translate3d(12%, 8%, 0) scale(1.12);
@@ -304,6 +325,8 @@
     --animate-mesh-b: none;
     --animate-mesh-c: none;
     --animate-word-rise: none;
+    --animate-node-in: none;
+    --animate-packet: none;
   }
 }
 
@@ -336,6 +359,74 @@
 /* Pause a running CSS animation (marquee: hover and the pause switch). */
 @utility animation-paused {
   animation-play-state: paused;
+}
+
+/*
+ * Hairline grid for a section background (DESIGN §7.1): 24 px cells drawn with
+ * the decorative border-subtle token, faded out towards the right and the
+ * bottom by a mask so it never competes with text. Static, no animation.
+ * Put it on an aria-hidden layer (src/components/diagrams/hairline-grid.tsx).
+ */
+@utility hairline-grid {
+  background-image:
+    linear-gradient(to right, var(--color-border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image:
+    linear-gradient(to right, black, transparent 85%),
+    linear-gradient(to bottom, black 40%, transparent);
+  mask-composite: intersect;
+}
+
+/*
+ * Legend -> node highlight (DESIGN §7.1): hovering a numbered legend item
+ * outlines the nodes of that step. Pointer devices only; the legend text is the
+ * real content, this is a pointer affordance on top of it.
+ */
+@media (hover: hover) {
+  [data-diagram]:has([data-step-index="1"]:hover)
+    [data-node-step-index="1"]
+    > rect,
+  [data-diagram]:has([data-step-index="2"]:hover)
+    [data-node-step-index="2"]
+    > rect,
+  [data-diagram]:has([data-step-index="3"]:hover)
+    [data-node-step-index="3"]
+    > rect,
+  [data-diagram]:has([data-step-index="4"]:hover)
+    [data-node-step-index="4"]
+    > rect,
+  [data-diagram]:has([data-step-index="5"]:hover)
+    [data-node-step-index="5"]
+    > rect,
+  [data-diagram]:has([data-step-index="6"]:hover)
+    [data-node-step-index="6"]
+    > rect {
+    stroke: var(--color-text);
+  }
+}
+
+/*
+ * Forced colours (DESIGN §7.1): the token colours of the drawing are replaced
+ * by system colours so strokes and labels stay visible; the decorative grid goes.
+ */
+@media (forced-colors: active) {
+  [data-diagram] svg rect {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+  [data-diagram] svg text,
+  [data-diagram] svg tspan,
+  [data-diagram] svg circle,
+  [data-diagram] svg path[class*="fill-"] {
+    fill: CanvasText;
+  }
+  [data-diagram] svg path[fill="none"] {
+    stroke: CanvasText;
+  }
+  [data-diagram] svg pattern path {
+    stroke: GrayText;
+  }
 }
 
 /* Light theme, explicit choice */

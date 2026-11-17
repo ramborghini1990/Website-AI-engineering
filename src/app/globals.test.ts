@@ -218,6 +218,23 @@ describe("design tokens in globals.css", () => {
     expect(animationsStillOn(darkTheme, reducedMotionBlock)).toEqual([]);
   });
 
+  it("require the diagram animation tokens (DESIGN §7.1) to exist and to be off under reduced motion", () => {
+    for (const token of ["--animate-node-in", "--animate-packet"]) {
+      expect(darkTheme[token], `${token} defined`).toBeDefined();
+      expect(
+        reducedMotionBlock[token],
+        `${token} in the reduced-motion block`,
+      ).toBe("none");
+    }
+  });
+
+  it("keep the diagram animations finite, with a backwards fill (the server-rendered state is the end state)", () => {
+    for (const token of ["--animate-node-in", "--animate-packet"]) {
+      expect(darkTheme[token], token).toMatch(/\bbackwards\b/);
+      expect(darkTheme[token], token).not.toMatch(/\binfinite\b|\bforwards\b/);
+    }
+  });
+
   it("keep body copy at 16px or more on the smallest viewport", () => {
     const min = /clamp\(\s*([\d.]+)rem/.exec(darkTheme["--text-base"] ?? "");
     expect(Number(min?.[1]) * 16).toBeGreaterThanOrEqual(16);

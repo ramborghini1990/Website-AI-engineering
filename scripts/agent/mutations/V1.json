@@ -1,0 +1,86 @@
+[
+  {
+    "id": "node-in-token-left-on-under-reduced-motion",
+    "file": "src/app/globals.css",
+    "find": "    --animate-node-in: none;\n",
+    "replace": "",
+    "check": "pnpm exec vitest run src/app/globals.test.ts"
+  },
+  {
+    "id": "packet-token-left-on-under-reduced-motion",
+    "file": "src/app/globals.css",
+    "find": "    --animate-packet: none;\n",
+    "replace": "",
+    "check": "pnpm exec vitest run src/app/globals.test.ts"
+  },
+  {
+    "id": "diagram-raw-hex-colour",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "d=\"M40 0H0V40\"",
+    "replace": "d=\"M40 0H0V40\" stroke=\"#ff0000\"",
+    "check": "pnpm exec vitest run src/no-raw-colors.test.ts src/components/diagrams"
+  },
+  {
+    "id": "diagram-use-client",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "import { useTranslations } from \"next-intl\";",
+    "replace": "\"use client\";\nimport { useTranslations } from \"next-intl\";",
+    "check": "pnpm exec vitest run src/components/diagrams/structure.test.ts"
+  },
+  {
+    "id": "hero-key-deleted-from-italian",
+    "file": "messages/it.json",
+    "find": "        \"docs\": \"Documenti\",\n        \"review\": \"Revisione\",",
+    "replace": "        \"review\": \"Revisione\",",
+    "check": "pnpm exec vitest run src/lib/diagrams/i18n.test.ts"
+  },
+  {
+    "id": "hero-node-moved-onto-another",
+    "file": "src/lib/diagrams/hero.ts",
+    "find": "      id: \"docs\",\n      labelKey: \"nodes.docs\",\n      x: 256,\n      y: 152,",
+    "replace": "      id: \"docs\",\n      labelKey: \"nodes.docs\",\n      x: 256,\n      y: 104,",
+    "check": "pnpm exec vitest run src/lib/diagrams/geometry.test.ts"
+  },
+  {
+    "id": "hero-label-too-long",
+    "file": "messages/en.json",
+    "find": "\"request\": \"Request\",\n        \"agent\": \"Agent\",",
+    "replace": "\"request\": \"Incoming request from a customer\",\n        \"agent\": \"Agent\",",
+    "check": "pnpm exec vitest run src/lib/diagrams/i18n.test.ts"
+  },
+  {
+    "id": "hero-diagram-wider-than-a-phone-allows",
+    "file": "src/lib/diagrams/hero.ts",
+    "find": "viewBox: { w: 400, h: 440 }",
+    "replace": "viewBox: { w: 448, h: 440 }",
+    "check": "pnpm exec vitest run src/lib/diagrams/geometry.test.ts"
+  },
+  {
+    "id": "second-accent-element",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "className=\"fill-success\"",
+    "replace": "className=\"fill-accent\"",
+    "check": "pnpm exec vitest run src/components/diagrams/diagram.test.tsx"
+  },
+  {
+    "id": "animation-class-on-still-diagram",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "  const play = animate && diagram.animated;",
+    "replace": "  const play = true;",
+    "check": "pnpm exec vitest run src/components/diagrams/diagram.test.tsx"
+  },
+  {
+    "id": "label-font-below-minimum",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "const LABEL_SIZE = 15;",
+    "replace": "const LABEL_SIZE = 12;",
+    "check": "pnpm exec vitest run src/components/diagrams/diagram.test.tsx"
+  },
+  {
+    "id": "diagram-imported-by-root-layout",
+    "file": "src/app/[locale]/layout.tsx",
+    "find": "import type { Metadata } from \"next\";",
+    "replace": "import type { Metadata } from \"next\";\nimport { Diagram } from \"@/components/diagrams/diagram\";",
+    "check": "pnpm exec vitest run src/components/diagrams/structure.test.ts"
+  }
+]

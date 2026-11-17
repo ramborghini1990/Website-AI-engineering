@@ -233,6 +233,139 @@
       }
     }
   },
+  "diagrams": {
+    "hero": {
+      "title": "Come lavora un agente",
+      "nodes": {
+        "request": "Richiesta",
+        "agent": "Agente",
+        "model": "Modello",
+        "rules": "Regole",
+        "tools": "Strumenti",
+        "docs": "Documenti",
+        "review": "Revisione",
+        "person": "Persona",
+        "action": "Azione",
+        "done": "Eseguita",
+        "log": "Registro"
+      },
+      "steps": {
+        "request": "Arriva una richiesta: un'email, un ticket o un messaggio.",
+        "reason": "L'agente la valuta con un modello e regole chiare.",
+        "tools": "Usa solo gli strumenti e i documenti che gli servono, con permessi limitati.",
+        "review": "Nei passaggi critici l'agente prepara e una persona approva.",
+        "act": "L'azione parte e ogni passaggio resta nel registro."
+      }
+    },
+    "services": {
+      "ai-agents": {
+        "title": "Architettura di un agente",
+        "nodes": {
+          "request": "Richiesta",
+          "permissions": "Permessi",
+          "agent": "Agente",
+          "tools": "Strumenti",
+          "data": "Dati",
+          "review": "Revisione",
+          "person": "Persona",
+          "action": "Azione",
+          "done": "Eseguita",
+          "log": "Registro",
+          "tests": "Casi di prova",
+          "quality": "Qualità/costi"
+        },
+        "steps": {
+          "request": "Arriva una richiesta: un'email, un ticket o un messaggio.",
+          "agent": "L'agente lavora entro permessi limitati.",
+          "sources": "Riceve solo gli strumenti e i dati che gli servono.",
+          "review": "Nei passaggi critici l'agente prepara e una persona approva.",
+          "act": "L'azione parte e ogni azione resta registrata.",
+          "evaluate": "Prima del rilascio lo valuto su casi di prova, dopo ne seguo qualità e costi."
+        }
+      },
+      "workflow-automation": {
+        "title": "Anatomia di un'automazione",
+        "nodes": {
+          "trigger": "Evento",
+          "check": "Duplicati",
+          "rule": "Regola",
+          "write": "Scrittura",
+          "retry": "Ripetizione",
+          "exception": "Eccezione",
+          "person": "Persona",
+          "log": "Registro"
+        },
+        "steps": {
+          "trigger": "Un evento parte da uno strumento che usi già: email, CRM, gestionale o foglio di calcolo.",
+          "check": "Un controllo evita le operazioni duplicate.",
+          "rule": "Se le regole sono chiare basta un flusso tradizionale: l'AI solo dove il testo è libero.",
+          "write": "Il dato arriva nel sistema di destinazione; se qualcosa va storto, il tentativo si ripete.",
+          "exception": "Quando qualcosa non torna, il sistema si ferma e avvisa una persona.",
+          "log": "Ogni esecuzione resta nel registro."
+        }
+      },
+      "web-applications": {
+        "title": "Dall'interfaccia ai dati",
+        "nodes": {
+          "user": "Utente",
+          "devices": "Telefono · PC",
+          "interface": "Interfaccia",
+          "app": "Next.js",
+          "language": "TypeScript",
+          "database": "PostgreSQL",
+          "tests": "Test",
+          "accessibility": "Accessibilità",
+          "speed": "Velocità",
+          "release": "Rilascio"
+        },
+        "steps": {
+          "user": "Si usa bene da telefono e da computer.",
+          "interface": "L'interfaccia fa parte della stessa applicazione.",
+          "app": "Un'unica base di codice leggibile, in TypeScript con Next.js.",
+          "data": "I dati stanno in PostgreSQL.",
+          "quality": "Test automatici, accessibilità WCAG 2.2 AA e velocità fanno parte del lavoro, fino al rilascio."
+        }
+      },
+      "document-intelligence": {
+        "title": "Dal documento al dato",
+        "nodes": {
+          "documents": "Documenti",
+          "extract": "Estrazione",
+          "check": "Controllo",
+          "review": "Revisione",
+          "person": "Persona",
+          "structured": "Dati",
+          "structuredSub": "Strutturati",
+          "question": "Domanda",
+          "answer": "Risposta",
+          "source": "Con fonte"
+        },
+        "steps": {
+          "documents": "Contratti, fatture, schede tecniche e moduli.",
+          "extract": "Il sistema legge i documenti ed estrae i campi che servono.",
+          "check": "I dati sono controllati con regole e formati definiti.",
+          "review": "I casi incerti passano a una persona, tramite un'interfaccia di revisione.",
+          "data": "Il risultato sono dati strutturati, pronti per i tuoi sistemi.",
+          "ask": "Chi cerca scrive una domanda in linguaggio naturale; la risposta indica il passaggio del documento da cui nasce."
+        }
+      }
+    },
+    "capabilityMap": {
+      "title": "Le quattro aree",
+      "nodes": {
+        "ai-agents": "Agenti AI",
+        "workflow-automation": "Automazione",
+        "web-applications": "Web app",
+        "document-intelligence": "Documenti"
+      },
+      "steps": {
+        "ai-agents": "Agenti AI: svolgono compiti con i tuoi strumenti, con una persona nei passaggi critici.",
+        "workflow-automation": "Automazione: collega i tuoi sistemi e toglie il lavoro manuale.",
+        "web-applications": "Web app: prodotti e strumenti interni, dall'MVP alla produzione.",
+        "document-intelligence": "Documenti: estrazione e ricerca, con revisione umana dei casi incerti."
+      }
+    }
+  },
   "toaster": {
     "viewport": "Notifiche ({hotkey})",
     "close": "Chiudi notifica"

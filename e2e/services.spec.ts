@@ -175,7 +175,10 @@ for (const locale of LOCALES) {
         ]) {
           await expect(page.getByText(item, { exact: true })).toBeVisible();
         }
-        await expect(page.getByText(data.stack.join(" · "))).toBeVisible();
+        // the technologies are tags, one list item each
+        await expect(
+          page.getByRole("main").locator("li.rounded-full"),
+        ).toHaveText(data.stack);
       });
 
       test("title, description, canonical and hreflang come from the frontmatter", async ({
@@ -562,5 +565,211 @@ test.describe("layout stability and security", () => {
 
     expect(await watcher.violations()).toEqual([]);
     expect(watcher.errors).toEqual([]);
+  });
+});
+
+/**
+ * V2: the architecture diagram on every service page, the capability map and
+ * the glyphs on the index (docs/DESIGN.md §7.1).
+ */
+test.describe("service architecture diagrams", () => {
+  const stepCount = (locale: "it" | "en", slug: string) =>
+    Object.keys(
+      messages[locale].diagrams.services[
+        slug as keyof typeof messages.it.diagrams.services
+      ].steps,
+    ).length;
+
+  for (const locale of LOCALES) {
+    for (const { slug } of readServices(locale)) {
+      test(`/${locale}/services/${slug}: a visible figure, one legend item per step, one h1`, async ({
+        page,
+      }) => {
+        await open(page, `/${locale}/services/${slug}`);
+
+        const figure = page.locator(`figure[data-diagram="${slug}"]`);
+        await expect(figure).toBeVisible();
+        await expect(figure.locator("svg")).toHaveAttribute(
+          "aria-hidden",
+          "true",
+        );
+        await expect(figure.locator("figcaption ol > li")).toHaveCount(
+          stepCount(locale, slug),
+        );
+        await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+        const levels = await page
+          .getByRole("main")
+          .locator("h1, h2, h3")
+          .evaluateAll((all) => all.map((h) => Number(h.tagName.slice(1))));
+        expect(levels[0]).toBe(1);
+        expect(levels.slice(1).every((level) => level === 2)).toBe(true);
+      });
+    }
+  }
+
+  test("no horizontal scroll at 360, 768, 1280 and 1920 px on every detail page, both languages", async ({
+    page,
+  }) => {
+    for (const width of [360, 768, 1280, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const locale of LOCALES) {
+        for (const { slug } of readServices(locale)) {
+          await open(page, `/${locale}/services/${slug}`);
+          const overflow = await page.evaluate(
+            () =>
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth,
+          );
+          expect(
+            overflow,
+            `${locale}/${slug} at ${String(width)}`,
+          ).toBeLessThanOrEqual(0);
+        }
+      }
+    }
+  });
+
+  test("every label fits its node with the real font, and renders at 12 px or more at 360 px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 900 });
+    for (const locale of LOCALES) {
+      const paths = [
+        `/${locale}/services`,
+        ...readServices(locale).map((s) => `/${locale}/services/${s.slug}`),
+      ];
+      for (const path of paths) {
+        await open(page, path);
+        const result = await page.evaluate(() => {
+          const out: Array<{ node: string; spare: number }> = [];
+          let smallest = Infinity;
+          for (const svg of document.querySelectorAll<SVGSVGElement>(
+            "figure svg",
+          )) {
+            const box = svg.viewBox.baseVal;
+            const scale = svg.getBoundingClientRect().width / box.width;
+            for (const text of svg.querySelectorAll("text")) {
+              smallest = Math.min(
+                smallest,
+                Number.parseFloat(text.getAttribute("font-size") ?? "0") *
+                  scale,
+              );
+            }
+            for (const group of svg.querySelectorAll("g[data-node]")) {
+              const rect = group.querySelector("rect");
+              if (!rect || rect.getAttribute("fill") === "none") continue;
+              const right = rect.x.baseVal.value + rect.width.baseVal.value;
+              // the accent dot or the check mark keeps its own room at the right edge
+              const mark = group.querySelector(
+                "circle.fill-accent, path.fill-success",
+              );
+              const limit = mark
+                ? mark instanceof SVGCircleElement
+                  ? mark.cx.baseVal.value - 4
+                  : (mark as SVGGraphicsElement).getBBox().x
+                : right;
+              for (const text of group.querySelectorAll("text")) {
+                const bounds = text.getBBox();
+                out.push({
+                  node: `${group.getAttribute("data-node") ?? "?"}: ${text.textContent}`,
+                  spare: Math.round(limit - (bounds.x + bounds.width)),
+                });
+              }
+            }
+          }
+          return { out, smallest };
+        });
+
+        expect(result.smallest, path).toBeGreaterThanOrEqual(12);
+        for (const { node, spare } of result.out) {
+          expect(spare, `${path} ${node}`).toBeGreaterThanOrEqual(0);
+        }
+      }
+    }
+  });
+
+  test("the capability map: one link per service, each scrolls to its card", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    for (const locale of LOCALES) {
+      const services = readServices(locale);
+      await open(page, `/${locale}/services`);
+      const figure = page.locator('figure[data-diagram="capability-map"]');
+      await expect(figure).toBeVisible();
+      const links = figure.locator("figcaption ol a");
+      await expect(links).toHaveCount(services.length);
+
+      for (const [index, { slug }] of services.entries()) {
+        const link = links.nth(index);
+        const box = await link.boundingBox();
+        expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+        await link.click();
+        await expect(page).toHaveURL(new RegExp(`#service-${slug}$`));
+        await expect(page.locator(`#service-${slug}`)).toBeInViewport();
+        await page.evaluate(() => {
+          window.scrollTo(0, 0);
+        });
+      }
+    }
+  });
+
+  test("the legend links are reached and activated from the keyboard", async ({
+    page,
+  }) => {
+    await open(page, "/it/services");
+    const first = page
+      .locator('figure[data-diagram="capability-map"] a')
+      .first();
+    await first.focus();
+    await expect(first).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/#service-ai-agents$/);
+  });
+
+  test("each card on the index has a visible glyph", async ({ page }) => {
+    await open(page, "/it/services");
+    const cards = page.locator("li[id^='service-']");
+    await expect(cards).toHaveCount(4);
+    for (const card of await cards.all()) {
+      await expect(card.locator("svg[data-glyph]")).toBeVisible();
+    }
+  });
+
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
+
+    test("no animation runs on the index or a detail page", async ({
+      page,
+    }) => {
+      for (const path of [
+        "/it/services",
+        `/it/services/${firstService("it").slug}`,
+      ]) {
+        await open(page, path);
+        const running = await page.evaluate(
+          () =>
+            document
+              .getAnimations()
+              .filter((animation) => animation.playState === "running").length,
+        );
+        expect(running, path).toBe(0);
+      }
+    });
+  });
+
+  test("the figures never animate, even with full motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    for (const { slug } of readServices("it")) {
+      await open(page, `/it/services/${slug}`);
+      const animated = await page
+        .locator("figure[data-diagram] *")
+        .evaluateAll(
+          (all) =>
+            all.filter((el) => getComputedStyle(el).animationName !== "none")
+              .length,
+        );
+      expect(animated, slug).toBe(0);
+    }
   });
 });
