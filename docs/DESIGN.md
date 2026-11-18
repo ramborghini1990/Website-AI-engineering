@@ -266,7 +266,7 @@ When `prefers-reduced-motion: reduce`:
 
 ### 7.1 Diagrams
 
-Added by task V1. Not part of the approved design until you approve it. A diagram is data (`src/lib/diagrams/`) rendered by one Server Component (`src/components/diagrams/diagram.tsx`) as inline SVG. No client JavaScript, no image files, no external URL.
+Added by task V1; **APPROVED** (confirmed in the V5 close-out, 2026-11-18). A diagram is data (`src/lib/diagrams/`) rendered by one Server Component (`src/components/diagrams/diagram.tsx`) as inline SVG. No client JavaScript, no image files, no external URL.
 
 **Colour roles** (token utilities only; never a raw value):
 
@@ -293,6 +293,10 @@ Added by task V1. Not part of the approved design until you approve it. A diagra
 **Budget:** at most 12 KB of markup per diagram, one accent element per figure, no new dependency. A diagram needs both `it.json` and `en.json` entries under `diagrams.<id>`.
 
 **Layout:** in the hero the figure takes columns 8–12 from `lg` and follows the calls to action below it (`max-w-md`). A `hairline-grid` background (24 px cells, `border-subtle`, masked to fade out to the right and bottom) sits behind the section.
+
+**Pieces built on the same system (V2–V4):** service architecture figures (`lib/diagrams/services.ts`) and the capability map (a legend whose items link to the sections they stand for, `stepHref`), all static; work-page demo diagrams (`lib/diagrams/demos.ts`), static; decorative service glyphs (`service-glyph.tsx`, viewBox 80 × 48, no text) and demo previews (`previews/`, viewBox 400 × 250, no text, built from fixture data), all `aria-hidden`; the home section index (`NN / Label`, an `aria-hidden` mono span) and the process phase track (static, no active-step highlight yet). None of them has client JavaScript, an image file or an external URL. Only the hero diagram animates.
+
+**Verification (V5):** `e2e/visuals.spec.ts` runs on the production build for the six diagram-bearing pages in `it` and `en`, in dark and light, with and without reduced motion (full 360/768/1280/1920 matrix for home, `/services/ai-agents` and the demo project page, 360 and 1280 for the rest; 120 combinations plus one non-vacuity test). Each asserts: legend and caption match the drawing, no horizontal overflow, every SVG label renders at 12 px or more, layout shift exactly 0 up to load + 1 s, no running animation in a diagram under reduced motion, every diagram animation finite and ended within 5 s, no request to another origin, no serious or critical axe violation. Static guards: `structure.test.ts` (no client code, no external URL or `<image>`, no layout import), `globals.test.ts` (tokens finite, off under reduced motion), `diagram.test.tsx` (font size, markup budget, one accent). Fixed mutations in `scripts/agent/mutations/V5.json`.
 
 ---
 

@@ -116,7 +116,7 @@ Goal: legally compliant, observable, resilient production launch.
 
 ## Phase 6 — Visual storytelling
 
-Goal: the site shows how the work is built, not only describes it. Server-rendered SVG diagrams from the hairline grid (docs/DESIGN.md §7.1, **PROPOSED**), zero client JavaScript, CSS-only motion in the hero and none below the fold. Every diagram shows only what the service or work page already says. V2–V5 titles are provisional until V1 is approved.
+Goal: the site shows how the work is built, not only describes it. Server-rendered SVG diagrams from the hairline grid (docs/DESIGN.md §7.1, approved), zero client JavaScript, CSS-only motion in the hero and none below the fold. Every diagram shows only what the service or work page already says. V2–V5 titles are provisional until V1 is approved.
 
 | ID | Task | Acceptance criteria |
 |---|---|---|
@@ -124,4 +124,4 @@ Goal: the site shows how the work is built, not only describes it. Server-render
 | V2 | Service page diagrams: one per service, from the page's own "how I build it" text. | Same rules as V1 minus the entrance animation (below the fold: static); labels in both languages. |
 | V3 | Work case-study diagrams (Instagram agent, LinkedIn outreach, document intelligence, business app), built only from the case study text and demo behaviour. | No invented client, metric or claim; `clientConsent` rules unchanged. |
 | V4 | Home sections: process and proof visuals on the same system. | One accent element per figure; Lighthouse budget (P4.6) still met. |
-| V5 | Visual QA and budget: contrast in both themes, forced colours, print, Lighthouse CI on every route that carries a diagram. | Budget unchanged; no new dependency; DESIGN §7.1 approved and no longer "PROPOSED". |
+| V5 | Visual QA and budget: contrast in both themes, forced colours, print, Lighthouse CI on every route that carries a diagram. | Budget unchanged; no new dependency; DESIGN §7.1 approved and no longer "PROPOSED". **Done (V5):** `e2e/visuals.spec.ts` 121 tests (120 combinations + 1) passed in 109 s, CLS 0 asserted on every one, 5 mutations killed. Lighthouse not run locally (CI); forced colours stay covered by the existing `home.spec.ts` test; print not checked, see `docs/state/tasks/V5.md`. |

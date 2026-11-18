@@ -50,6 +50,22 @@ describe("diagram code stays free of client JavaScript", () => {
     }
   });
 
+  it("loads nothing from outside: no URL, <image>, <foreignObject>, <use> or url() in diagram code", () => {
+    for (const file of files()) {
+      const code = source(file);
+      expect(code, file).not.toMatch(
+        /https?:\/\/|(?:^|[^:])\/\/[a-z0-9.-]+\.[a-z]{2,}\//im,
+      );
+      expect(code, file).not.toMatch(
+        /<image\b|<foreignObject\b|<use\b|xlink:href/,
+      );
+      // the only url() allowed is the in-page pattern reference
+      for (const match of code.matchAll(/url\(([^)]*)\)/g)) {
+        expect(match[1], file).toMatch(/^#|^["'`]?#/);
+      }
+    }
+  });
+
   it("is imported by no layout (the layout stays light, see layout.imports.test.ts)", () => {
     const layout = readFileSync(srcRoot + "app/[locale]/layout.tsx", "utf8");
     expect(layout).not.toMatch(/components\/diagrams|lib\/diagrams/);

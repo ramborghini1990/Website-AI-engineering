@@ -1,0 +1,37 @@
+[
+  {
+    "id": "svg-label-renders-below-12px-at-360",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "const LABEL_SIZE = 15;",
+    "replace": "const LABEL_SIZE = 10;",
+    "check": "pnpm agent:e2e e2e/visuals.spec.ts -g \"/it 360px dark reduced-motion\""
+  },
+  {
+    "id": "diagram-animation-token-loops-forever",
+    "file": "src/app/globals.css",
+    "find": "--animate-node-in: node-in var(--duration-slow) var(--ease-out) backwards;",
+    "replace": "--animate-node-in: node-in var(--duration-slow) var(--ease-out) infinite;",
+    "check": "pnpm exec vitest run src/app/globals.test.ts"
+  },
+  {
+    "id": "diagram-imported-into-the-root-layout",
+    "file": "src/app/[locale]/layout.tsx",
+    "find": "import { SiteFooter } from \"@/components/shell/site-footer\";",
+    "replace": "import { SiteFooter } from \"@/components/shell/site-footer\";\nimport { Diagram } from \"@/components/diagrams/diagram\";",
+    "check": "pnpm exec vitest run src/components/diagrams/structure.test.ts \"src/app/[locale]/layout.imports.test.ts\""
+  },
+  {
+    "id": "external-href-in-an-svg-image",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "<rect width={w} height={h} fill={`url(#${gridId})`} />",
+    "replace": "<rect width={w} height={h} fill={`url(#${gridId})`} /><image href=\"https://example.com/x.png\" width={1} height={1} />",
+    "check": "pnpm exec vitest run src/components/diagrams/structure.test.ts"
+  },
+  {
+    "id": "svg-exposed-to-assistive-technology",
+    "file": "src/components/diagrams/diagram.tsx",
+    "find": "        aria-hidden=\"true\"\n        focusable=\"false\"",
+    "replace": "        focusable=\"false\"",
+    "check": "pnpm exec vitest run src/components/diagrams/diagram.test.tsx"
+  }
+]

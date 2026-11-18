@@ -79,7 +79,7 @@ Six reusable effects, showcased at `/[locale]/_dev/fx` (dev only). Every one is 
 | `Marquee` | **no** (CSS) | wrapped static list, no loop, no switch | still loops; the pause switch still works |
 | `GradientMesh` | **no** (CSS) | blobs stand still | blobs drift (CSS) |
 
-**CSS-only diagram motion (V1, `src/components/diagrams/`, docs/DESIGN.md §7.1 PROPOSED).** Not part of the FX library: no JavaScript at all, so no wrapper/`*.motion.tsx` pair. Home hero only.
+**CSS-only diagram motion (V1, `src/components/diagrams/`, docs/DESIGN.md §7.1, approved).** Not part of the FX library: no JavaScript at all, so no wrapper/`*.motion.tsx` pair. Home hero only; every other diagram is static. Both tokens must stay finite with a `backwards` fill and be `none` under reduced motion (`globals.test.ts`); the whole sequence ends before 5 s, asserted per page on the production build by `e2e/visuals.spec.ts`.
 
 | Token | Keyframes | Use | Under reduced motion |
 |---|---|---|---|
