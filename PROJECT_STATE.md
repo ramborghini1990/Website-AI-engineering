@@ -7,18 +7,18 @@ Live handoff between sessions. **Hard cap: 8 KB** (a hook warns above it). This 
 - Cross-cutting notes and old follow-ups → `docs/state/tasks/general.md`
 - Milestones and commits → `docs/state/MILESTONES.md` and `git log`
 
-_Last updated: 2026-11-17 · branch `main` (V1, V2 committed as `af47502`; V3 uncommitted)_
+_Last updated: 2026-11-17 · branch `main` (V1–V3 committed, V3 as `2a3e354`; V4 uncommitted)_
 
 ## 1. Current focus
 
 | Field | Value |
 |---|---|
-| Phase | 6 — Visual storytelling (V1–V3 of V1–V5; titles of V4–V5 are provisional). Phase 4 is 6/7: P4.7 built, its acceptance (every launch item checked) waits on your accounts |
-| Active task | `V3` Work previews, demo fact badges, case-study layout (D52, D53, `docs/state/tasks/V3.md`) |
-| Status | Gate-green, **awaiting review and commit**. Zero client JS, no dependency, CSP unchanged. Lighthouse not run (CI only; `/it/work/instagram-lead-agent` adds about 9 KB of markup) |
-| Next task | None unprompted. V4 (Home sections: process and proof visuals) |
-| Where I stopped | Nothing half-done. No scratch files. One unit test (markup budget of the work detail page) was added after the last gate run; `agent:check` is green for it |
-| Needs the user | Review and commit V3 (message in `.agent-logs/COMMIT_MSG.txt`). Content decision still open from V2: the service texts do not mention Server Components / Server Actions / Zod or a validate/transform step, so the diagrams omit them. Still open from P4.7: push and watch the first GitHub runs (`ci`, `security`, `lighthouse`), walk `docs/LAUNCH_CHECKLIST.md` (§0 blockers first) and `GDPR_CHECKLIST.md`, legal review of `INCIDENTS.md`, apply the ruleset (`DEPLOYMENT.md` §4b), Sentry yes/no, uptime monitor, Vercel budget, `SECURITY_CONTACT`, consent limiter on Upstash, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4) |
+| Phase | 6 — Visual storytelling (V1–V4 of V1–V5; V5 title is provisional). Phase 4 is 6/7: P4.7 built, its acceptance (every launch item checked) waits on your accounts |
+| Active task | `V4` Home narrative polish: section index, proof icons, process phase track (D54, D55, `docs/state/tasks/V4.md`) |
+| Status | Gate result in section 5; **awaiting review and commit**. Zero client JS added, no dependency, CSP unchanged. Lighthouse not run (CI only) |
+| Next task | None unprompted. V5 |
+| Where I stopped | Nothing half-done. No scratch files. Follow-up: "active-step highlight" of the process track needs a change to `scroll-pinned-section.motion.tsx` (the active step is not exposed), out of scope for V4 |
+| Needs the user | Review and commit V4 (message in `.agent-logs/COMMIT_MSG.txt`). Content decision still open from V2: the service texts do not mention Server Components / Server Actions / Zod or a validate/transform step, so the diagrams omit them. Still open from P4.7: push and watch the first GitHub runs (`ci`, `security`, `lighthouse`), walk `docs/LAUNCH_CHECKLIST.md` (§0 blockers first) and `GDPR_CHECKLIST.md`, legal review of `INCIDENTS.md`, apply the ruleset (`DEPLOYMENT.md` §4b), Sentry yes/no, uptime monitor, Vercel budget, `SECURITY_CONTACT`, consent limiter on Upstash, `CRON_SECRET`, legal review of DSR.md/ROPA.md (B4) |
 
 ## 2. Phase progress
 
@@ -29,7 +29,7 @@ _Last updated: 2026-11-17 · branch `main` (V1, V2 committed as `af47502`; V3 un
 | 2 Landing & value proposition | ✔ | 7/7 | closed at task level |
 | 3 Agent showcases & funnels | ✔ | 6/7 | P3.0 deferred, P3.6 not needed (`docs/state/tasks/P3.1.md`) |
 | 4 GDPR, CI/CD, hardening | ◐ | 6/7 | P4.7 acceptance waits on your accounts |
-| 6 Visual storytelling | ◐ | 3/5 | V1, V2 committed; V3 gate-green, uncommitted; §7.1 approved |
+| 6 Visual storytelling | ◐ | 4/5 | V1–V3 committed; V4 uncommitted; §7.1 approved |
 
 ## 3. Open blockers (resolved ones are deleted; their outcome lives in DECISIONS.md)
 
@@ -54,12 +54,11 @@ Dev needs no external service (in-process stand-ins for DB, limiter, mailbox, Tu
 ## 5. Last gate run (replace, never append)
 
 ```
-pnpm agent:gate (V3) → FULL PASS, 2026-11-17 (second run; see docs/state/tasks/V3.md)
-  typecheck, lint, unit (128 files / 2193 tests), knip, format, build → pass
-  e2e: 822 passed, 0 failed, 0 flaky
-  Mutations: V3 11/11 killed (scripts/agent/mutations/V3.json)
-  First run: unit failed on collections.test.ts (the claims lint reads "}}" in ICU plurals as a template marker); messages now end "} }", lint untouched
-  NOT done: Lighthouse (CI); Firefox/WebKit; real forced-colours and screen-reader checks; workflows on GitHub; ruleset applied
+pnpm agent:gate (V4) → FULL PASS, 2026-11-17 (second run; see docs/state/tasks/V4.md)
+  typecheck, lint, unit (131 files / 2211 tests), knip, format, build → pass
+  e2e: 829 passed, 0 failed, 0 flaky
+  First run: format failed on home-process.tsx and home-proof.tsx (Prettier); fixed with --write
+  NOT done: mutation checks (none scripted for V4); Lighthouse (CI); Firefox/WebKit; real forced-colours and screen-reader checks; workflows on GitHub; ruleset applied
 ```
 
 ## 6. Rules for updating this file

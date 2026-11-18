@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { DemoPreview, PREVIEW_PANEL } from "@/components/diagrams/demo-preview";
 import { SectionHeader } from "@/components/home/section-header";
+import { featuredDemos } from "@/components/home/section-index";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Work } from "@/lib/content/schemas";
@@ -20,15 +21,19 @@ import { isPageAvailable } from "@/lib/navigation";
 export function HomeDemos({
   demos: published,
   linked = isPageAvailable("work"),
+  index,
 }: {
   demos: ReadonlyArray<{ slug: string; data: Work }>;
   linked?: boolean;
+  /** Section number for the "NN / Label" index; computed by the page. */
+  index?: number;
 }) {
   const t = useTranslations("home.demos");
+  const sections = useTranslations("home.sections");
   const labels = useTranslations("work.labels");
 
   // Case studies are not "interactive demos": they have their own place in /work.
-  const demos = published.filter(({ data }) => data.kind === "demo");
+  const demos = featuredDemos(published);
   if (demos.length === 0) return null;
 
   return (
@@ -38,7 +43,16 @@ export function HomeDemos({
       className="border-t border-border-subtle"
     >
       <div className="mx-auto grid w-full max-w-page gap-10 px-gutter py-section">
-        <SectionHeader id="home-demos" title={t("title")} lead={t("lead")} />
+        <SectionHeader
+          id="home-demos"
+          title={t("title")}
+          lead={t("lead")}
+          index={
+            index === undefined
+              ? undefined
+              : { n: index, label: sections("demos") }
+          }
+        />
         <ul className="grid gap-px border border-border-subtle bg-border-subtle md:grid-cols-2">
           {demos.map(({ slug, data }) => (
             <li key={slug} className="group grid content-start bg-bg">

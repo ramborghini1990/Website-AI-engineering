@@ -7,6 +7,10 @@ import { HomeHero } from "@/components/home/home-hero";
 import { HomeProcess } from "@/components/home/home-process";
 import { HomeProof } from "@/components/home/home-proof";
 import { HomeServices } from "@/components/home/home-services";
+import {
+  featuredDemos,
+  homeSectionIndexes,
+} from "@/components/home/section-index";
 import { business } from "@/lib/business";
 import { getServices, getWork } from "@/lib/content/read";
 import { pageMetadata } from "@/lib/seo";
@@ -38,14 +42,18 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function HomePage() {
   const locale = await getLocale();
+  const work = getWork(locale);
+  // Numbered here, not in each section, so the labels stay consecutive when
+  // the demos section renders nothing.
+  const index = homeSectionIndexes(featuredDemos(work).length > 0);
 
   return (
     <>
       <HomeHero />
-      <HomeProof />
-      <HomeServices services={getServices(locale)} />
-      <HomeDemos demos={getWork(locale)} />
-      <HomeProcess />
+      <HomeProof index={index.proof} />
+      <HomeServices services={getServices(locale)} index={index.services} />
+      <HomeDemos demos={work} index={index.demos ?? undefined} />
+      <HomeProcess index={index.process} />
       <HomeFinalCta />
     </>
   );

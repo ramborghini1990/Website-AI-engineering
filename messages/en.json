@@ -459,6 +459,12 @@
       "primaryCta": "Get in touch",
       "secondaryCta": "See the services"
     },
+    "sections": {
+      "proof": "Approach",
+      "services": "Services",
+      "demos": "Demos",
+      "process": "Process"
+    },
     "proof": {
       "title": "How I work",
       "items": {

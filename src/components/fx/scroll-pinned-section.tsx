@@ -29,6 +29,9 @@ export function ScrollPinnedSection({
   steps,
   "aria-labelledby": labelledBy,
   className,
+  listClassName,
+  stepClassName,
+  showStepIndex = true,
 }: {
   /** The section heading and intro, always visible. */
   children: ReactNode;
@@ -36,6 +39,12 @@ export function ScrollPinnedSection({
   /** Id of the heading that names the section (it becomes a labelled region). */
   "aria-labelledby"?: string;
   className?: string;
+  /** Extra classes for the step list (static decoration only, such as a track). */
+  listClassName?: string;
+  /** Extra classes for every step. */
+  stepClassName?: string;
+  /** Set to false when the step content carries its own label ("Phase 01"). */
+  showStepIndex?: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
   const ready = useFxReady();
@@ -66,20 +75,25 @@ export function ScrollPinnedSection({
           >
             <div data-fx-progress className="h-full origin-left bg-accent" />
           </div>
-          <ol className="grid gap-6">
+          <ol className={cn("grid gap-6", listClassName)}>
             {steps.map((step, index) => (
               <li
                 // Positional and fixed: steps are never reordered.
                 key={index}
                 data-fx-step
-                className="grid gap-1 border-t border-border-subtle pt-4"
+                className={cn(
+                  "grid gap-1 border-t border-border-subtle pt-4",
+                  stepClassName,
+                )}
               >
-                <span
-                  aria-hidden="true"
-                  className="font-mono text-xs text-text-muted uppercase"
-                >
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+                {showStepIndex ? (
+                  <span
+                    aria-hidden="true"
+                    className="font-mono text-xs text-text-muted uppercase"
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                ) : null}
                 {step}
               </li>
             ))}

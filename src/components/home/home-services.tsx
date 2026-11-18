@@ -19,11 +19,15 @@ import { isPageAvailable } from "@/lib/navigation";
 export function HomeServices({
   services,
   linked = isPageAvailable("services"),
+  index,
 }: {
   services: ReadonlyArray<{ slug: string; data: Service }>;
   linked?: boolean;
+  /** Section number for the "NN / Label" index; computed by the page. */
+  index?: number;
 }) {
   const t = useTranslations("home.services");
+  const sections = useTranslations("home.sections");
   const labels = useTranslations("services.labels");
 
   return (
@@ -33,7 +37,16 @@ export function HomeServices({
       className="border-t border-border-subtle"
     >
       <div className="mx-auto grid w-full max-w-page gap-10 px-gutter py-section">
-        <SectionHeader id="home-services" title={t("title")} lead={t("lead")} />
+        <SectionHeader
+          id="home-services"
+          title={t("title")}
+          lead={t("lead")}
+          index={
+            index === undefined
+              ? undefined
+              : { n: index, label: sections("services") }
+          }
+        />
         <ul className="grid gap-4 md:grid-cols-2">
           {services.map(({ slug, data }) => (
             <li key={slug} className="grid">

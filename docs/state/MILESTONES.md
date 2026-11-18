@@ -40,5 +40,6 @@ Moved out of PROJECT_STATE.md (which keeps only the last 3).
 | 2026-11-13 | P4.6 (Lighthouse) | Lighthouse CI: `lighthouse.yml` + `lighthouserc.json` budgets on 5 routes, `@lhci/cli` devDependency, gitleaks confirmed as the free pinned binary and test-pinned (D44). Budget enforced and proven to fail, but **not met** by the site (performance 0.73–0.86); not a required check yet; never run on GitHub | `7e8a8c7` |
 | 2026-11-13 | P4.7 | Performance fixes to meet the Lighthouse budget on all five routes (banner server-rendered, unused Radix providers removed, ICU engine off the first render; D45), gitleaks exit 1 diagnosed and fixed with `.gitleaks.toml` (D46), `docs/LAUNCH_CHECKLIST.md` and `docs/INCIDENTS.md` (draft). Budget met locally; nothing run on GitHub; launch items all open | |
 | 2026-11-17 | V1, V2 | Diagram system and Home hero schematic (D47, D48); service diagrams, glyphs and capability map, DESIGN §7.1 approved (D49–D51). Committed as `af47502`. |
+| 2026-11-17 | V3 | Demo previews, fixture-derived fact badges, case-study layout (D52, D53). Committed as `2a3e354`. |
 
 ---

@@ -151,6 +151,35 @@ describe.each(["it", "en"] as const)("Proof strip (%s)", (locale) => {
     expect(items[0]).toHaveTextContent(copy.items.owner.text);
   });
 
+  it("gives each commitment one decorative 24 px icon, and the first hairline one accent segment", () => {
+    renderIn(locale, <HomeProof />);
+
+    const items = within(screen.getByRole("region")).getAllByRole("listitem");
+    for (const item of items) {
+      const icons = item.querySelectorAll("svg");
+      expect(icons).toHaveLength(1);
+      expect(icons[0]).toHaveAttribute("aria-hidden", "true");
+      expect(icons[0]).toHaveAttribute("width", "24");
+      expect(icons[0]).toHaveAttribute("stroke-width", "1.5");
+    }
+    expect(document.querySelectorAll("[data-proof-accent]")).toHaveLength(1);
+    const accent = document.querySelector("[data-proof-accent]");
+    expect(accent).toHaveAttribute("aria-hidden", "true");
+    expect(accent).toHaveClass("bg-accent", "h-0.5", "w-8");
+    expect(items[0].contains(accent)).toBe(true);
+  });
+
+  it("shows the section index only when the page passes one", () => {
+    const { unmount } = renderIn(locale, <HomeProof />);
+    expect(screen.queryByText(/^\d\d \/ /)).toBeNull();
+    unmount();
+
+    renderIn(locale, <HomeProof index={1} />);
+    expect(
+      screen.getByText(`01 / ${messages[locale].home.sections.proof}`),
+    ).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("shows no figure: no metric has been supplied and none may be invented (docs/CONTENT.md)", () => {
     renderIn(locale, <HomeProof />);
 
@@ -343,6 +372,38 @@ describe.each(["it", "en"] as const)("Process timeline (%s)", (locale) => {
     expect(
       screen.getByRole("link", { name: messages[locale].home.process.cta }),
     ).toHaveAttribute("href", "/it/process");
+  });
+
+  it("labels each step 'Phase NN' and lists its three outputs as plain text", () => {
+    renderIn(locale, <HomeProcess index={4} />);
+
+    const process = messages[locale].process;
+    const items = [...document.querySelectorAll("[data-fx-step]")];
+    items.forEach((item, position) => {
+      const key = processStepKeys[position];
+      expect(item).toHaveTextContent(
+        `${process.stepLabel} ${String(position + 1).padStart(2, "0")}`,
+      );
+      const outputs = [...item.querySelectorAll("ul > li")].map(
+        (li) => li.textContent,
+      );
+      expect(outputs).toEqual(Object.values(process.steps[key].outputs));
+      expect(item.querySelectorAll("a, button")).toHaveLength(0);
+    });
+    expect(
+      screen.getByText(`04 / ${messages[locale].home.sections.process}`),
+    ).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("draws the phase track from md with tokens only (no raw colour, no script)", () => {
+    renderIn(locale, <HomeProcess />);
+
+    const list = document.querySelector("[data-fx='pinned-section'] ol");
+    expect(list?.className).toContain("md:before:bg-border-strong");
+    for (const step of document.querySelectorAll("[data-fx-step]")) {
+      expect(step.className).toContain("md:before:size-2");
+      expect(step.className).toContain("md:before:rounded-full");
+    }
   });
 
   it("the steps are text only: nothing focusable can hide inside a faded step", () => {

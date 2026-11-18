@@ -184,6 +184,64 @@ for (const locale of LOCALES) {
       ]);
     });
 
+    test("V4: the section index labels are visible at 1280 px, numbered 01-04, and absent from the accessibility tree", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await open(page, locale);
+
+      const labels = copy.sections;
+      const expected = [
+        `01 / ${labels.proof}`,
+        `02 / ${labels.services}`,
+        `03 / ${labels.demos}`,
+        `04 / ${labels.process}`,
+      ];
+      for (const text of expected) {
+        const label = page.getByText(text, { exact: true });
+        await expect(label).toBeVisible();
+        await expect(label).toHaveAttribute("aria-hidden", "true");
+      }
+      const tree = await page.getByRole("main").ariaSnapshot();
+      for (const text of expected) expect(tree).not.toContain(text);
+    });
+
+    test("V4: the proof icons are decorative and one accent segment marks the first hairline", async ({
+      page,
+    }) => {
+      await open(page, locale);
+
+      const items = page
+        .getByRole("region", { name: copy.proof.title })
+        .getByRole("listitem");
+      await expect(items.locator("svg[aria-hidden='true']")).toHaveCount(4);
+      await expect(page.locator("[data-proof-accent]")).toHaveCount(1);
+      await expect(items.first().locator("[data-proof-accent]")).toHaveCount(1);
+    });
+
+    test("V4: every phase shows its label, its summary and its three outputs, with no link or button", async ({
+      page,
+    }) => {
+      await open(page, locale);
+
+      const process = messages[locale].process;
+      const steps = page.locator("[data-fx-step]");
+      await expect(steps).toHaveCount(4);
+      for (const [position, key] of (
+        ["discover", "prototype", "build", "launch"] as const
+      ).entries()) {
+        const step = steps.nth(position);
+        await expect(step).toContainText(
+          `${process.stepLabel} ${String(position + 1).padStart(2, "0")}`,
+        );
+        await expect(step).toContainText(process.steps[key].summary);
+        for (const output of Object.values(process.steps[key].outputs)) {
+          await expect(step).toContainText(output);
+        }
+        await expect(step.locator("a, button")).toHaveCount(0);
+      }
+    });
+
     test("the closing call to action sits on the mesh and points at the contact block", async ({
       page,
     }) => {
@@ -272,6 +330,11 @@ test.describe("static-first: without JavaScript", () => {
         expect(await css(step, "opacity")).toBe("1");
       }
       expect(await page.locator(".pin-spacer").count()).toBe(0);
+      // V4: each phase's three outputs are in the HTML and readable too
+      for (const step of await page.locator("[data-fx-step]").all()) {
+        await expect(step.locator("ul > li")).toHaveCount(3);
+        await expect(step.locator("ul > li").first()).toBeVisible();
+      }
       expect(
         await css(page.locator("[data-fx-progress-track]"), "visibility"),
       ).toBe("hidden");
@@ -300,6 +363,8 @@ test.describe("reduced motion", () => {
     expect(await page.locator(".pin-spacer").count()).toBe(0);
     for (const step of await page.locator("[data-fx-step]").all()) {
       expect(await css(step, "opacity")).toBe("1");
+      // V4: stacked and readable, outputs included
+      await expect(step.locator("ul > li").last()).toBeVisible();
     }
     expect(
       await css(
@@ -491,32 +556,34 @@ test.describe("accessibility (axe, WCAG 2.0-2.2 A/AA)", () => {
     }
   });
 
-  test("zero violations with the pinned story at its end (every phase visible)", async ({
-    page,
-  }) => {
-    await page.setViewportSize(TALL);
-    await page.emulateMedia({ colorScheme: "light" });
-    await open(page, "it");
-    await heroSettled(page);
-    await expect
-      .poll(() => page.locator(".pin-spacer").count(), { timeout: 15_000 })
-      .toBe(1);
-    await page.evaluate(() => {
-      const spacer = document.querySelector<HTMLElement>(".pin-spacer");
-      if (spacer)
-        window.scrollTo(
-          0,
-          spacer.offsetTop + spacer.offsetHeight - window.innerHeight - 40,
-        );
-    });
-    await expect
-      .poll(() => css(page.locator("[data-fx-step]").nth(3), "opacity"), {
-        timeout: 10_000,
-      })
-      .toBe("1");
+  for (const scheme of ["dark", "light"] as const) {
+    test(`zero violations (${scheme}) with the pinned story at its end (every phase visible)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(TALL);
+      await page.emulateMedia({ colorScheme: scheme });
+      await open(page, "it");
+      await heroSettled(page);
+      await expect
+        .poll(() => page.locator(".pin-spacer").count(), { timeout: 15_000 })
+        .toBe(1);
+      await page.evaluate(() => {
+        const spacer = document.querySelector<HTMLElement>(".pin-spacer");
+        if (spacer)
+          window.scrollTo(
+            0,
+            spacer.offsetTop + spacer.offsetHeight - window.innerHeight - 40,
+          );
+      });
+      await expect
+        .poll(() => css(page.locator("[data-fx-step]").nth(3), "opacity"), {
+          timeout: 10_000,
+        })
+        .toBe("1");
 
-    await expectNoAxeViolations(page);
-  });
+      await expectNoAxeViolations(page);
+    });
+  }
 
   test("the keyboard reaches every action in reading order, and nothing hidden is focusable", async ({
     page,

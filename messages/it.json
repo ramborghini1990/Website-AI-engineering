@@ -459,6 +459,12 @@
       "primaryCta": "Parliamone",
       "secondaryCta": "Scopri i servizi"
     },
+    "sections": {
+      "proof": "Metodo",
+      "services": "Servizi",
+      "demos": "Demo",
+      "process": "Processo"
+    },
     "proof": {
       "title": "Come lavoro",
       "items": {
